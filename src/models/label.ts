@@ -10,10 +10,6 @@ export default (sequelize: Sequelize) => {
   class Label extends Model<GroupAttributes> implements GroupAttributes {
     slug!: string;
     name!: string;
-
-    static associate(models: any) {
-      // define association here
-    }
   }
 
   Label.init(

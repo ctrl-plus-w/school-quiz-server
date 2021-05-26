@@ -12,10 +12,6 @@ export default (sequelize: Sequelize) => {
     slug!: string;
     name!: string;
     permission!: string;
-
-    static associate(models: any) {
-      // define association here
-    }
   }
 
   Role.init(

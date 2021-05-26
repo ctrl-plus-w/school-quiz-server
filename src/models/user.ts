@@ -16,10 +16,6 @@ export default (sequelize: Sequelize) => {
     lastName!: string;
     password!: string;
     gender!: boolean | null;
-
-    static associate(models: any) {
-      // define association here
-    }
   }
 
   User.init(
