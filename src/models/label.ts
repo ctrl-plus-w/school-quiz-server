@@ -1,20 +1,20 @@
 import { Sequelize } from 'sequelize/types';
 import { Model, DataTypes } from 'sequelize';
 
+interface GroupAttributes {
+  slug: string;
+  name: string;
+}
+
+export class Label extends Model<GroupAttributes> implements GroupAttributes {
+  public slug!: string;
+  public name!: string;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
+
 export default (sequelize: Sequelize) => {
-  interface GroupAttributes {
-    slug: string;
-    name: string;
-  }
-
-  class Label extends Model<GroupAttributes> implements GroupAttributes {
-    public slug!: string;
-    public name!: string;
-
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
-  }
-
   Label.init(
     {
       slug: {
@@ -29,7 +29,7 @@ export default (sequelize: Sequelize) => {
     },
     {
       sequelize,
-      modelName: 'Label',
+      modelName: 'label',
       tableName: 'Label',
     }
   );

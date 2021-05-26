@@ -1,26 +1,37 @@
-import { BelongsToGetAssociationMixin, Sequelize } from 'sequelize/types';
+import { Association, Sequelize, BelongsToGetAssociationMixin, BelongsToSetAssociationMixin } from 'sequelize/types';
 import { Model, DataTypes } from 'sequelize';
 
+import { Role } from './role';
+
+interface UserAttributes {
+  username: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  gender: boolean | null;
+}
+
+export class User extends Model<UserAttributes> implements UserAttributes {
+  public username!: string;
+  public firstName!: string;
+  public lastName!: string;
+  public password!: string;
+  public gender!: boolean | null;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+
+  public getRole!: BelongsToGetAssociationMixin<Role>;
+  public setRole!: BelongsToSetAssociationMixin<Role, number>;
+
+  public role!: Role;
+
+  public static associations: {
+    role: Association<User, Role>;
+  };
+}
+
 export default (sequelize: Sequelize) => {
-  interface UserAttributes {
-    username: string;
-    firstName: string;
-    lastName: string;
-    password: string;
-    gender: boolean | null;
-  }
-
-  class User extends Model<UserAttributes> implements UserAttributes {
-    public username!: string;
-    public firstName!: string;
-    public lastName!: string;
-    public password!: string;
-    public gender!: boolean | null;
-
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
-  }
-
   User.init(
     {
       username: {
@@ -47,7 +58,7 @@ export default (sequelize: Sequelize) => {
     },
     {
       sequelize,
-      modelName: 'User',
+      modelName: 'user',
       tableName: 'User',
     }
   );

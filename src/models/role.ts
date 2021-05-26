@@ -1,22 +1,22 @@
 import { Sequelize } from 'sequelize/types';
 import { Model, DataTypes } from 'sequelize';
 
+interface RoleAttributes {
+  slug: string;
+  name: string;
+  permission: number;
+}
+
+export class Role extends Model<RoleAttributes> implements RoleAttributes {
+  public slug!: string;
+  public name!: string;
+  public permission!: number;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
+
 export default (sequelize: Sequelize) => {
-  interface RoleAttributes {
-    slug: string;
-    name: string;
-    permission: number;
-  }
-
-  class Role extends Model<RoleAttributes> implements RoleAttributes {
-    public slug!: string;
-    public name!: string;
-    public permission!: number;
-
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
-  }
-
   Role.init(
     {
       slug: {
@@ -35,7 +35,7 @@ export default (sequelize: Sequelize) => {
     },
     {
       sequelize,
-      modelName: 'Role',
+      modelName: 'role',
       tableName: 'Role',
     }
   );
