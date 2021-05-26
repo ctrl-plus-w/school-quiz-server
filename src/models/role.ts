@@ -5,13 +5,13 @@ export default (sequelize: Sequelize) => {
   interface RoleAttributes {
     slug: string;
     name: string;
-    permission: string;
+    permission: number;
   }
 
   class Role extends Model<RoleAttributes> implements RoleAttributes {
     public slug!: string;
     public name!: string;
-    public permission!: string;
+    public permission!: number;
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
