@@ -15,6 +15,6 @@ export default {
     User: user(sequelize),
     Role: role(sequelize),
     Group: group(sequelize),
-    Lable: label(sequelize),
+    Label: label(sequelize),
   },
 };
