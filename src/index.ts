@@ -3,6 +3,7 @@ import express from 'express';
 import { json } from 'body-parser';
 
 import database from './models';
+import registerAssociations from './database/registerAssociations';
 
 // Constants
 const PORT = process.env.PORT || 6000;
@@ -25,6 +26,8 @@ app.get('/users', async (_, res) => {
 });
 
 (async () => {
+  await registerAssociations();
+
   await database.sequelize.sync({ force: true });
 
   app.listen(PORT, () => {
