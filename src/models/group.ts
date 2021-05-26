@@ -8,8 +8,11 @@ export default (sequelize: Sequelize) => {
   }
 
   class Group extends Model<GroupAttributes> implements GroupAttributes {
-    slug!: string;
-    name!: string;
+    public slug!: string;
+    public name!: string;
+
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
   }
 
   Group.init(

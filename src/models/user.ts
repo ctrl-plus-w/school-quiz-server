@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize/types';
+import { BelongsToGetAssociationMixin, Sequelize } from 'sequelize/types';
 import { Model, DataTypes } from 'sequelize';
 
 export default (sequelize: Sequelize) => {
@@ -11,11 +11,14 @@ export default (sequelize: Sequelize) => {
   }
 
   class User extends Model<UserAttributes> implements UserAttributes {
-    username!: string;
-    firstName!: string;
-    lastName!: string;
-    password!: string;
-    gender!: boolean | null;
+    public username!: string;
+    public firstName!: string;
+    public lastName!: string;
+    public password!: string;
+    public gender!: boolean | null;
+
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
   }
 
   User.init(
