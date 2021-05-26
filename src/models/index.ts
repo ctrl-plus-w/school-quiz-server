@@ -1,7 +1,10 @@
 import { Sequelize as SequelizeClass } from 'sequelize/types';
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize } from 'sequelize';
 
 import user from './user';
+import role from './role';
+import group from './group';
+import label from './label';
 
 const config = require(__dirname + '/../../config/sequelize-credentials.json')[process.env.NODE_ENV || 'development'];
 const sequelize: SequelizeClass = new Sequelize(config.database, config.username, config.password, config);
@@ -9,6 +12,9 @@ const sequelize: SequelizeClass = new Sequelize(config.database, config.username
 export default {
   sequelize,
   models: {
-    User: user(sequelize, DataTypes),
+    User: user(sequelize),
+    Role: role(sequelize),
+    Group: group(sequelize),
+    Lable: label(sequelize),
   },
 };

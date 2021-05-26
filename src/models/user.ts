@@ -1,6 +1,7 @@
-import { Model } from 'sequelize';
+import { Sequelize } from 'sequelize/types';
+import { Model, DataTypes } from 'sequelize';
 
-export default (sequelize: any, DataTypes: any) => {
+export default (sequelize: Sequelize) => {
   interface UserAttributes {
     username: string;
     firstName: string;

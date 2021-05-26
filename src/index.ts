@@ -25,7 +25,7 @@ app.get('/users', async (_, res) => {
 });
 
 (async () => {
-  await database.sequelize.sync();
+  await database.sequelize.sync({ force: true });
 
   app.listen(PORT, () => {
     console.log(`App started, listening on port : ${PORT}.`);
