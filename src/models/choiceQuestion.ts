@@ -25,7 +25,7 @@ export default (sequelize: Sequelize) => {
     {
       sequelize,
       modelName: 'choiceQuestion',
-      tableName: 'choiceQuestion',
+      tableName: 'ChoiceQuestion',
     }
   );
 
