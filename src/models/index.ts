@@ -5,6 +5,23 @@ import user from './user';
 import role from './role';
 import group from './group';
 import label from './label';
+import event from './event';
+import quiz from './quiz';
+import textualQuestion from './textualQuestion';
+import numericQuestion from './numericQuestion';
+import choiceQuestion from './choiceQuestion';
+import question from './question';
+import questionType from './questionType';
+import questionTypeSpecification from './questionTypeSpecification';
+import verificationType from './verificationType';
+import eventUserState from './eventUserState';
+import eqAnswer from './eqAnswer';
+import gtltAnswer from './gtltAnswer';
+import answer from './answer';
+import answerType from './answerType';
+import userAnswer from './userAnswer';
+import eventUserRelation from './eventUserRelation';
+import choice from './choice';
 
 const config = require(__dirname + '/../../config/sequelize-credentials.json')[process.env.NODE_ENV || 'development'];
 const sequelize: SequelizeClass = new Sequelize(config.database, config.username, config.password, config);
@@ -16,5 +33,31 @@ export default {
     Role: role(sequelize),
     Group: group(sequelize),
     Label: label(sequelize),
+
+    Event: event(sequelize),
+    Quiz: quiz(sequelize),
+
+    EventUserState: eventUserState(sequelize),
+    EventUserRelation: eventUserRelation(sequelize),
+
+    Question: question(sequelize),
+    QuestionType: questionType(sequelize),
+    QuestionTypeSpecification: questionTypeSpecification(sequelize),
+
+    TextualQuestion: textualQuestion(sequelize),
+    VerificationType: verificationType(sequelize),
+
+    NumericQuestion: numericQuestion(sequelize),
+
+    ChoiceQuestion: choiceQuestion(sequelize),
+    Choice: choice(sequelize),
+
+    Answer: answer(sequelize),
+    AnswerType: answerType(sequelize),
+
+    UserAnswer: userAnswer(sequelize),
+
+    EqAnswer: eqAnswer(sequelize),
+    GTLTAnswer: gtltAnswer(sequelize),
   },
 };
