@@ -4,6 +4,7 @@ import { json } from 'body-parser';
 
 import database from './models';
 import registerAssociations from './database/registerAssociations';
+import seedDatabase from './database/seedDatabase';
 
 // Constants
 const PORT = process.env.PORT || 6000;
@@ -29,6 +30,7 @@ app.get('/users', async (_, res) => {
   await registerAssociations();
 
   await database.sequelize.sync({ force: true });
+  await seedDatabase();
 
   app.listen(PORT, () => {
     console.log(`App started, listening on port : ${PORT}.`);

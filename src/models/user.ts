@@ -1,9 +1,21 @@
-import { Association, Sequelize, BelongsToGetAssociationMixin, BelongsToSetAssociationMixin } from 'sequelize/types';
+import {
+  Association,
+  Sequelize,
+  BelongsToGetAssociationMixin,
+  BelongsToSetAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyRemoveAssociationMixin,
+  Optional,
+} from 'sequelize/types';
+
 import { Model, DataTypes } from 'sequelize';
 
 import { Role } from './role';
+import { Event } from './event';
+import { State } from './state';
 
 interface UserAttributes {
+  id: number;
   username: string;
   firstName: string;
   lastName: string;
@@ -11,7 +23,10 @@ interface UserAttributes {
   gender: boolean | null;
 }
 
-export class User extends Model<UserAttributes> implements UserAttributes {
+interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+
+export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+  public id!: number;
   public username!: string;
   public firstName!: string;
   public lastName!: string;
@@ -23,8 +38,14 @@ export class User extends Model<UserAttributes> implements UserAttributes {
 
   public getRole!: BelongsToGetAssociationMixin<Role>;
   public setRole!: BelongsToSetAssociationMixin<Role, number>;
+  public setState!: BelongsToSetAssociationMixin<State, number>;
 
-  public role!: Role;
+  public addEvent!: BelongsToManyAddAssociationMixin<Event, number>;
+  public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
+
+  public state?: State;
+  public role?: Role;
+  public events?: Array<Event>;
 
   public static associations: {
     role: Association<User, Role>;
@@ -34,6 +55,11 @@ export class User extends Model<UserAttributes> implements UserAttributes {
 export default (sequelize: Sequelize) => {
   User.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       username: {
         type: DataTypes.STRING,
         unique: true,
