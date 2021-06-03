@@ -11,7 +11,6 @@ import textualQuestion from './textualQuestion';
 import numericQuestion from './numericQuestion';
 import choiceQuestion from './choiceQuestion';
 import question from './question';
-import questionType from './questionType';
 import questionTypeSpecification from './questionTypeSpecification';
 import verificationType from './verificationType';
 import state from './state';
@@ -39,7 +38,6 @@ export default {
     State: state(sequelize),
 
     Question: question(sequelize),
-    QuestionType: questionType(sequelize),
     QuestionTypeSpecification: questionTypeSpecification(sequelize),
 
     TextualQuestion: textualQuestion(sequelize),

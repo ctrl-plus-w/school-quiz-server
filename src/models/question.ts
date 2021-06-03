@@ -1,19 +1,43 @@
-import { Sequelize } from 'sequelize/types';
+import { BelongsToCreateAssociationMixin, Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
+import { TextualQuestion } from './textualQuestion';
+import { ChoiceQuestion } from './choiceQuestion';
+import { NumericQuestion } from './numericQuestion';
+import { QuestionTypeSpecification } from './questionTypeSpecification';
+import { VerificationType } from './verificationType';
+
 interface QuestionAttributes {
+  id: number;
   slug: string;
   title: string;
   description: string;
   filename: string;
+  questionType: string;
 }
 
-export class Question extends Model<QuestionAttributes> implements QuestionAttributes {
+interface QuestionCreationAttributes extends Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'> {}
+
+export class Question extends Model<QuestionAttributes, QuestionCreationAttributes> implements QuestionAttributes {
+  public id!: number;
   public slug!: string;
   public title!: string;
   public description!: string;
   public filename!: string;
+  public questionType!: string;
+
+  private numericQuestion?: NumericQuestion;
+  private textualQuestion?: TextualQuestion;
+  private choiceQuestion?: ChoiceQuestion;
+
+  public get typedQuestion(): NumericQuestion | TextualQuestion | ChoiceQuestion | undefined {
+    if (this.numericQuestion) return this.numericQuestion;
+    if (this.textualQuestion) return this.textualQuestion;
+    if (this.choiceQuestion) return this.choiceQuestion;
+
+    return undefined;
+  }
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -22,6 +46,11 @@ export class Question extends Model<QuestionAttributes> implements QuestionAttri
 export default (sequelize: Sequelize) => {
   Question.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       slug: {
         type: DataTypes.STRING,
         unique: true,
@@ -39,11 +68,34 @@ export default (sequelize: Sequelize) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      questionType: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     {
       sequelize,
       modelName: 'question',
       tableName: 'Question',
+
+      hooks: {
+        beforeFind: (options) => {
+          options.include = [
+            {
+              model: TextualQuestion,
+              include: [VerificationType, QuestionTypeSpecification],
+            },
+            {
+              model: NumericQuestion,
+              include: [QuestionTypeSpecification],
+            },
+            {
+              model: ChoiceQuestion,
+              include: [QuestionTypeSpecification],
+            },
+          ];
+        },
+      },
     }
   );
 

@@ -1,9 +1,12 @@
 import bcrypt from 'bcrypt';
-import database from '../models';
+
+import { QuestionTypeSpecification } from '../models/questionTypeSpecification';
+import { VerificationType } from '../models/verificationType';
+import { Group } from '../models/group';
+import { Role } from '../models/role';
+import { User } from '../models/user';
 
 export default async () => {
-  const { User, Role, Group } = database.models;
-
   await Role.bulkCreate([
     {
       slug: 'admin',
@@ -64,6 +67,56 @@ export default async () => {
     {
       slug: '1ere2',
       name: '1ère2',
+    },
+  ]);
+
+  await VerificationType.bulkCreate([
+    {
+      name: 'Hybride',
+      slug: 'hybride',
+    },
+    {
+      name: 'Automatique',
+      slug: 'automatique',
+    },
+    {
+      name: 'Manuel',
+      slug: 'manuel',
+    },
+  ]);
+
+  await QuestionTypeSpecification.bulkCreate([
+    {
+      slug: 'nombre-entier',
+      name: 'Nombre entier',
+    },
+    {
+      slug: 'nombre-décimal',
+      name: 'Nombre décimal',
+    },
+    {
+      slug: 'pourcentage',
+      name: 'Pourcentage',
+    },
+    {
+      slug: 'prix',
+      name: 'Prix',
+    },
+    {
+      slug: 'date',
+      name: 'Date',
+    },
+    {
+      slug: 'date-et-heure',
+      name: 'Date et heure',
+    },
+    {
+      slug: 'choix-unique',
+      name: 'Choix unique',
+    },
+    {
+      slug: 'choix-multiple',
+      name: 'Choix multiple',
     },
   ]);
 };
