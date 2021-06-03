@@ -7,6 +7,7 @@ import { ChoiceQuestion } from './choiceQuestion';
 import { NumericQuestion } from './numericQuestion';
 import { QuestionTypeSpecification } from './questionTypeSpecification';
 import { VerificationType } from './verificationType';
+import { Choice } from './choice';
 
 interface QuestionAttributes {
   id: number;
@@ -27,9 +28,9 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public filename!: string;
   public questionType!: string;
 
-  private numericQuestion?: NumericQuestion;
-  private textualQuestion?: TextualQuestion;
-  private choiceQuestion?: ChoiceQuestion;
+  public numericQuestion?: NumericQuestion;
+  public textualQuestion?: TextualQuestion;
+  public choiceQuestion?: ChoiceQuestion;
 
   public get typedQuestion(): NumericQuestion | TextualQuestion | ChoiceQuestion | undefined {
     if (this.numericQuestion) return this.numericQuestion;
@@ -91,7 +92,7 @@ export default (sequelize: Sequelize) => {
             },
             {
               model: ChoiceQuestion,
-              include: [QuestionTypeSpecification],
+              include: [QuestionTypeSpecification, Choice],
             },
           ];
         },

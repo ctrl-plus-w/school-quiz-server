@@ -10,6 +10,7 @@ export default async () => {
     State,
     Quiz,
     Question,
+    Choice,
     TextualQuestion,
     NumericQuestion,
     ChoiceQuestion,
@@ -100,4 +101,9 @@ export default async () => {
   TextualQuestion.belongsTo(QuestionTypeSpecification);
   NumericQuestion.belongsTo(QuestionTypeSpecification);
   ChoiceQuestion.belongsTo(QuestionTypeSpecification);
+
+  // Numeric question & Choice realtion.
+  const CHOICE_QUESTION_CHOICE_TABLENAME = 'ChoiceQuestionChoice';
+  ChoiceQuestion.belongsToMany(Choice, { through: CHOICE_QUESTION_CHOICE_TABLENAME });
+  Choice.belongsToMany(ChoiceQuestion, { through: CHOICE_QUESTION_CHOICE_TABLENAME });
 };

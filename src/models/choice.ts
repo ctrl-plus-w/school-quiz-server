@@ -4,14 +4,14 @@ import { Model, DataTypes } from 'sequelize';
 
 interface ChoiceAttributes {
   valid: boolean;
-  slug: Date;
-  name: Date;
+  slug: string;
+  name: string;
 }
 
 export class Choice extends Model<ChoiceAttributes> implements ChoiceAttributes {
   public valid!: boolean;
-  public slug!: Date;
-  public name!: Date;
+  public slug!: string;
+  public name!: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
