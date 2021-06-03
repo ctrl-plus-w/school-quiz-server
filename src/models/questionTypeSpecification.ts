@@ -3,13 +3,13 @@ import { Sequelize } from 'sequelize/types';
 import { Model, DataTypes } from 'sequelize';
 
 interface QuestionTypeSpecificationAttributes {
-  slug: Date;
-  name: Date;
+  slug: string;
+  name: string;
 }
 
 export class QuestionTypeSpecification extends Model<QuestionTypeSpecificationAttributes> implements QuestionTypeSpecificationAttributes {
-  public slug!: Date;
-  public name!: Date;
+  public slug!: string;
+  public name!: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;

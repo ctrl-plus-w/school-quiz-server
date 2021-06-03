@@ -3,13 +3,13 @@ import { Sequelize } from 'sequelize/types';
 import { Model, DataTypes } from 'sequelize';
 
 interface VerificationTypeAttributes {
-  slug: Date;
-  name: Date;
+  slug: string;
+  name: string;
 }
 
 export class VerificationType extends Model<VerificationTypeAttributes> implements VerificationTypeAttributes {
-  public slug!: Date;
-  public name!: Date;
+  public slug!: string;
+  public name!: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
