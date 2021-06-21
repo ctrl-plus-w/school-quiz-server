@@ -9,6 +9,9 @@ import registerAssociations from './database/registerAssociations';
 import seedDatabase from './database/seedDatabase';
 
 import auth from './api/auth/auth.routes';
+import groups from './api/group/group.routes';
+
+import authenticateMiddleware from './middlewares/authenticate.middleware';
 
 // Constants
 const PORT = process.env.PORT || 6000;
@@ -22,6 +25,7 @@ app.use(json());
 
 // Routes
 app.use('/auth', auth);
+app.use('/api/groups', authenticateMiddleware, groups);
 
 (async () => {
   await registerAssociations();
