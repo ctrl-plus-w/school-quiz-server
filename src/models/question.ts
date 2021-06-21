@@ -1,4 +1,4 @@
-import { Optional, Sequelize } from 'sequelize/types';
+import { HasManyAddAssociationMixin, HasManyCreateAssociationMixin, HasManyRemoveAssociationMixin, Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
@@ -8,6 +8,8 @@ import { NumericQuestion } from './numericQuestion';
 import { QuestionTypeSpecification } from './questionTypeSpecification';
 import { VerificationType } from './verificationType';
 import { Choice } from './choice';
+import { UserAnswer } from './userAnswer';
+import { User } from './user';
 
 type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
 
@@ -46,6 +48,12 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public typedQuestionId?: number;
 
   public dataValues!: QuestionDataValues;
+
+  public userAnswers?: Array<UserAnswer>;
+
+  public addUserAnswer!: HasManyAddAssociationMixin<UserAnswer, number>;
+  public removeUserAnswer!: HasManyRemoveAssociationMixin<UserAnswer, number>;
+  public createUserAnswer!: HasManyCreateAssociationMixin<UserAnswer>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -100,6 +108,10 @@ export default (sequelize: Sequelize) => {
             {
               model: ChoiceQuestion,
               include: [QuestionTypeSpecification, Choice],
+            },
+            {
+              model: UserAnswer,
+              include: [User],
             },
           ];
         },

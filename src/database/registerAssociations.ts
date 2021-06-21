@@ -1,4 +1,5 @@
 import database from '../models';
+import { UserAnswer } from '../models/userAnswer';
 
 export default async () => {
   const {
@@ -101,4 +102,11 @@ export default async () => {
 
   Answer.belongsTo(GTLTAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
   GTLTAnswer.hasOne(Answer, { ...ANSWER_TYPES_DEFAULT_PROPERTIES, scope: { answerType: 'gtLtAnswer' } });
+
+  // UserAnswers & (User / Question) relation.
+  Question.hasMany(UserAnswer);
+  UserAnswer.belongsTo(Question);
+
+  User.hasMany(UserAnswer);
+  UserAnswer.belongsTo(User);
 };
