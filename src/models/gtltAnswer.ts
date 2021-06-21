@@ -12,10 +12,11 @@ export class GTLTAnswer extends Model<GTLTAnswerAttributes> implements GTLTAnswe
   public greaterThan!: number;
   public lowerThan!: number;
 
-  public createAnswer!: HasOneCreateAssociationMixin<Answer>;
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Answer property */
+  public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 }
 
 export default (sequelize: Sequelize) => {

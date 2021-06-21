@@ -13,14 +13,15 @@ export class Group extends Model<GroupAttributes> implements GroupAttributes {
   public slug!: string;
   public name!: string;
 
-  public getLabels!: BelongsToManyGetAssociationsMixin<Label>;
-  public addLabel!: BelongsToManyAddAssociationMixin<Label, number>;
-  public hasLabel!: BelongsToManyHasAssociationMixin<Label, number>;
-
   public readonly labels?: Label[];
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Labels properties */
+  public getLabels!: BelongsToManyGetAssociationsMixin<Label>;
+  public addLabel!: BelongsToManyAddAssociationMixin<Label, number>;
+  public hasLabel!: BelongsToManyHasAssociationMixin<Label, number>;
 }
 
 export default (sequelize: Sequelize) => {

@@ -23,15 +23,19 @@ export class ChoiceQuestion extends Model<ChoiceQuestionAttributes> implements C
   public choices!: Array<Choice>;
   public questionTypeSpecification!: QuestionTypeSpecification;
 
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+
+  /* Choice properties */
   public addChoice!: BelongsToManyAddAssociationMixin<Choice, number>;
   public addChoices!: BelongsToManyAddAssociationsMixin<Choice, number>;
   public removeChoice!: BelongsToManyRemoveAssociationMixin<Choice, number>;
 
+  /* Question specification property */
   public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
-  public createQuestion!: HasOneCreateAssociationMixin<Question>;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  /* Question property */
+  public createQuestion!: HasOneCreateAssociationMixin<Question>;
 }
 
 export default (sequelize: Sequelize) => {

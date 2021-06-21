@@ -33,23 +33,21 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public password!: string;
   public gender!: boolean | null;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-
-  public getRole!: BelongsToGetAssociationMixin<Role>;
-  public setRole!: BelongsToSetAssociationMixin<Role, number>;
-  public setState!: BelongsToSetAssociationMixin<State, number>;
-
-  public addEvent!: BelongsToManyAddAssociationMixin<Event, number>;
-  public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
-
   public state?: State;
   public role?: Role;
   public events?: Array<Event>;
 
-  public static associations: {
-    role: Association<User, Role>;
-  };
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+
+  /* Role properties */
+  public getRole!: BelongsToGetAssociationMixin<Role>;
+  public setRole!: BelongsToSetAssociationMixin<Role, number>;
+  public setState!: BelongsToSetAssociationMixin<State, number>;
+
+  /* Event properties */
+  public addEvent!: BelongsToManyAddAssociationMixin<Event, number>;
+  public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
 }
 
 export default (sequelize: Sequelize) => {

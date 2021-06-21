@@ -28,14 +28,15 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public strict!: boolean;
   public shuffle!: boolean;
 
-  public addQuestion!: BelongsToManyAddAssociationMixin<Question, number>;
-  public addQuestions!: BelongsToManyAddAssociationsMixin<Question, number>;
-  public removeQuestion!: BelongsToManyRemoveAssociationsMixin<Question, number>;
-
   public questions?: Array<Question>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Question properties */
+  public addQuestion!: BelongsToManyAddAssociationMixin<Question, number>;
+  public addQuestions!: BelongsToManyAddAssociationsMixin<Question, number>;
+  public removeQuestion!: BelongsToManyRemoveAssociationsMixin<Question, number>;
 }
 
 export default (sequelize: Sequelize) => {

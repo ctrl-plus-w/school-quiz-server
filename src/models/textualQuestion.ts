@@ -17,12 +17,17 @@ export class TextualQuestion extends Model<TextualQuestionAttributes> implements
   public verificationType!: VerificationType;
   public questionTypeSpecification!: QuestionTypeSpecification;
 
-  public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
-  public setVerificationType!: BelongsToSetAssociationMixin<VerificationType, number>;
-  public createQuestion!: HasOneCreateAssociationMixin<Question>;
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Question specification property */
+  public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
+
+  /*  Question verification type property */
+  public setVerificationType!: BelongsToSetAssociationMixin<VerificationType, number>;
+
+  /* Question property */
+  public createQuestion!: HasOneCreateAssociationMixin<Question>;
 }
 
 export default (sequelize: Sequelize) => {

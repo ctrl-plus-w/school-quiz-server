@@ -47,16 +47,18 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public typedQuestion?: TypedQuestion;
   public typedQuestionId?: number;
 
-  public dataValues!: QuestionDataValues;
-
   public userAnswers?: Array<UserAnswer>;
 
-  public addUserAnswer!: HasManyAddAssociationMixin<UserAnswer, number>;
-  public removeUserAnswer!: HasManyRemoveAssociationMixin<UserAnswer, number>;
-  public createUserAnswer!: HasManyCreateAssociationMixin<UserAnswer>;
+  /* Additional property */
+  public dataValues!: QuestionDataValues;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* User answer properties */
+  public addUserAnswer!: HasManyAddAssociationMixin<UserAnswer, number>;
+  public removeUserAnswer!: HasManyRemoveAssociationMixin<UserAnswer, number>;
+  public createUserAnswer!: HasManyCreateAssociationMixin<UserAnswer>;
 }
 
 export default (sequelize: Sequelize) => {

@@ -9,11 +9,14 @@ interface NumericQuestionAttributes {}
 export class NumericQuestion extends Model<NumericQuestionAttributes> implements NumericQuestionAttributes {
   public questionTypeSpecification!: QuestionTypeSpecification;
 
-  public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
-  public createQuestion!: HasOneCreateAssociationMixin<Question>;
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Question specification property */
+  public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
+
+  /* Question property */
+  public createQuestion!: HasOneCreateAssociationMixin<Question>;
 }
 
 export default (sequelize: Sequelize) => {

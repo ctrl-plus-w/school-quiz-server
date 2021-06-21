@@ -25,12 +25,6 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public start!: Date;
   public countdown!: Date;
 
-  public setQuiz!: BelongsToSetAssociationMixin<Quiz, number>;
-  public setGroup!: BelongsToSetAssociationMixin<Group, number>;
-  public setOwner!: BelongsToSetAssociationMixin<User, number>;
-  public addCollaborator!: BelongsToManyAddAssociationMixin<User, number>;
-  public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
-
   public quiz!: Quiz;
   public group!: Group;
   public collaborators!: Array<User>;
@@ -38,6 +32,19 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Quiz property */
+  public setQuiz!: BelongsToSetAssociationMixin<Quiz, number>;
+
+  /* Group property */
+  public setGroup!: BelongsToSetAssociationMixin<Group, number>;
+
+  /* Owner property */
+  public setOwner!: BelongsToSetAssociationMixin<User, number>;
+
+  /* Collaborators properties */
+  public addCollaborator!: BelongsToManyAddAssociationMixin<User, number>;
+  public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
 }
 
 export default (sequelize: Sequelize) => {

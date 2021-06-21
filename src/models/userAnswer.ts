@@ -14,10 +14,11 @@ export class UserAnswer extends Model<UserAnswerAttributes> implements UserAnswe
   public question?: Question;
   public user?: User;
 
-  public setUser!: BelongsToSetAssociationMixin<User, number>;
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* User property */
+  public setUser!: BelongsToSetAssociationMixin<User, number>;
 }
 
 export default (sequelize: Sequelize) => {

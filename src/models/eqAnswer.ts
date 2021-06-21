@@ -10,10 +10,11 @@ interface EqAnswerAttributes {
 export class EqAnswer extends Model<EqAnswerAttributes> implements EqAnswerAttributes {
   public answerContent!: string;
 
-  public createAnswer!: HasOneCreateAssociationMixin<Answer>;
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Answer property */
+  public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 }
 
 export default (sequelize: Sequelize) => {
