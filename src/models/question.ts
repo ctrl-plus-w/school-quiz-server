@@ -1,4 +1,4 @@
-import { BelongsToCreateAssociationMixin, Optional, Sequelize } from 'sequelize/types';
+import { HasOneGetAssociationMixin, Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
@@ -9,6 +9,11 @@ import { QuestionTypeSpecification } from './questionTypeSpecification';
 import { VerificationType } from './verificationType';
 import { Choice } from './choice';
 
+type TypedQuestion =
+  | HasOneGetAssociationMixin<NumericQuestion>
+  | HasOneGetAssociationMixin<TextualQuestion>
+  | HasOneGetAssociationMixin<ChoiceQuestion>;
+
 interface QuestionAttributes {
   id: number;
   slug: string;
@@ -16,6 +21,14 @@ interface QuestionAttributes {
   description: string;
   filename: string;
   questionType: string;
+}
+
+interface QuestionDataValues extends QuestionAttributes {
+  textualQuestion?: TextualQuestion;
+  numericQuestion?: NumericQuestion;
+  choiceQuestion?: ChoiceQuestion;
+
+  typedQuestion?: TypedQuestion;
 }
 
 interface QuestionCreationAttributes extends Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'> {}
@@ -28,17 +41,14 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public filename!: string;
   public questionType!: string;
 
-  public numericQuestion?: NumericQuestion;
-  public textualQuestion?: TextualQuestion;
-  public choiceQuestion?: ChoiceQuestion;
+  public numericQuestion?: HasOneGetAssociationMixin<NumericQuestion>;
+  public textualQuestion?: HasOneGetAssociationMixin<TextualQuestion>;
+  public choiceQuestion?: HasOneGetAssociationMixin<ChoiceQuestion>;
 
-  public get typedQuestion(): NumericQuestion | TextualQuestion | ChoiceQuestion | undefined {
-    if (this.numericQuestion) return this.numericQuestion;
-    if (this.textualQuestion) return this.textualQuestion;
-    if (this.choiceQuestion) return this.choiceQuestion;
+  public typedQuestion?: TypedQuestion;
+  public typedQuestionId?: number;
 
-    return undefined;
-  }
+  public dataValues!: QuestionDataValues;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -95,6 +105,29 @@ export default (sequelize: Sequelize) => {
               include: [QuestionTypeSpecification, Choice],
             },
           ];
+        },
+
+        afterFind: (instanceOrInstances: Array<Question> | Question) => {
+          const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+
+          for (let instance of instances) {
+            if (instance.questionType === 'numericQuestion' && instance.typedQuestionId != undefined) {
+              instance.typedQuestion = instance.numericQuestion;
+            } else if (instance.questionType === 'textualQuestion' && instance.typedQuestionId != undefined) {
+              instance.typedQuestion = instance.textualQuestion;
+            } else if (instance.questionType === 'choiceQuestion' && instance.typedQuestionId != undefined) {
+              instance.typedQuestion = instance.choiceQuestion;
+            }
+
+            delete instance.numericQuestion;
+            delete instance.dataValues.numericQuestion;
+
+            delete instance.textualQuestion;
+            delete instance.dataValues.textualQuestion;
+
+            delete instance.choiceQuestion;
+            delete instance.dataValues.choiceQuestion;
+          }
         },
       },
     }

@@ -1,4 +1,4 @@
-import { BelongsToCreateAssociationMixin, BelongsToSetAssociationMixin, HasOneCreateAssociationMixin, Sequelize } from 'sequelize/types';
+import { HasOneCreateAssociationMixin, BelongsToSetAssociationMixin, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 import { Question } from './question';
