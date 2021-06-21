@@ -1,4 +1,4 @@
-import { HasOneGetAssociationMixin, Optional, Sequelize } from 'sequelize/types';
+import { Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
@@ -9,10 +9,7 @@ import { QuestionTypeSpecification } from './questionTypeSpecification';
 import { VerificationType } from './verificationType';
 import { Choice } from './choice';
 
-type TypedQuestion =
-  | HasOneGetAssociationMixin<NumericQuestion>
-  | HasOneGetAssociationMixin<TextualQuestion>
-  | HasOneGetAssociationMixin<ChoiceQuestion>;
+type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
 
 interface QuestionAttributes {
   id: number;
@@ -41,9 +38,9 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public filename!: string;
   public questionType!: string;
 
-  public numericQuestion?: HasOneGetAssociationMixin<NumericQuestion>;
-  public textualQuestion?: HasOneGetAssociationMixin<TextualQuestion>;
-  public choiceQuestion?: HasOneGetAssociationMixin<ChoiceQuestion>;
+  public numericQuestion?: NumericQuestion;
+  public textualQuestion?: TextualQuestion;
+  public choiceQuestion?: ChoiceQuestion;
 
   public typedQuestion?: TypedQuestion;
   public typedQuestionId?: number;
