@@ -16,6 +16,9 @@ export default async () => {
     ChoiceQuestion,
     VerificationType,
     QuestionTypeSpecification,
+    Answer,
+    EqAnswer,
+    GTLTAnswer,
   } = database.models;
 
   // User & Role relation.
@@ -55,44 +58,19 @@ export default async () => {
   Quiz.belongsToMany(Question, { through: QUIZ_QUESTION_TABLENAME });
   Question.belongsToMany(Quiz, { through: QUIZ_QUESTION_TABLENAME });
 
-  Question.belongsTo(TextualQuestion, {
-    foreignKey: 'questionnableId',
+  const QUESTION_TYPES_DEFAULT_PROPERTIES = {
+    foreignKey: 'typedQuestionId',
     constraints: false,
-  });
-  TextualQuestion.hasOne(Question, {
-    foreignKey: 'questionnableId',
-    constraints: false,
+  };
 
-    scope: {
-      questionType: 'textualQuestion',
-    },
-  });
+  Question.belongsTo(TextualQuestion, QUESTION_TYPES_DEFAULT_PROPERTIES);
+  TextualQuestion.hasOne(Question, { ...QUESTION_TYPES_DEFAULT_PROPERTIES, scope: { questionType: 'textualQuestion' } });
 
-  Question.belongsTo(NumericQuestion, {
-    foreignKey: 'questionnableId',
-    constraints: false,
-  });
-  NumericQuestion.hasOne(Question, {
-    foreignKey: 'questionnableId',
-    constraints: false,
+  Question.belongsTo(NumericQuestion, QUESTION_TYPES_DEFAULT_PROPERTIES);
+  NumericQuestion.hasOne(Question, { ...QUESTION_TYPES_DEFAULT_PROPERTIES, scope: { questionType: 'numericQuestion' } });
 
-    scope: {
-      questionType: 'numericQuestion',
-    },
-  });
-
-  Question.belongsTo(ChoiceQuestion, {
-    foreignKey: 'questionnableId',
-    constraints: false,
-  });
-  ChoiceQuestion.hasOne(Question, {
-    foreignKey: 'questionnableId',
-    constraints: false,
-
-    scope: {
-      questionType: 'choiceQuestion',
-    },
-  });
+  Question.belongsTo(ChoiceQuestion, QUESTION_TYPES_DEFAULT_PROPERTIES);
+  ChoiceQuestion.hasOne(Question, { ...QUESTION_TYPES_DEFAULT_PROPERTIES, scope: { questionType: 'choiceQuestion' } });
 
   // Textual question & Verification type relation.
   TextualQuestion.belongsTo(VerificationType);
@@ -106,4 +84,21 @@ export default async () => {
   const CHOICE_QUESTION_CHOICE_TABLENAME = 'ChoiceQuestionChoice';
   ChoiceQuestion.belongsToMany(Choice, { through: CHOICE_QUESTION_CHOICE_TABLENAME });
   Choice.belongsToMany(ChoiceQuestion, { through: CHOICE_QUESTION_CHOICE_TABLENAME });
+
+  // Question & QuestionAnswer relation.
+  const QUESTION_ANSWER_TABLENAME = 'QuestionAnswer';
+  Question.belongsToMany(Answer, { through: QUESTION_ANSWER_TABLENAME });
+  Answer.belongsToMany(Question, { through: QUESTION_ANSWER_TABLENAME });
+
+  // QuestionAnswer & AnswerTypes relations.
+  const ANSWER_TYPES_DEFAULT_PROPERTIES = {
+    foreignKey: 'typedAnswerId',
+    constraints: false,
+  };
+
+  Answer.belongsTo(EqAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
+  EqAnswer.hasOne(Answer, { ...ANSWER_TYPES_DEFAULT_PROPERTIES, scope: { answerType: 'eqAnswer' } });
+
+  Answer.belongsTo(GTLTAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
+  GTLTAnswer.hasOne(Answer, { ...ANSWER_TYPES_DEFAULT_PROPERTIES, scope: { answerType: 'gtLtAnswer' } });
 };

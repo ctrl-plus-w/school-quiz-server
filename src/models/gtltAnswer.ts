@@ -1,6 +1,7 @@
-import { Sequelize } from 'sequelize/types';
+import { HasOneCreateAssociationMixin, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
+import { Answer } from './answer';
 
 interface GTLTAnswerAttributes {
   greaterThan: number;
@@ -10,6 +11,8 @@ interface GTLTAnswerAttributes {
 export class GTLTAnswer extends Model<GTLTAnswerAttributes> implements GTLTAnswerAttributes {
   public greaterThan!: number;
   public lowerThan!: number;
+
+  public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -29,7 +32,7 @@ export default (sequelize: Sequelize) => {
     },
     {
       sequelize,
-      modelName: 'gtltAnswer',
+      modelName: 'gtLtAnswer',
       tableName: 'GTLTAnswer',
     }
   );

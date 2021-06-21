@@ -1,13 +1,16 @@
-import { Sequelize } from 'sequelize/types';
+import { HasOneCreateAssociationMixin, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
+import { Answer } from './answer';
 
 interface EqAnswerAttributes {
-  answer: string;
+  answerContent: string;
 }
 
 export class EqAnswer extends Model<EqAnswerAttributes> implements EqAnswerAttributes {
-  public answer!: string;
+  public answerContent!: string;
+
+  public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -16,9 +19,10 @@ export class EqAnswer extends Model<EqAnswerAttributes> implements EqAnswerAttri
 export default (sequelize: Sequelize) => {
   EqAnswer.init(
     {
-      answer: {
+      answerContent: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
     },
     {
