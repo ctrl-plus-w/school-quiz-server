@@ -22,10 +22,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const payload = {
       username: user.username,
       role: user.role?.slug,
+      rolePermission: user.role?.permission,
     };
 
     const options: SignOptions = {
-      expiresIn: 1,
+      expiresIn: '1h',
     };
 
     const token = sign(payload, credentials.JWT_TOKEN, options);
