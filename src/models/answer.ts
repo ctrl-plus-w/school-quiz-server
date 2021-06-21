@@ -1,10 +1,10 @@
-import { DataTypes, HasOneGetAssociationMixin, Optional, Sequelize } from 'sequelize';
+import { DataTypes, Optional, Sequelize } from 'sequelize';
 
 import { Model } from 'sequelize';
 import { EqAnswer } from './eqAnswer';
 import { GTLTAnswer } from './gtltAnswer';
 
-type TypedAnswer = HasOneGetAssociationMixin<EqAnswer> | HasOneGetAssociationMixin<GTLTAnswer>;
+type TypedAnswer = EqAnswer | GTLTAnswer;
 
 interface AnswerAttributes {
   id: string;
@@ -24,8 +24,8 @@ export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> im
   public id!: string;
   public answerType!: string;
 
-  public eqAnswer?: HasOneGetAssociationMixin<EqAnswer>;
-  public gtLtAnswer?: HasOneGetAssociationMixin<GTLTAnswer>;
+  public eqAnswer?: EqAnswer;
+  public gtLtAnswer?: GTLTAnswer;
 
   public dataValues!: AnswerDataValues;
 
