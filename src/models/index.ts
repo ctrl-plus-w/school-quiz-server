@@ -17,7 +17,6 @@ import state from './state';
 import eqAnswer from './eqAnswer';
 import gtltAnswer from './gtltAnswer';
 import answer from './answer';
-import answerType from './answerType';
 import userAnswer from './userAnswer';
 import choice from './choice';
 
@@ -49,7 +48,6 @@ export default {
     Choice: choice(sequelize),
 
     Answer: answer(sequelize),
-    AnswerType: answerType(sequelize),
 
     UserAnswer: userAnswer(sequelize),
 
