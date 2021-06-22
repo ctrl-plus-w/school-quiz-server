@@ -1,12 +1,12 @@
 import {
   Sequelize,
-  BelongsToGetAssociationMixin,
   BelongsToSetAssociationMixin,
   BelongsToManyAddAssociationMixin,
   BelongsToManyRemoveAssociationMixin,
   Optional,
   Model,
   DataTypes,
+  BelongsToManyAddAssociationsMixin,
 } from 'sequelize';
 
 import { Role } from './role';
@@ -40,12 +40,15 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public readonly updatedAt!: Date;
 
   /* Role properties */
-  public getRole!: BelongsToGetAssociationMixin<Role>;
   public setRole!: BelongsToSetAssociationMixin<Role, number>;
+  public removeRole!: BelongsToSetAssociationMixin<Role, number>;
+
+  /* State property */
   public setState!: BelongsToSetAssociationMixin<State, number>;
 
   /* Event properties */
   public addEvent!: BelongsToManyAddAssociationMixin<Event, number>;
+  public addEvents!: BelongsToManyAddAssociationsMixin<Event, number>;
   public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
 }
 
