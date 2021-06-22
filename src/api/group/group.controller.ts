@@ -94,3 +94,24 @@ export const deleteGroup = async (req: Request, res: Response) => {
     res.json({ error: 'Une erreur est servenue.' });
   }
 };
+
+export const removeLabel = async (req: Request, res: Response) => {
+  try {
+    const groupId = req.params.groupId;
+    const labelId = req.body.labelId;
+    if (!labelId || !groupId) throw new Error();
+
+    const group = await Group.findByPk(groupId);
+    if (!group) throw new Error();
+
+    const label = await Label.findByPk(labelId);
+    if (!label) throw new Error();
+
+    await group.removeLabel(label);
+
+    res.json({ removed: true });
+  } catch (err) {
+    console.log(err);
+    res.json({ error: "Un des champs n'est pas valide." });
+  }
+};
