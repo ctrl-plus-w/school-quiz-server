@@ -14,6 +14,8 @@ import labels from './api/label/label.routes';
 import users from './api/user/user.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
+import errorHandler from './middlewares/errorHandler.middleware';
+import pageNotFound from './middlewares/pageNotFound.middleware';
 
 // Constants
 const PORT = process.env.PORT || 6000;
@@ -30,6 +32,9 @@ app.use('/auth', auth);
 app.use('/api/groups', authenticateMiddleware, groups);
 app.use('/api/labels', authenticateMiddleware, labels);
 app.use('/api/users', authenticateMiddleware, users);
+
+app.use(pageNotFound);
+app.use(errorHandler);
 
 (async () => {
   await registerAssociations();
