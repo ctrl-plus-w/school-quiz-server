@@ -1,6 +1,5 @@
-import { BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, Optional, Sequelize } from 'sequelize/types';
+import { Model, DataTypes, BelongsToSetAssociationMixin, Optional, Sequelize } from 'sequelize';
 
-import { Model, DataTypes } from 'sequelize';
 import { Question } from './question';
 import { User } from './user';
 

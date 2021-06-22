@@ -1,6 +1,5 @@
-import { HasOneCreateAssociationMixin, Optional, Sequelize } from 'sequelize/types';
+import { HasOneCreateAssociationMixin, Optional, Sequelize, Model, DataTypes } from 'sequelize';
 
-import { Model, DataTypes } from 'sequelize';
 import { Answer } from './answer';
 
 interface GTLTAnswerAttributes {

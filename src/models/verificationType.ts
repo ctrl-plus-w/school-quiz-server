@@ -1,6 +1,4 @@
-import { Optional, Sequelize } from 'sequelize/types';
-
-import { Model, DataTypes } from 'sequelize';
+import { Optional, Sequelize, Model, DataTypes } from 'sequelize';
 
 interface VerificationTypeAttributes {
   id: number;

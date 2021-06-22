@@ -1,12 +1,13 @@
 import {
+  Model,
+  DataTypes,
   BelongsToManyAddAssociationMixin,
   BelongsToManyAddAssociationsMixin,
   BelongsToManyRemoveAssociationsMixin,
   Optional,
   Sequelize,
-} from 'sequelize/types';
+} from 'sequelize';
 
-import { Model, DataTypes } from 'sequelize';
 import { Question } from './question';
 
 interface QuizAttributes {

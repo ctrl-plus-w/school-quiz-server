@@ -1,14 +1,13 @@
 import {
-  Association,
   Sequelize,
   BelongsToGetAssociationMixin,
   BelongsToSetAssociationMixin,
   BelongsToManyAddAssociationMixin,
   BelongsToManyRemoveAssociationMixin,
   Optional,
-} from 'sequelize/types';
-
-import { Model, DataTypes } from 'sequelize';
+  Model,
+  DataTypes,
+} from 'sequelize';
 
 import { Role } from './role';
 import { Event } from './event';

@@ -1,6 +1,5 @@
-import { DataTypes, Optional, Sequelize } from 'sequelize';
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 
-import { Model } from 'sequelize';
 import { EqAnswer } from './eqAnswer';
 import { GTLTAnswer } from './gtltAnswer';
 

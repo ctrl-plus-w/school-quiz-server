@@ -5,9 +5,9 @@ import {
   FindOptions,
   Optional,
   Sequelize,
-} from 'sequelize/types';
-
-import { Model, DataTypes } from 'sequelize';
+  Model,
+  DataTypes,
+} from 'sequelize';
 
 import { Label } from './label';
 

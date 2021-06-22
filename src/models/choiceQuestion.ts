@@ -6,9 +6,9 @@ import {
   HasOneCreateAssociationMixin,
   Optional,
   Sequelize,
-} from 'sequelize/types';
-
-import { Model, DataTypes } from 'sequelize';
+  Model,
+  DataTypes,
+} from 'sequelize';
 
 import { Question } from './question';
 import { QuestionTypeSpecification } from './questionTypeSpecification';

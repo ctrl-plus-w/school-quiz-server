@@ -1,5 +1,4 @@
-import { Optional, Sequelize } from 'sequelize/types';
-import { Model, DataTypes } from 'sequelize';
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 
 interface RoleAttributes {
   id: number;

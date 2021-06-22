@@ -1,6 +1,5 @@
-import { HasOneCreateAssociationMixin, BelongsToSetAssociationMixin, Sequelize, Optional } from 'sequelize/types';
+import { HasOneCreateAssociationMixin, BelongsToSetAssociationMixin, Sequelize, Optional, Model, DataTypes } from 'sequelize';
 
-import { Model, DataTypes } from 'sequelize';
 import { Question } from './question';
 import { VerificationType } from './verificationType';
 import { QuestionTypeSpecification } from './questionTypeSpecification';

@@ -1,6 +1,12 @@
-import { HasManyAddAssociationMixin, HasManyCreateAssociationMixin, HasManyRemoveAssociationMixin, Optional, Sequelize } from 'sequelize/types';
-
-import { Model, DataTypes } from 'sequelize';
+import {
+  Model,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyCreateAssociationMixin,
+  HasManyRemoveAssociationMixin,
+  Optional,
+  Sequelize,
+} from 'sequelize';
 
 import { TextualQuestion } from './textualQuestion';
 import { ChoiceQuestion } from './choiceQuestion';

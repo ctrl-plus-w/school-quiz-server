@@ -4,9 +4,9 @@ import {
   BelongsToSetAssociationMixin,
   Optional,
   Sequelize,
-} from 'sequelize/types';
-
-import { Model, DataTypes } from 'sequelize';
+  Model,
+  DataTypes,
+} from 'sequelize';
 
 import { Group } from './group';
 import { User } from './user';
