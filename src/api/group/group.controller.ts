@@ -15,6 +15,24 @@ export const getGroups = async (req: Request, res: Response) => {
   res.json(groups);
 };
 
+export const getGroupLabels = async (req: Request, res: Response) => {
+  try {
+    const group = await Group.findByPk(req.params.groupId);
+    res.json(group?.labels);
+  } catch (err) {
+    res.json({ error: 'Une erreur est servenue.' });
+  }
+};
+
+export const getGroupLabel = async (req: Request, res: Response) => {
+  try {
+    const group = await Group.findByPk(req.params.groupId);
+    res.json(group?.labels?.find((label) => label.id === parseInt(req.params.labelId)));
+  } catch (err) {
+    res.json({ error: 'Une erreur est servenue.' });
+  }
+};
+
 export const getGroup = async (req: Request, res: Response) => {
   try {
     const group = await Group.findByPk(req.params.groupId);

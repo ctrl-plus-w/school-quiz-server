@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { getGroups, getGroup, createGroup, deleteGroup } from './group.controller';
+import { getGroups, getGroup, createGroup, deleteGroup, getGroupLabel, getGroupLabels } from './group.controller';
 
 import checkPermission from '../../middlewares/authorization.middleware';
 
@@ -10,6 +10,8 @@ const router = Router();
 
 router.get('/', checkPermission(roles.ADMIN.PERMISSION), getGroups);
 router.get('/:groupId', checkPermission(roles.ADMIN.PERMISSION), getGroup);
+router.get('/:groupId/labels', checkPermission(roles.ADMIN.PERMISSION), getGroupLabels);
+router.get('/:groupId/labels/:labelId', checkPermission(roles.ADMIN.PERMISSION), getGroupLabel);
 
 router.post('/', checkPermission(roles.ADMIN.PERMISSION), createGroup);
 
