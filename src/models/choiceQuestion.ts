@@ -4,6 +4,7 @@ import {
   BelongsToManyRemoveAssociationMixin,
   BelongsToSetAssociationMixin,
   HasOneCreateAssociationMixin,
+  Optional,
   Sequelize,
 } from 'sequelize/types';
 
@@ -14,10 +15,14 @@ import { QuestionTypeSpecification } from './questionTypeSpecification';
 import { Choice } from './choice';
 
 interface ChoiceQuestionAttributes {
+  id: number;
   shuffle: boolean;
 }
 
-export class ChoiceQuestion extends Model<ChoiceQuestionAttributes> implements ChoiceQuestionAttributes {
+interface ChoiceQuestionCreationAttributes extends Optional<ChoiceQuestionAttributes, 'id'> {}
+
+export class ChoiceQuestion extends Model<ChoiceQuestionAttributes, ChoiceQuestionCreationAttributes> implements ChoiceQuestionAttributes {
+  public id!: number;
   public shuffle!: boolean;
 
   public choices!: Array<Choice>;
@@ -41,6 +46,11 @@ export class ChoiceQuestion extends Model<ChoiceQuestionAttributes> implements C
 export default (sequelize: Sequelize) => {
   ChoiceQuestion.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       shuffle: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

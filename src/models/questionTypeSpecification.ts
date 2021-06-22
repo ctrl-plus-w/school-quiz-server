@@ -1,13 +1,20 @@
-import { Sequelize } from 'sequelize/types';
+import { Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
 interface QuestionTypeSpecificationAttributes {
+  id: number;
   slug: string;
   name: string;
 }
 
-export class QuestionTypeSpecification extends Model<QuestionTypeSpecificationAttributes> implements QuestionTypeSpecificationAttributes {
+interface QuestionTypeSpecificationCreationAttributes extends Optional<QuestionTypeSpecificationAttributes, 'id'> {}
+
+export class QuestionTypeSpecification
+  extends Model<QuestionTypeSpecificationAttributes, QuestionTypeSpecificationCreationAttributes>
+  implements QuestionTypeSpecificationAttributes
+{
+  public id!: number;
   public slug!: string;
   public name!: string;
 
@@ -18,6 +25,11 @@ export class QuestionTypeSpecification extends Model<QuestionTypeSpecificationAt
 export default (sequelize: Sequelize) => {
   QuestionTypeSpecification.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       slug: {
         type: DataTypes.STRING,
         allowNull: false,

@@ -1,14 +1,18 @@
-import { HasOneCreateAssociationMixin, Sequelize } from 'sequelize/types';
+import { HasOneCreateAssociationMixin, Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 import { Answer } from './answer';
 
 interface GTLTAnswerAttributes {
+  id: number;
   greaterThan: number;
   lowerThan: number;
 }
 
-export class GTLTAnswer extends Model<GTLTAnswerAttributes> implements GTLTAnswerAttributes {
+interface GTLTAnswerCreationAttributes extends Optional<GTLTAnswerAttributes, 'id'> {}
+
+export class GTLTAnswer extends Model<GTLTAnswerAttributes, GTLTAnswerCreationAttributes> implements GTLTAnswerAttributes {
+  public id!: number;
   public greaterThan!: number;
   public lowerThan!: number;
 
@@ -22,6 +26,11 @@ export class GTLTAnswer extends Model<GTLTAnswerAttributes> implements GTLTAnswe
 export default (sequelize: Sequelize) => {
   GTLTAnswer.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       greaterThan: {
         type: DataTypes.INTEGER,
         allowNull: false,

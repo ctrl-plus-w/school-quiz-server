@@ -1,14 +1,19 @@
-import { BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, Sequelize } from 'sequelize/types';
+import { BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 import { Question } from './question';
 import { User } from './user';
 
 interface UserAnswerAttributes {
+  id: number;
   answerContent: string;
 }
 
-export class UserAnswer extends Model<UserAnswerAttributes> implements UserAnswerAttributes {
+interface UserAnswerCreationAttributes extends Optional<UserAnswerAttributes, 'id'> {}
+
+export class UserAnswer extends Model<UserAnswerAttributes, UserAnswerCreationAttributes> implements UserAnswerAttributes {
+  public id!: number;
+
   public answerContent!: string;
 
   public question?: Question;
@@ -24,6 +29,11 @@ export class UserAnswer extends Model<UserAnswerAttributes> implements UserAnswe
 export default (sequelize: Sequelize) => {
   UserAnswer.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       answerContent: {
         type: DataTypes.STRING,
         allowNull: false,

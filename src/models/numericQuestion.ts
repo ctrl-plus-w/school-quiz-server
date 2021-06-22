@@ -1,12 +1,18 @@
-import { BelongsToSetAssociationMixin, HasOneCreateAssociationMixin, Optional, Sequelize } from 'sequelize/types';
+import { BelongsToSetAssociationMixin, DataTypes, HasOneCreateAssociationMixin, Optional, Sequelize } from 'sequelize/types';
 
 import { Model } from 'sequelize';
 import { Question } from './question';
 import { QuestionTypeSpecification } from './questionTypeSpecification';
 
-interface NumericQuestionAttributes {}
+interface NumericQuestionAttributes {
+  id: number;
+}
 
-export class NumericQuestion extends Model<NumericQuestionAttributes> implements NumericQuestionAttributes {
+interface NumericQuestionCreationAttributes extends Optional<NumericQuestionAttributes, 'id'> {}
+
+export class NumericQuestion extends Model<NumericQuestionAttributes, NumericQuestionCreationAttributes> implements NumericQuestionAttributes {
+  public id!: number;
+
   public questionTypeSpecification!: QuestionTypeSpecification;
 
   public readonly createdAt!: Date;
@@ -21,7 +27,13 @@ export class NumericQuestion extends Model<NumericQuestionAttributes> implements
 
 export default (sequelize: Sequelize) => {
   NumericQuestion.init(
-    {},
+    {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+    },
     {
       sequelize,
       modelName: 'numericQuestion',

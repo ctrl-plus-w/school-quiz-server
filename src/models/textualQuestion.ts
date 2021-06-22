@@ -1,4 +1,4 @@
-import { HasOneCreateAssociationMixin, BelongsToSetAssociationMixin, Sequelize } from 'sequelize/types';
+import { HasOneCreateAssociationMixin, BelongsToSetAssociationMixin, Sequelize, Optional } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 import { Question } from './question';
@@ -6,11 +6,16 @@ import { VerificationType } from './verificationType';
 import { QuestionTypeSpecification } from './questionTypeSpecification';
 
 interface TextualQuestionAttributes {
+  id: number;
   caseSensitive: boolean;
   accentSensitive: boolean;
 }
 
-export class TextualQuestion extends Model<TextualQuestionAttributes> implements TextualQuestionAttributes {
+interface TextualQuestionCreationAttributes extends Optional<TextualQuestionAttributes, 'id'> {}
+
+export class TextualQuestion extends Model<TextualQuestionAttributes, TextualQuestionCreationAttributes> implements TextualQuestionAttributes {
+  public id!: number;
+
   public caseSensitive!: boolean;
   public accentSensitive!: boolean;
 
@@ -33,6 +38,11 @@ export class TextualQuestion extends Model<TextualQuestionAttributes> implements
 export default (sequelize: Sequelize) => {
   TextualQuestion.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       caseSensitive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

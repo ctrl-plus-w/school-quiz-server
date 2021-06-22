@@ -1,14 +1,18 @@
-import { Sequelize } from 'sequelize/types';
+import { Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
 interface ChoiceAttributes {
+  id: number;
   valid: boolean;
   slug: string;
   name: string;
 }
 
-export class Choice extends Model<ChoiceAttributes> implements ChoiceAttributes {
+interface ChoiceCreationAttributes extends Optional<ChoiceAttributes, 'id'> {}
+
+export class Choice extends Model<ChoiceAttributes, ChoiceCreationAttributes> implements ChoiceAttributes {
+  public id!: number;
   public valid!: boolean;
   public slug!: string;
   public name!: string;
@@ -20,6 +24,11 @@ export class Choice extends Model<ChoiceAttributes> implements ChoiceAttributes 
 export default (sequelize: Sequelize) => {
   Choice.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       valid: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

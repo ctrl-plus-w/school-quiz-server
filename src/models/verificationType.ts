@@ -1,13 +1,17 @@
-import { Sequelize } from 'sequelize/types';
+import { Optional, Sequelize } from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
 interface VerificationTypeAttributes {
+  id: number;
   slug: string;
   name: string;
 }
 
-export class VerificationType extends Model<VerificationTypeAttributes> implements VerificationTypeAttributes {
+interface VerificationTypeCreationAttributes extends Optional<VerificationTypeAttributes, 'id'> {}
+
+export class VerificationType extends Model<VerificationTypeAttributes, VerificationTypeCreationAttributes> implements VerificationTypeAttributes {
+  public id!: number;
   public slug!: string;
   public name!: string;
 
@@ -18,6 +22,11 @@ export class VerificationType extends Model<VerificationTypeAttributes> implemen
 export default (sequelize: Sequelize) => {
   VerificationType.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       slug: {
         type: DataTypes.STRING,
         allowNull: false,

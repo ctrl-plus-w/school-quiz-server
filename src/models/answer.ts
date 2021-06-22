@@ -7,7 +7,7 @@ import { GTLTAnswer } from './gtltAnswer';
 type TypedAnswer = EqAnswer | GTLTAnswer;
 
 interface AnswerAttributes {
-  id: string;
+  id: number;
   answerType: string;
 }
 
@@ -21,7 +21,7 @@ interface AnswerDataValues extends AnswerAttributes {
 interface AnswerCreationAttributes extends Optional<AnswerAttributes, 'id' | 'answerType'> {}
 
 export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> implements AnswerAttributes {
-  public id!: string;
+  public id!: number;
   public answerType!: string;
 
   public eqAnswer?: EqAnswer;

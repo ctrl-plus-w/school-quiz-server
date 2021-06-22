@@ -1,15 +1,26 @@
-import { BelongsToManyAddAssociationMixin, BelongsToManyGetAssociationsMixin, BelongsToManyHasAssociationMixin, Sequelize } from 'sequelize/types';
+import {
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  FindOptions,
+  Optional,
+  Sequelize,
+} from 'sequelize/types';
 
 import { Model, DataTypes } from 'sequelize';
 
 import { Label } from './label';
 
 interface GroupAttributes {
+  id: number;
   slug: string;
   name: string;
 }
 
-export class Group extends Model<GroupAttributes> implements GroupAttributes {
+interface GroupCreationAttributes extends Optional<GroupAttributes, 'id'> {}
+
+export class Group extends Model<GroupAttributes, GroupCreationAttributes> implements GroupAttributes {
+  public id!: number;
   public slug!: string;
   public name!: string;
 
@@ -27,6 +38,11 @@ export class Group extends Model<GroupAttributes> implements GroupAttributes {
 export default (sequelize: Sequelize) => {
   Group.init(
     {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       slug: {
         type: DataTypes.STRING,
         unique: true,
@@ -41,6 +57,16 @@ export default (sequelize: Sequelize) => {
       sequelize,
       modelName: 'group',
       tableName: 'Group',
+
+      hooks: {
+        beforeFind: (options: FindOptions<GroupAttributes>) => {
+          options.include = [
+            {
+              model: Label,
+            },
+          ];
+        },
+      },
     }
   );
 
