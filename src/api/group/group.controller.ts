@@ -7,7 +7,7 @@ import { Group } from '../../models/group';
 import { slugify } from '../../utils/string.utils';
 
 const schema = Joi.object({
-  name: Joi.string().min(4).max(10).required(),
+  name: Joi.string().min(4).max(20).required(),
 });
 
 export const getGroups = async (req: Request, res: Response) => {
