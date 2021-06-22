@@ -11,6 +11,7 @@ import seedDatabase from './database/seedDatabase';
 import auth from './api/auth/auth.routes';
 import groups from './api/group/group.routes';
 import labels from './api/label/label.routes';
+import users from './api/user/user.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 
@@ -28,6 +29,7 @@ app.use(json());
 app.use('/auth', auth);
 app.use('/api/groups', authenticateMiddleware, groups);
 app.use('/api/labels', authenticateMiddleware, labels);
+app.use('/api/users', authenticateMiddleware, users);
 
 (async () => {
   await registerAssociations();
