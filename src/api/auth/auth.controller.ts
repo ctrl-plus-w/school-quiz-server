@@ -6,18 +6,20 @@ import bcrypt from 'bcrypt';
 import { User } from '../../models/user';
 import { Role } from '../../models/role';
 
+import StatusError from '../../classes/StatusError';
+
 import credentials from '../../constants/credentials';
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
-  const username = req.body.username;
-  const password = req.body.password;
-
   try {
+    const username = req.body.username;
+    const password = req.body.password;
+
     const user = await User.findOne({ where: { username }, include: Role });
-    if (!user) throw new Error();
+    if (!user) return next(new StatusError('The username or the password is invalid.', 422));
 
     const passwordValid = await bcrypt.compare(password, user.password);
-    if (!passwordValid) throw new Error();
+    if (!user) return next(new StatusError('The username or the password is invalid.', 422));
 
     const payload = {
       username: user.username,
@@ -32,7 +34,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const token = sign(payload, credentials.JWT_TOKEN, options);
 
     res.json({ token });
-  } catch (error) {
-    res.status(400).json({ message: "Le nom d'utilisateur ou le mot de passe est invalide." });
+  } catch (err) {
+    next(err);
   }
 };

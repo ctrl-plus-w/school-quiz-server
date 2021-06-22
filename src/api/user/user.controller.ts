@@ -1,9 +1,11 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 import Joi from 'joi';
 import bcrypt, { hashSync } from 'bcrypt';
 
 import { User } from '../../models/user';
+import { nextTick } from 'process';
+import StatusError from '../../classes/StatusError';
 
 const schema = Joi.object({
   username: Joi.string().min(5).max(25).required(),
@@ -13,21 +15,25 @@ const schema = Joi.object({
   gender: Joi.boolean(),
 });
 
-export const getUsers = async (req: Request, res: Response) => {
-  const users = await User.findAll();
-  res.json(users);
+export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
 };
 
-export const getUser = async (req: Request, res: Response) => {
+export const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findByPk(req.params.userId);
     res.json(user);
   } catch (err) {
-    res.json({ error: 'Une erreur est servenue.' });
+    next(err);
   }
 };
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {
       username,
@@ -46,26 +52,26 @@ export const createUser = async (req: Request, res: Response) => {
     await schema.validateAsync(req.body);
 
     const user = await User.findOne({ where: { username: username } });
-    if (user) throw new Error();
+    if (user) return next(new StatusError('User already exists', 409));
 
     const password = bcrypt.hashSync(plainPassword, 12);
 
     const createdUser = await User.create({ username, firstName, lastName, gender, password });
     res.json(createdUser);
   } catch (err) {
-    res.json({ error: 'Une erreur est servenue.' });
+    next(err);
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findByPk(req.params.userId);
-    if (!user) throw new Error();
+    if (!user) return next(new StatusError('User not found', 404));
 
     await user.destroy();
 
     res.json({ deleted: true });
   } catch (err) {
-    res.json({ error: 'Une erreur est servenue.' });
+    next(err);
   }
 };
