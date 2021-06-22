@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { getGroups, getGroup, createGroup, deleteGroup, getGroupLabel, getGroupLabels } from './group.controller';
+import { getGroups, getGroup, createGroup, deleteGroup, getGroupLabel, getGroupLabels, addLabel } from './group.controller';
 
 import checkPermission from '../../middlewares/authorization.middleware';
 
@@ -14,6 +14,7 @@ router.get('/:groupId/labels', checkPermission(roles.ADMIN.PERMISSION), getGroup
 router.get('/:groupId/labels/:labelId', checkPermission(roles.ADMIN.PERMISSION), getGroupLabel);
 
 router.post('/', checkPermission(roles.ADMIN.PERMISSION), createGroup);
+router.post('/:groupId/labels', checkPermission(roles.ADMIN.PERMISSION), addLabel);
 
 router.delete('/:groupId', checkPermission(roles.ADMIN.PERMISSION), deleteGroup);
 

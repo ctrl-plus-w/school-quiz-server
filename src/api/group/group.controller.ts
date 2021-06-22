@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 
 import { Group } from '../../models/group';
+import { Label } from '../../models/label';
 
 import { slugify } from '../../utils/string.utils';
 
@@ -57,6 +58,27 @@ export const createGroup = async (req: Request, res: Response) => {
     const createdGroup = await Group.create({ name, slug });
     res.json(createdGroup);
   } catch (err) {
+    res.json({ error: "Un des champs n'est pas valide." });
+  }
+};
+
+export const addLabel = async (req: Request, res: Response) => {
+  try {
+    const groupId = req.params.groupId;
+    const labelId = req.body.labelId;
+    if (!labelId || !groupId) throw new Error();
+
+    const group = await Group.findByPk(groupId);
+    if (!group) throw new Error();
+
+    const label = await Label.findByPk(labelId);
+    if (!label) throw new Error();
+
+    await group.addLabel(label);
+
+    res.json({ added: true });
+  } catch (err) {
+    console.log(err);
     res.json({ error: "Un des champs n'est pas valide." });
   }
 };
