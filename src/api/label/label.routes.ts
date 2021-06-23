@@ -13,6 +13,6 @@ router.get('/:labelId', checkPermission(roles.ADMIN.PERMISSION), getLabel);
 
 router.post('/', checkPermission(roles.ADMIN.PERMISSION), createLabel);
 
-router.delete('/', checkPermission(roles.ADMIN.PERMISSION), deleteLabel);
+router.delete('/:labelId', checkPermission(roles.ADMIN.PERMISSION), deleteLabel);
 
 export default router;
