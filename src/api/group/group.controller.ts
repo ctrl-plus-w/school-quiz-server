@@ -13,7 +13,7 @@ const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
 });
 
-export const getGroups = async (req: Request, res: Response, next: NextFunction) => {
+export const getGroups = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const groups = await Group.findAll();
     res.json(groups);
@@ -22,7 +22,7 @@ export const getGroups = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export const getGroupLabels = async (req: Request, res: Response, next: NextFunction) => {
+export const getGroupLabels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const group = await Group.findByPk(req.params.groupId);
     res.json(group?.labels);
@@ -31,7 +31,7 @@ export const getGroupLabels = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const getGroupLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const getGroupLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const group = await Group.findByPk(req.params.groupId);
     res.json(group?.labels?.find((label) => label.id === parseInt(req.params.labelId)));
@@ -40,7 +40,7 @@ export const getGroupLabel = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const getGroup = async (req: Request, res: Response, next: NextFunction) => {
+export const getGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const group = await Group.findByPk(req.params.groupId);
     res.json(group);
@@ -49,7 +49,7 @@ export const getGroup = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const createGroup = async (req: Request, res: Response, next: NextFunction) => {
+export const createGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const name = req.body.name;
     if (!name) return next(new InvalidInputError());
@@ -70,7 +70,7 @@ export const createGroup = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const addLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const addLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const groupId = req.params.groupId;
     const labelId = req.body.labelId;
@@ -90,7 +90,7 @@ export const addLabel = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const deleteGroup = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const group = await Group.findByPk(req.params.groupId);
     if (!group) return next(new NotFoundError('Group'));
@@ -102,7 +102,7 @@ export const deleteGroup = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const removeLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const removeLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const groupId = req.params.groupId;
     const labelId = req.body.labelId;

@@ -6,7 +6,7 @@ interface GroupAttributes {
   name: string;
 }
 
-interface GroupCreationAttributes extends Optional<GroupAttributes, 'id'> {}
+type GroupCreationAttributes = Optional<GroupAttributes, 'id'>
 
 export class Label extends Model<GroupAttributes, GroupCreationAttributes> implements GroupAttributes {
   public id!: number;
@@ -17,7 +17,7 @@ export class Label extends Model<GroupAttributes, GroupCreationAttributes> imple
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Label => {
   Label.init(
     {
       id: {

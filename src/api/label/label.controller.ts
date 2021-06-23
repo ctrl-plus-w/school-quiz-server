@@ -11,7 +11,7 @@ const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
 });
 
-export const getLabels = async (req: Request, res: Response, next: NextFunction) => {
+export const getLabels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const labels = await Label.findAll();
     res.json(labels);
@@ -20,7 +20,7 @@ export const getLabels = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export const getLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const getLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const label = await Label.findByPk(req.params.labelId);
     res.json(label);
@@ -29,7 +29,7 @@ export const getLabel = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const createLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const createLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const name = req.body.name;
     if (!name) return next(new InvalidInputError());
@@ -50,7 +50,7 @@ export const createLabel = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const deleteLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const label = await Label.findByPk(req.params.labelId);
     if (!label) return next(new NotFoundError('Label'));

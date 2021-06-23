@@ -19,7 +19,7 @@ interface ChoiceQuestionAttributes {
   shuffle: boolean;
 }
 
-interface ChoiceQuestionCreationAttributes extends Optional<ChoiceQuestionAttributes, 'id'> {}
+type ChoiceQuestionCreationAttributes = Optional<ChoiceQuestionAttributes, 'id'>
 
 export class ChoiceQuestion extends Model<ChoiceQuestionAttributes, ChoiceQuestionCreationAttributes> implements ChoiceQuestionAttributes {
   public id!: number;
@@ -43,7 +43,7 @@ export class ChoiceQuestion extends Model<ChoiceQuestionAttributes, ChoiceQuesti
   public createQuestion!: HasOneCreateAssociationMixin<Question>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof ChoiceQuestion => {
   ChoiceQuestion.init(
     {
       id: {

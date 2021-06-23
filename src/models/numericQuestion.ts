@@ -7,7 +7,7 @@ interface NumericQuestionAttributes {
   id: number;
 }
 
-interface NumericQuestionCreationAttributes extends Optional<NumericQuestionAttributes, 'id'> {}
+type NumericQuestionCreationAttributes = Optional<NumericQuestionAttributes, 'id'>
 
 export class NumericQuestion extends Model<NumericQuestionAttributes, NumericQuestionCreationAttributes> implements NumericQuestionAttributes {
   public id!: number;
@@ -24,7 +24,7 @@ export class NumericQuestion extends Model<NumericQuestionAttributes, NumericQue
   public createQuestion!: HasOneCreateAssociationMixin<Question>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof NumericQuestion => {
   NumericQuestion.init(
     {
       id: {

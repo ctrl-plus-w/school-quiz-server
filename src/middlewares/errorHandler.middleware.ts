@@ -6,7 +6,9 @@ import StatusError from '../classes/StatusError';
    it looks like the middlware do things differently depending on the number 
    of arguments.
 */
-export default (err: StatusError | Error, req: Request, res: Response, next: NextFunction) => {
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+export default async (err: StatusError | Error, req: Request, res: Response, next: NextFunction): Promise<void> => {
   if (err instanceof StatusError) {
     res.status(err.status).json({ error: err.message });
   } else {

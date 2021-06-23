@@ -18,7 +18,7 @@ interface EventAttributes {
   countdown: Date;
 }
 
-interface EventCreationAttributes extends Optional<EventAttributes, 'id'> {}
+type EventCreationAttributes = Optional<EventAttributes, 'id'>
 
 export class Event extends Model<EventAttributes, EventCreationAttributes> implements EventAttributes {
   public id!: number;
@@ -47,7 +47,7 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Event => {
   Event.init(
     {
       id: {

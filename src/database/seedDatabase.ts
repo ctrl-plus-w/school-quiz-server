@@ -6,7 +6,7 @@ import { Group } from '../models/group';
 import { Role } from '../models/role';
 import { User } from '../models/user';
 
-export default async () => {
+export default async (): Promise<void> => {
   await Role.bulkCreate([
     {
       slug: 'admin',

@@ -7,7 +7,7 @@ interface RoleAttributes {
   permission: number;
 }
 
-interface RoleCreationAttributes extends Optional<RoleAttributes, 'id'> {}
+type RoleCreationAttributes = Optional<RoleAttributes, 'id'>
 
 export class Role extends Model<RoleAttributes, RoleCreationAttributes> implements RoleAttributes {
   public id!: number;
@@ -19,7 +19,7 @@ export class Role extends Model<RoleAttributes, RoleCreationAttributes> implemen
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Role => {
   Role.init(
     {
       id: {

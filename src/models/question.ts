@@ -36,7 +36,7 @@ interface QuestionDataValues extends QuestionAttributes {
   typedQuestion?: TypedQuestion;
 }
 
-interface QuestionCreationAttributes extends Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'> {}
+type QuestionCreationAttributes = Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'>
 
 export class Question extends Model<QuestionAttributes, QuestionCreationAttributes> implements QuestionAttributes {
   public id!: number;
@@ -67,7 +67,7 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public createUserAnswer!: HasManyCreateAssociationMixin<UserAnswer>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Question => {
   Question.init(
     {
       id: {
@@ -127,7 +127,7 @@ export default (sequelize: Sequelize) => {
         afterFind: (instanceOrInstances: Array<Question> | Question) => {
           const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
 
-          for (let instance of instances) {
+          for (const instance of instances) {
             if (instance.questionType === 'numericQuestion' && instance.typedQuestionId != undefined) {
               instance.typedQuestion = instance.numericQuestion;
             } else if (instance.questionType === 'textualQuestion' && instance.typedQuestionId != undefined) {

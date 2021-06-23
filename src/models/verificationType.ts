@@ -6,7 +6,7 @@ interface VerificationTypeAttributes {
   name: string;
 }
 
-interface VerificationTypeCreationAttributes extends Optional<VerificationTypeAttributes, 'id'> {}
+type VerificationTypeCreationAttributes = Optional<VerificationTypeAttributes, 'id'>
 
 export class VerificationType extends Model<VerificationTypeAttributes, VerificationTypeCreationAttributes> implements VerificationTypeAttributes {
   public id!: number;
@@ -17,7 +17,7 @@ export class VerificationType extends Model<VerificationTypeAttributes, Verifica
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof VerificationType => {
   VerificationType.init(
     {
       id: {

@@ -1,7 +1,5 @@
 import {
   BelongsToManyAddAssociationMixin,
-  BelongsToManyGetAssociationsMixin,
-  BelongsToManyHasAssociationMixin,
   FindOptions,
   Optional,
   Sequelize,
@@ -19,7 +17,7 @@ interface GroupAttributes {
   name: string;
 }
 
-interface GroupCreationAttributes extends Optional<GroupAttributes, 'id'> {}
+type GroupCreationAttributes = Optional<GroupAttributes, 'id'>
 
 export class Group extends Model<GroupAttributes, GroupCreationAttributes> implements GroupAttributes {
   public id!: number;
@@ -37,7 +35,7 @@ export class Group extends Model<GroupAttributes, GroupCreationAttributes> imple
   public removeLabel!: BelongsToManyRemoveAssociationMixin<Label, number>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Group => {
   Group.init(
     {
       id: {

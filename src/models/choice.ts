@@ -7,7 +7,7 @@ interface ChoiceAttributes {
   name: string;
 }
 
-interface ChoiceCreationAttributes extends Optional<ChoiceAttributes, 'id'> {}
+type ChoiceCreationAttributes = Optional<ChoiceAttributes, 'id'>;
 
 export class Choice extends Model<ChoiceAttributes, ChoiceCreationAttributes> implements ChoiceAttributes {
   public id!: number;
@@ -19,7 +19,7 @@ export class Choice extends Model<ChoiceAttributes, ChoiceCreationAttributes> im
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Choice => {
   Choice.init(
     {
       id: {

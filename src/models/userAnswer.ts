@@ -8,7 +8,7 @@ interface UserAnswerAttributes {
   answerContent: string;
 }
 
-interface UserAnswerCreationAttributes extends Optional<UserAnswerAttributes, 'id'> {}
+type UserAnswerCreationAttributes = Optional<UserAnswerAttributes, 'id'>
 
 export class UserAnswer extends Model<UserAnswerAttributes, UserAnswerCreationAttributes> implements UserAnswerAttributes {
   public id!: number;
@@ -25,7 +25,7 @@ export class UserAnswer extends Model<UserAnswerAttributes, UserAnswerCreationAt
   public setUser!: BelongsToSetAssociationMixin<User, number>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof UserAnswer => {
   UserAnswer.init(
     {
       id: {

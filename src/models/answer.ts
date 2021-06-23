@@ -17,7 +17,7 @@ interface AnswerDataValues extends AnswerAttributes {
   typedAnswer?: TypedAnswer;
 }
 
-interface AnswerCreationAttributes extends Optional<AnswerAttributes, 'id' | 'answerType'> {}
+type AnswerCreationAttributes = Optional<AnswerAttributes, 'id' | 'answerType'>
 
 export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> implements AnswerAttributes {
   public id!: number;
@@ -35,7 +35,7 @@ export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> im
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Answer => {
   Answer.init(
     {
       id: {
@@ -61,7 +61,7 @@ export default (sequelize: Sequelize) => {
         afterFind: (instanceOrInstances: Array<Answer> | Answer) => {
           const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
 
-          for (let instance of instances) {
+          for (const instance of instances) {
             if (instance.answerType === 'eqAnswer' && instance.typedAnswerId != undefined) {
               instance.typedAnswer = instance.eqAnswer;
             } else if (instance.answerType === 'gtLtAnswer' && instance.typedAnswerId != undefined) {

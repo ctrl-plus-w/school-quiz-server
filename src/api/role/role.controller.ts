@@ -13,7 +13,7 @@ const schema = Joi.object({
   permission: Joi.number().positive().required(),
 });
 
-export const getRoles = async (req: Request, res: Response, next: NextFunction) => {
+export const getRoles = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const roles = await Role.findAll();
     res.json(roles);
@@ -22,7 +22,7 @@ export const getRoles = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const getRole = async (req: Request, res: Response, next: NextFunction) => {
+export const getRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const role = await Role.findByPk(req.params.roleId);
     res.json(role);
@@ -31,7 +31,7 @@ export const getRole = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export const createRole = async (req: Request, res: Response, next: NextFunction) => {
+export const createRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const name = req.body.name;
     const permission = req.body.permission;
@@ -53,7 +53,7 @@ export const createRole = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const deleteRole = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = req.params.roleId;
     if (!id) return next(new StatusError('One of the parameter is invalid', 422));

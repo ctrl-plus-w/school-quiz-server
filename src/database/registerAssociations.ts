@@ -1,7 +1,7 @@
 import database from '../models';
 import { UserAnswer } from '../models/userAnswer';
 
-export default async () => {
+export default async (): Promise<void> => {
   const {
     User,
     Role,

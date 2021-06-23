@@ -8,7 +8,7 @@ interface GTLTAnswerAttributes {
   lowerThan: number;
 }
 
-interface GTLTAnswerCreationAttributes extends Optional<GTLTAnswerAttributes, 'id'> {}
+type GTLTAnswerCreationAttributes = Optional<GTLTAnswerAttributes, 'id'>
 
 export class GTLTAnswer extends Model<GTLTAnswerAttributes, GTLTAnswerCreationAttributes> implements GTLTAnswerAttributes {
   public id!: number;
@@ -22,7 +22,7 @@ export class GTLTAnswer extends Model<GTLTAnswerAttributes, GTLTAnswerCreationAt
   public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof GTLTAnswer => {
   GTLTAnswer.init(
     {
       id: {

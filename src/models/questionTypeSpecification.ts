@@ -6,7 +6,7 @@ interface QuestionTypeSpecificationAttributes {
   name: string;
 }
 
-interface QuestionTypeSpecificationCreationAttributes extends Optional<QuestionTypeSpecificationAttributes, 'id'> {}
+type QuestionTypeSpecificationCreationAttributes = Optional<QuestionTypeSpecificationAttributes, 'id'>
 
 export class QuestionTypeSpecification
   extends Model<QuestionTypeSpecificationAttributes, QuestionTypeSpecificationCreationAttributes>
@@ -20,7 +20,7 @@ export class QuestionTypeSpecification
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof QuestionTypeSpecification => {
   QuestionTypeSpecification.init(
     {
       id: {

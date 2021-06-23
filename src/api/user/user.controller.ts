@@ -15,7 +15,7 @@ const schema = Joi.object({
   gender: Joi.boolean(),
 });
 
-export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const users = await User.findAll();
     res.json(users);
@@ -24,7 +24,7 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const getUser = async (req: Request, res: Response, next: NextFunction) => {
+export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = await User.findByPk(req.params.userId);
     res.json(user);
@@ -33,7 +33,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export const createUser = async (req: Request, res: Response, next: NextFunction) => {
+export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
       username,
@@ -63,7 +63,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = await User.findByPk(req.params.userId);
     if (!user) return next(new NotFoundError('User'));

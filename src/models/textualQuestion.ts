@@ -10,7 +10,7 @@ interface TextualQuestionAttributes {
   accentSensitive: boolean;
 }
 
-interface TextualQuestionCreationAttributes extends Optional<TextualQuestionAttributes, 'id'> {}
+type TextualQuestionCreationAttributes = Optional<TextualQuestionAttributes, 'id'>
 
 export class TextualQuestion extends Model<TextualQuestionAttributes, TextualQuestionCreationAttributes> implements TextualQuestionAttributes {
   public id!: number;
@@ -34,7 +34,7 @@ export class TextualQuestion extends Model<TextualQuestionAttributes, TextualQue
   public createQuestion!: HasOneCreateAssociationMixin<Question>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof TextualQuestion => {
   TextualQuestion.init(
     {
       id: {

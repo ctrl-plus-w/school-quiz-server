@@ -22,7 +22,7 @@ interface UserAttributes {
   gender: boolean | null;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+type UserCreationAttributes = Optional<UserAttributes, 'id'>
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
@@ -52,7 +52,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof User => {
   User.init(
     {
       id: {

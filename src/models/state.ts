@@ -6,7 +6,7 @@ interface StateAttributes {
   name: string;
 }
 
-interface StateCreationAttributes extends Optional<StateAttributes, 'id'> {}
+type StateCreationAttributes = Optional<StateAttributes, 'id'>
 
 export class State extends Model<StateAttributes, StateCreationAttributes> implements StateAttributes {
   public id!: number;
@@ -17,7 +17,7 @@ export class State extends Model<StateAttributes, StateCreationAttributes> imple
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof State => {
   State.init(
     {
       id: {

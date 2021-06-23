@@ -6,11 +6,11 @@ import bcrypt from 'bcrypt';
 import { User } from '../../models/user';
 import { Role } from '../../models/role';
 
-import { InvalidCredentialsError } from '../../classes/StatusError';
+import { InvalidCredentialsError } from '../../classes/StatusError';
 
 import credentials from '../../constants/credentials';
 
-export const login = async (req: Request, res: Response, next: NextFunction) => {
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const username = req.body.username;
     const password = req.body.password;
@@ -19,7 +19,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     if (!user) return next(new InvalidCredentialsError());
 
     const passwordValid = await bcrypt.compare(password, user.password);
-    if (!user) return next(new InvalidCredentialsError());
+    if (!passwordValid) return next(new InvalidCredentialsError());
 
     const payload = {
       username: user.username,

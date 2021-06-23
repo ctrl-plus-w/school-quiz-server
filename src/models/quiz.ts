@@ -19,7 +19,7 @@ interface QuizAttributes {
   shuffle: boolean;
 }
 
-interface QuizCreationAttributes extends Optional<QuizAttributes, 'id'> {}
+type QuizCreationAttributes = Optional<QuizAttributes, 'id'>
 
 export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implements QuizAttributes {
   public id!: number;
@@ -40,7 +40,7 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public removeQuestion!: BelongsToManyRemoveAssociationsMixin<Question, number>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof Quiz => {
   Quiz.init(
     {
       id: {

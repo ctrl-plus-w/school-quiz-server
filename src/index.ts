@@ -4,9 +4,7 @@ import morgan from 'morgan';
 
 import { json } from 'body-parser';
 
-import database from './models';
 import registerAssociations from './database/registerAssociations';
-import seedDatabase from './database/seedDatabase';
 
 import auth from './api/auth/auth.routes';
 import groups from './api/group/group.routes';

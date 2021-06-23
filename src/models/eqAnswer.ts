@@ -7,7 +7,7 @@ interface EqAnswerAttributes {
   answerContent: string;
 }
 
-interface EqAnswerCreationAttributes extends Optional<EqAnswerAttributes, 'id'> {}
+type EqAnswerCreationAttributes = Optional<EqAnswerAttributes, 'id'>
 
 export class EqAnswer extends Model<EqAnswerAttributes, EqAnswerCreationAttributes> implements EqAnswerAttributes {
   public id!: number;
@@ -20,7 +20,7 @@ export class EqAnswer extends Model<EqAnswerAttributes, EqAnswerCreationAttribut
   public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 }
 
-export default (sequelize: Sequelize) => {
+export default (sequelize: Sequelize): typeof EqAnswer => {
   EqAnswer.init(
     {
       id: {
