@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 
 import Joi from 'joi';
-import bcrypt, { hashSync } from 'bcrypt';
+import bcrypt from 'bcrypt';
 
 import { User } from '../../models/user';
-import { nextTick } from 'process';
 import StatusError from '../../classes/StatusError';
 
 const schema = Joi.object({

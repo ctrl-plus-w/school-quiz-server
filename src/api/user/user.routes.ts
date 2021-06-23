@@ -13,6 +13,6 @@ router.get('/:userId', checkPermission(roles.ADMIN.PERMISSION), getUser);
 
 router.post('/', checkPermission(roles.ADMIN.PERMISSION), createUser);
 
-router.delete('/', checkPermission(roles.ADMIN.PERMISSION), deleteUser);
+router.delete('/:userId', checkPermission(roles.ADMIN.PERMISSION), deleteUser);
 
 export default router;
