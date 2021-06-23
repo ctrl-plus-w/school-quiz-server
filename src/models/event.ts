@@ -18,7 +18,7 @@ interface EventAttributes {
   countdown: Date;
 }
 
-type EventCreationAttributes = Optional<EventAttributes, 'id'>
+type EventCreationAttributes = Optional<EventAttributes, 'id'>;
 
 export class Event extends Model<EventAttributes, EventCreationAttributes> implements EventAttributes {
   public id!: number;

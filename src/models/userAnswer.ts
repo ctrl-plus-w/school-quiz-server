@@ -8,9 +8,12 @@ interface UserAnswerAttributes {
   answerContent: string;
 }
 
-type UserAnswerCreationAttributes = Optional<UserAnswerAttributes, 'id'>
+type UserAnswerCreationAttributes = Optional<UserAnswerAttributes, 'id'>;
 
-export class UserAnswer extends Model<UserAnswerAttributes, UserAnswerCreationAttributes> implements UserAnswerAttributes {
+export class UserAnswer
+  extends Model<UserAnswerAttributes, UserAnswerCreationAttributes>
+  implements UserAnswerAttributes
+{
   public id!: number;
 
   public answerContent!: string;

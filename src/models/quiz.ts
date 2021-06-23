@@ -19,7 +19,7 @@ interface QuizAttributes {
   shuffle: boolean;
 }
 
-type QuizCreationAttributes = Optional<QuizAttributes, 'id'>
+type QuizCreationAttributes = Optional<QuizAttributes, 'id'>;
 
 export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implements QuizAttributes {
   public id!: number;

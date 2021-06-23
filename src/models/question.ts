@@ -36,7 +36,7 @@ interface QuestionDataValues extends QuestionAttributes {
   typedQuestion?: TypedQuestion;
 }
 
-type QuestionCreationAttributes = Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'>
+type QuestionCreationAttributes = Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'>;
 
 export class Question extends Model<QuestionAttributes, QuestionCreationAttributes> implements QuestionAttributes {
   public id!: number;

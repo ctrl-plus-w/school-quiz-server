@@ -8,9 +8,12 @@ interface GTLTAnswerAttributes {
   lowerThan: number;
 }
 
-type GTLTAnswerCreationAttributes = Optional<GTLTAnswerAttributes, 'id'>
+type GTLTAnswerCreationAttributes = Optional<GTLTAnswerAttributes, 'id'>;
 
-export class GTLTAnswer extends Model<GTLTAnswerAttributes, GTLTAnswerCreationAttributes> implements GTLTAnswerAttributes {
+export class GTLTAnswer
+  extends Model<GTLTAnswerAttributes, GTLTAnswerCreationAttributes>
+  implements GTLTAnswerAttributes
+{
   public id!: number;
   public greaterThan!: number;
   public lowerThan!: number;

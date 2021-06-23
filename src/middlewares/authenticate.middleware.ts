@@ -9,7 +9,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
   try {
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) return next(new StatusError('Invalid token', 403));
-    
+
     const [_, token] = authorizationHeader.split(' ');
     if (!token) return next(new StatusError('Invalid token', 403));
 

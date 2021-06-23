@@ -51,7 +51,10 @@ export default async (): Promise<void> => {
   User.hasOne(Event);
 
   const EVENT_COLLABORATORS_TABLENAME = 'Collaborators';
-  Event.belongsToMany(User, { through: EVENT_COLLABORATORS_TABLENAME, as: 'collaborators' });
+  Event.belongsToMany(User, {
+    through: EVENT_COLLABORATORS_TABLENAME,
+    as: 'collaborators',
+  });
   User.belongsToMany(Event, { through: EVENT_COLLABORATORS_TABLENAME });
 
   // Quiz & Question relation.
@@ -65,13 +68,22 @@ export default async (): Promise<void> => {
   };
 
   Question.belongsTo(TextualQuestion, QUESTION_TYPES_DEFAULT_PROPERTIES);
-  TextualQuestion.hasOne(Question, { ...QUESTION_TYPES_DEFAULT_PROPERTIES, scope: { questionType: 'textualQuestion' } });
+  TextualQuestion.hasOne(Question, {
+    ...QUESTION_TYPES_DEFAULT_PROPERTIES,
+    scope: { questionType: 'textualQuestion' },
+  });
 
   Question.belongsTo(NumericQuestion, QUESTION_TYPES_DEFAULT_PROPERTIES);
-  NumericQuestion.hasOne(Question, { ...QUESTION_TYPES_DEFAULT_PROPERTIES, scope: { questionType: 'numericQuestion' } });
+  NumericQuestion.hasOne(Question, {
+    ...QUESTION_TYPES_DEFAULT_PROPERTIES,
+    scope: { questionType: 'numericQuestion' },
+  });
 
   Question.belongsTo(ChoiceQuestion, QUESTION_TYPES_DEFAULT_PROPERTIES);
-  ChoiceQuestion.hasOne(Question, { ...QUESTION_TYPES_DEFAULT_PROPERTIES, scope: { questionType: 'choiceQuestion' } });
+  ChoiceQuestion.hasOne(Question, {
+    ...QUESTION_TYPES_DEFAULT_PROPERTIES,
+    scope: { questionType: 'choiceQuestion' },
+  });
 
   // Textual question & Verification type relation.
   TextualQuestion.belongsTo(VerificationType);
@@ -83,8 +95,12 @@ export default async (): Promise<void> => {
 
   // Numeric question & Choice realtion.
   const CHOICE_QUESTION_CHOICE_TABLENAME = 'ChoiceQuestionChoice';
-  ChoiceQuestion.belongsToMany(Choice, { through: CHOICE_QUESTION_CHOICE_TABLENAME });
-  Choice.belongsToMany(ChoiceQuestion, { through: CHOICE_QUESTION_CHOICE_TABLENAME });
+  ChoiceQuestion.belongsToMany(Choice, {
+    through: CHOICE_QUESTION_CHOICE_TABLENAME,
+  });
+  Choice.belongsToMany(ChoiceQuestion, {
+    through: CHOICE_QUESTION_CHOICE_TABLENAME,
+  });
 
   // Question & QuestionAnswer relation.
   const QUESTION_ANSWER_TABLENAME = 'QuestionAnswer';
@@ -98,10 +114,16 @@ export default async (): Promise<void> => {
   };
 
   Answer.belongsTo(EqAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
-  EqAnswer.hasOne(Answer, { ...ANSWER_TYPES_DEFAULT_PROPERTIES, scope: { answerType: 'eqAnswer' } });
+  EqAnswer.hasOne(Answer, {
+    ...ANSWER_TYPES_DEFAULT_PROPERTIES,
+    scope: { answerType: 'eqAnswer' },
+  });
 
   Answer.belongsTo(GTLTAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
-  GTLTAnswer.hasOne(Answer, { ...ANSWER_TYPES_DEFAULT_PROPERTIES, scope: { answerType: 'gtLtAnswer' } });
+  GTLTAnswer.hasOne(Answer, {
+    ...ANSWER_TYPES_DEFAULT_PROPERTIES,
+    scope: { answerType: 'gtLtAnswer' },
+  });
 
   // UserAnswers & (User / Question) relation.
   Question.hasMany(UserAnswer);

@@ -11,7 +11,22 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'prettier'],
   rules: {
-    'no-unused-vars': ['error', { varsIgnorePattern: '_' }],
-    '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '_' }],
+    'no-unused-vars': [
+      'error',
+      {
+        vars: 'local',
+        args: 'none',
+        varsIgnorePattern: '^_',
+      },
+    ],
+
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        vars: 'local',
+        args: 'none',
+        varsIgnorePattern: '^_',
+      },
+    ],
   },
 };

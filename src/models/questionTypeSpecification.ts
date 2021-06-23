@@ -6,7 +6,7 @@ interface QuestionTypeSpecificationAttributes {
   name: string;
 }
 
-type QuestionTypeSpecificationCreationAttributes = Optional<QuestionTypeSpecificationAttributes, 'id'>
+type QuestionTypeSpecificationCreationAttributes = Optional<QuestionTypeSpecificationAttributes, 'id'>;
 
 export class QuestionTypeSpecification
   extends Model<QuestionTypeSpecificationAttributes, QuestionTypeSpecificationCreationAttributes>

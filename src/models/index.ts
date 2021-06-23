@@ -20,7 +20,7 @@ import answer from './answer';
 import userAnswer from './userAnswer';
 import choice from './choice';
 
-import config from '../../config/sequelize-credentials';
+import config from '../config/sequelize-credentials';
 
 if (!config.database || !config.username || !config.password) throw new Error('Invalid database credentials.');
 const sequelize: SequelizeClass = new Sequelize(config.database, config.username, config.password, config);

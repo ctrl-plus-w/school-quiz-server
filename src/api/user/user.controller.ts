@@ -56,7 +56,13 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
     const password = bcrypt.hashSync(plainPassword, 12);
 
-    const createdUser = await User.create({ username, firstName, lastName, gender, password });
+    const createdUser = await User.create({
+      username,
+      firstName,
+      lastName,
+      gender,
+      password,
+    });
     res.json(createdUser);
   } catch (err) {
     next(err);

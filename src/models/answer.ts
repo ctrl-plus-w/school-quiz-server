@@ -17,7 +17,7 @@ interface AnswerDataValues extends AnswerAttributes {
   typedAnswer?: TypedAnswer;
 }
 
-type AnswerCreationAttributes = Optional<AnswerAttributes, 'id' | 'answerType'>
+type AnswerCreationAttributes = Optional<AnswerAttributes, 'id' | 'answerType'>;
 
 export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> implements AnswerAttributes {
   public id!: number;

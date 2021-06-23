@@ -7,7 +7,7 @@ interface EqAnswerAttributes {
   answerContent: string;
 }
 
-type EqAnswerCreationAttributes = Optional<EqAnswerAttributes, 'id'>
+type EqAnswerCreationAttributes = Optional<EqAnswerAttributes, 'id'>;
 
 export class EqAnswer extends Model<EqAnswerAttributes, EqAnswerCreationAttributes> implements EqAnswerAttributes {
   public id!: number;

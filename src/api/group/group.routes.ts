@@ -1,6 +1,15 @@
 import { Router } from 'express';
 
-import { getGroups, getGroup, createGroup, deleteGroup, getGroupLabel, getGroupLabels, addLabel, removeLabel } from './group.controller';
+import {
+  getGroups,
+  getGroup,
+  createGroup,
+  deleteGroup,
+  getGroupLabel,
+  getGroupLabels,
+  addLabel,
+  removeLabel,
+} from './group.controller';
 
 import checkPermission from '../../middlewares/authorization.middleware';
 
