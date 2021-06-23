@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import { User } from '../../models/user';
 import { Role } from '../../models/role';
 
-import StatusError from '../../classes/StatusError';
+import { InvalidCredentialsError } from '../../classes/StatusError';
 
 import credentials from '../../constants/credentials';
 
@@ -16,10 +16,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const password = req.body.password;
 
     const user = await User.findOne({ where: { username }, include: Role });
-    if (!user) return next(new StatusError('The username or the password is invalid.', 422));
+    if (!user) return next(new InvalidCredentialsError());
 
     const passwordValid = await bcrypt.compare(password, user.password);
-    if (!user) return next(new StatusError('The username or the password is invalid.', 422));
+    if (!user) return next(new InvalidCredentialsError());
 
     const payload = {
       username: user.username,

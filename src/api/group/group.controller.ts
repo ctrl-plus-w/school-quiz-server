@@ -7,7 +7,7 @@ import { Label } from '../../models/label';
 
 import { slugify } from '../../utils/string.utils';
 
-import StatusError from '../../classes/StatusError';
+import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
@@ -52,16 +52,16 @@ export const getGroup = async (req: Request, res: Response, next: NextFunction) 
 export const createGroup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const name = req.body.name;
-    if (!name) return next(new StatusError('One of the parameter is invalid', 422));
+    if (!name) return next(new InvalidInputError());
 
     const slug = slugify(name);
 
     await schema.validateAsync({ name: name }).catch(() => {
-      next(new StatusError('One of the parameter is invalid', 422));
+      next(new InvalidInputError());
     });
 
     const group = await Group.findOne({ where: { slug } });
-    if (group) return next(new StatusError('Group already exists', 409));
+    if (group) return next(new DuplicationError('Group'));
 
     const createdGroup = await Group.create({ name, slug });
     res.json(createdGroup);
@@ -74,13 +74,13 @@ export const addLabel = async (req: Request, res: Response, next: NextFunction) 
   try {
     const groupId = req.params.groupId;
     const labelId = req.body.labelId;
-    if (!labelId || !groupId) return next(new StatusError('One of the parameter is invalid', 422));
+    if (!labelId || !groupId) return next(new InvalidInputError());
 
     const group = await Group.findByPk(groupId);
-    if (!group) return next(new StatusError('Group not found', 404));
+    if (!group) return next(new NotFoundError('Group'));
 
     const label = await Label.findByPk(labelId);
-    if (!label) return next(new StatusError('Label not found', 404));
+    if (!label) return next(new NotFoundError('Label'));
 
     await group.addLabel(label);
 
@@ -93,12 +93,12 @@ export const addLabel = async (req: Request, res: Response, next: NextFunction) 
 export const deleteGroup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const group = await Group.findByPk(req.params.groupId);
-    if (!group) return next(new StatusError('Group not found', 404));
+    if (!group) return next(new NotFoundError('Group'));
 
     await group.destroy();
     res.json({ deleted: true });
   } catch (err) {
-    res.json({ error: 'Une erreur est servenue.' });
+    next(err);
   }
 };
 
@@ -106,13 +106,13 @@ export const removeLabel = async (req: Request, res: Response, next: NextFunctio
   try {
     const groupId = req.params.groupId;
     const labelId = req.body.labelId;
-    if (!labelId || !groupId) return next(new StatusError('One of the parameter is invalid', 422));
+    if (!labelId || !groupId) return next(new InvalidInputError());
 
     const group = await Group.findByPk(groupId);
-    if (!group) return next(new StatusError('Group not found', 404));
+    if (!group) return next(new NotFoundError('Group'));
 
     const label = await Label.findByPk(labelId);
-    if (!label) return next(new StatusError('Label not found', 404));
+    if (!label) return next(new NotFoundError('Label'));
 
     await group.removeLabel(label);
 
