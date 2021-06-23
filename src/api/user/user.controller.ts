@@ -4,7 +4,8 @@ import Joi from 'joi';
 import bcrypt from 'bcrypt';
 
 import { User } from '../../models/user';
-import StatusError from '../../classes/StatusError';
+
+import { DuplicationError, NotFoundError } from '../../classes/StatusError';
 
 const schema = Joi.object({
   username: Joi.string().min(5).max(25).required(),
@@ -51,7 +52,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     await schema.validateAsync(req.body);
 
     const user = await User.findOne({ where: { username: username } });
-    if (user) return next(new StatusError('User already exists', 409));
+    if (user) return next(new DuplicationError('User'));
 
     const password = bcrypt.hashSync(plainPassword, 12);
 
@@ -65,7 +66,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findByPk(req.params.userId);
-    if (!user) return next(new StatusError('User not found', 404));
+    if (!user) return next(new NotFoundError('User'));
 
     await user.destroy();
 

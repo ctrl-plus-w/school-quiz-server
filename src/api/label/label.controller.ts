@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { Label } from '../../models/label';
 import { slugify } from '../../utils/string.utils';
 
-import StatusError from '../../classes/StatusError';
+import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
@@ -32,16 +32,16 @@ export const getLabel = async (req: Request, res: Response, next: NextFunction) 
 export const createLabel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const name = req.body.name;
-    if (!name) return next(new StatusError('One of the parameter is invalid', 422));
+    if (!name) return next(new InvalidInputError());
 
     const slug = slugify(name);
 
     await schema.validateAsync({ name: name }).catch(() => {
-      return next(new StatusError('One of the parameter is invalid', 422));
+      return next(new InvalidInputError());
     });
 
     const label = await Label.findOne({ where: { slug: slug } });
-    if (label) return next(new StatusError('Label already exists', 409));
+    if (label) return next(new DuplicationError('Label'));
 
     const createdLabel = await Label.create({ name, slug });
     res.json(createdLabel);
@@ -53,7 +53,7 @@ export const createLabel = async (req: Request, res: Response, next: NextFunctio
 export const deleteLabel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const label = await Label.findByPk(req.params.labelId);
-    if (!label) return next(new StatusError('Label not found', 404));
+    if (!label) return next(new NotFoundError('Label'));
 
     await label.destroy();
 
