@@ -8,13 +8,13 @@ export default class StatusError {
   }
 }
 
-export class AcccessForbidden extends StatusError {
+export class AcccessForbiddenError extends StatusError {
   constructor() {
     super(`Access forbidden`, 403);
   }
 }
 
-export class InvalidInput extends StatusError {
+export class InvalidInputError extends StatusError {
   constructor() {
     super(`One of the parameters is invalid.`, 422);
   }
@@ -32,7 +32,7 @@ export class NotFoundError extends StatusError {
   }
 }
 
-export class InvalidCredentials extends StatusError {
+export class InvalidCredentialsError extends StatusError {
   constructor() {
     super(`The username or the password is invalid.`, 422);
   }
