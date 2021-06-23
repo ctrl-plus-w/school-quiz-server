@@ -12,6 +12,7 @@ import auth from './api/auth/auth.routes';
 import groups from './api/group/group.routes';
 import labels from './api/label/label.routes';
 import users from './api/user/user.routes';
+import roles from './api/role/role.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
@@ -32,6 +33,7 @@ app.use('/auth', auth);
 app.use('/api/groups', authenticateMiddleware, groups);
 app.use('/api/labels', authenticateMiddleware, labels);
 app.use('/api/users', authenticateMiddleware, users);
+app.use('/api/roles', authenticateMiddleware, roles);
 
 app.use(pageNotFound);
 app.use(errorHandler);
