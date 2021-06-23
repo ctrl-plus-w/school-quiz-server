@@ -7,3 +7,33 @@ export default class StatusError {
     this.status = status;
   }
 }
+
+export class AcccessForbidden extends StatusError {
+  constructor() {
+    super(`Access forbidden`, 403);
+  }
+}
+
+export class InvalidInput extends StatusError {
+  constructor() {
+    super(`One of the parameters is invalid.`, 422);
+  }
+}
+
+export class DuplicationError extends StatusError {
+  constructor(thing: string) {
+    super(`${thing} already exists`, 409);
+  }
+}
+
+export class NotFoundError extends StatusError {
+  constructor(thing: string) {
+    super(`${thing} not found`, 404);
+  }
+}
+
+export class InvalidCredentials extends StatusError {
+  constructor() {
+    super(`The username or the password is invalid.`, 422);
+  }
+}
