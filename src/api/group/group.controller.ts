@@ -111,6 +111,8 @@ export const removeLabel = async (req: Request, res: Response, next: NextFunctio
     const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
 
+    if (!group.labels?.some((label) => label.id === labelId)) return next(new NotFoundError('Label'));
+
     const label = await Label.findByPk(labelId);
     if (!label) return next(new NotFoundError('Label'));
 
