@@ -12,6 +12,7 @@ import {
 import { Role } from './role';
 import { Event } from './event';
 import { State } from './state';
+import { Group } from './group';
 
 interface UserAttributes {
   id: number;
@@ -35,6 +36,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public state?: State;
   public role?: Role;
   public events?: Array<Event>;
+  public groups?: Array<Group>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -42,6 +44,11 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   /* Role properties */
   public setRole!: BelongsToSetAssociationMixin<Role, number>;
   public removeRole!: BelongsToSetAssociationMixin<Role, number>;
+
+  /* Group properties */
+  public addGroup!: BelongsToManyAddAssociationMixin<Group, number>;
+  public addGroups!: BelongsToManyAddAssociationsMixin<Group, number>;
+  public removeGroup!: BelongsToManyRemoveAssociationMixin<Group, number>;
 
   /* State property */
   public setState!: BelongsToSetAssociationMixin<State, number>;
