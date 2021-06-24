@@ -16,6 +16,9 @@ import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
 import pageNotFound from './middlewares/pageNotFound.middleware';
 
+// import seedDatabase from './database/seedDatabase';
+// import database from './models/index';
+
 // Constants
 const PORT = process.env.PORT || 6000;
 
