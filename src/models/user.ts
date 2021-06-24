@@ -86,7 +86,7 @@ export default (sequelize: Sequelize): typeof User => {
       },
       gender: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
+        allowNull: true,
       },
     },
     {
