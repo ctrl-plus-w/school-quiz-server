@@ -2,14 +2,15 @@ import { Request, Response, NextFunction } from 'express';
 
 import Joi from 'joi';
 
-import { Role } from '../../models/role';
+import { Role, RoleCreationAttributes } from '../../models/role';
 
 import { slugify } from '../../utils/string.utils';
 
-import StatusError from '../../classes/StatusError';
+import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 const schema = Joi.object({
   name: Joi.string().min(4).max(25).required(),
+  slug: Joi.string().min(4).max(25).required(),
   permission: Joi.number().positive().required(),
 });
 
@@ -33,20 +34,20 @@ export const getRole = async (req: Request, res: Response, next: NextFunction): 
 
 export const createRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const name = req.body.name;
-    const permission = req.body.permission;
-    if (!name || !permission) return next(new StatusError('One of the parameter is invalid', 422));
+    const {
+      value: validatedRole,
+      error: validationError,
+    }: {
+      value: RoleCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
 
-    const slug = slugify(name);
+    if (validationError) return next(new InvalidInputError());
 
-    await schema.validateAsync({ name, permission }).catch(() => {
-      return next(new StatusError('One of the parameter is invalid', 422));
-    });
+    const role = await Role.findOne({ where: { slug: validatedRole.slug } });
+    if (role) return next(new DuplicationError('Role'));
 
-    const role = await Role.findOne({ where: { slug } });
-    if (role) return next(new StatusError('Role already exists', 409));
-
-    const createdRole = await Role.create({ name, slug, permission });
+    const createdRole = await Role.create(validatedRole);
     res.json(createdRole);
   } catch (err) {
     next(err);
@@ -56,10 +57,10 @@ export const createRole = async (req: Request, res: Response, next: NextFunction
 export const deleteRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = req.params.roleId;
-    if (!id) return next(new StatusError('One of the parameter is invalid', 422));
+    if (!id) return next(new InvalidInputError());
 
     const role = await Role.findByPk(id);
-    if (!role) return next(new StatusError('Role not found', 404));
+    if (!role) return next(new NotFoundError('Role'));
 
     await role.destroy();
 
