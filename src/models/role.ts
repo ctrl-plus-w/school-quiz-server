@@ -7,7 +7,7 @@ interface RoleAttributes {
   permission: number;
 }
 
-type RoleCreationAttributes = Optional<RoleAttributes, 'id'>;
+export type RoleCreationAttributes = Optional<RoleAttributes, 'id'>;
 
 export class Role extends Model<RoleAttributes, RoleCreationAttributes> implements RoleAttributes {
   public id!: number;
