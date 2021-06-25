@@ -23,7 +23,7 @@ interface UserAttributes {
   gender: boolean | null;
 }
 
-type UserCreationAttributes = Optional<UserAttributes, 'id'>;
+export type UserCreationAttributes = Optional<UserAttributes, 'id'>;
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;

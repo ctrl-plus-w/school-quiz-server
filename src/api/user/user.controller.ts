@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import bcrypt from 'bcrypt';
 
-import { User } from '../../models/user';
+import { User, UserCreationAttributes } from '../../models/user';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 import { Group } from '../../models/group';
@@ -84,34 +84,21 @@ export const getRole = async (req: Request, res: Response, next: NextFunction): 
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
-      username,
-      firstName,
-      lastName,
-      password: plainPassword,
-      gender,
+      value: validatedUser,
+      error: validationError,
     }: {
-      username: string;
-      firstName: string;
-      lastName: string;
-      password: string;
-      gender: boolean | null;
-    } = req.body;
+      value: UserCreationAttributes;
+      error?: Error;
+    } = schema.validate(req.body);
 
-    const validation = await schema.validateAsync(req.body).catch(console.log);
-    if (validation instanceof Error) return next(new InvalidInputError());
+    if (validationError) return next(new InvalidInputError());
 
-    const user = await User.findOne({ where: { username: username } });
+    const user = await User.findOne({ where: { username: validatedUser.username } });
     if (user) return next(new DuplicationError('User'));
 
-    const password = bcrypt.hashSync(plainPassword, 12);
+    const password = bcrypt.hashSync(validatedUser.password, 12);
 
-    const createdUser = await User.create({
-      username,
-      firstName,
-      lastName,
-      gender,
-      password,
-    });
+    const createdUser = await User.create({ ...validatedUser, password });
     res.json(createdUser);
   } catch (err) {
     next(err);
