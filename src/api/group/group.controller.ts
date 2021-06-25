@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import Joi from 'joi';
 
-import { Group } from '../../models/group';
+import { Group, GroupCreationAttributes } from '../../models/group';
 import { Label } from '../../models/label';
 
 import { slugify } from '../../utils/string.utils';
@@ -11,6 +11,7 @@ import { DuplicationError, InvalidInputError, NotFoundError } from '../../classe
 
 const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
+  slug: Joi.string().min(4).max(20).required(),
 });
 
 export const getGroups = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -51,19 +52,22 @@ export const getGroup = async (req: Request, res: Response, next: NextFunction):
 
 export const createGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const name = req.body.name;
-    if (!name) return next(new InvalidInputError());
+    const {
+      value: validatedGroup,
+      error: validationError,
+    }: {
+      value: GroupCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
 
-    const slug = slugify(name);
+    console.log(validationError);
 
-    await schema.validateAsync({ name: name }).catch(() => {
-      next(new InvalidInputError());
-    });
+    if (validationError) return next(new InvalidInputError());
 
-    const group = await Group.findOne({ where: { slug } });
+    const group = await Group.findOne({ where: { slug: validatedGroup.slug } });
     if (group) return next(new DuplicationError('Group'));
 
-    const createdGroup = await Group.create({ name, slug });
+    const createdGroup = await Group.create(validatedGroup);
     res.json(createdGroup);
   } catch (err) {
     next(err);

@@ -17,7 +17,7 @@ interface GroupAttributes {
   name: string;
 }
 
-type GroupCreationAttributes = Optional<GroupAttributes, 'id'>;
+export type GroupCreationAttributes = Optional<GroupAttributes, 'id'>;
 
 export class Group extends Model<GroupAttributes, GroupCreationAttributes> implements GroupAttributes {
   public id!: number;
