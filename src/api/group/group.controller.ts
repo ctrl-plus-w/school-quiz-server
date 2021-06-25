@@ -60,8 +60,6 @@ export const createGroup = async (req: Request, res: Response, next: NextFunctio
       error?: Error;
     } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
 
-    console.log(validationError);
-
     if (validationError) return next(new InvalidInputError());
 
     const group = await Group.findOne({ where: { slug: validatedGroup.slug } });
