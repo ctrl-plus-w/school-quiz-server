@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 
 import Joi from 'joi';
 
-import { Label } from '../../models/label';
+import { Label, LabelCreationAttributes } from '../../models/label';
 import { slugify } from '../../utils/string.utils';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
+  slug: Joi.string().min(4).max(20).required(),
 });
 
 export const getLabels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -31,19 +32,20 @@ export const getLabel = async (req: Request, res: Response, next: NextFunction):
 
 export const createLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const name = req.body.name;
-    if (!name) return next(new InvalidInputError());
+    const {
+      value: validatedLabel,
+      error: validationError,
+    }: {
+      value: LabelCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
 
-    const slug = slugify(name);
+    if (validationError) return next(new InvalidInputError());
 
-    await schema.validateAsync({ name: name }).catch(() => {
-      return next(new InvalidInputError());
-    });
-
-    const label = await Label.findOne({ where: { slug: slug } });
+    const label = await Label.findOne({ where: { slug: validatedLabel.slug } });
     if (label) return next(new DuplicationError('Label'));
 
-    const createdLabel = await Label.create({ name, slug });
+    const createdLabel = await Label.create(validatedLabel);
     res.json(createdLabel);
   } catch (err) {
     next(err);

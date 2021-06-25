@@ -1,14 +1,14 @@
 import { Optional, Sequelize, Model, DataTypes } from 'sequelize';
 
-interface GroupAttributes {
+interface LabelAttributes {
   id: number;
   slug: string;
   name: string;
 }
 
-type GroupCreationAttributes = Optional<GroupAttributes, 'id'>;
+export type LabelCreationAttributes = Optional<LabelAttributes, 'id'>;
 
-export class Label extends Model<GroupAttributes, GroupCreationAttributes> implements GroupAttributes {
+export class Label extends Model<LabelAttributes, LabelCreationAttributes> implements LabelAttributes {
   public id!: number;
   public slug!: string;
   public name!: string;
