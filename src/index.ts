@@ -12,6 +12,8 @@ import labels from './api/label/label.routes';
 import users from './api/user/user.routes';
 import roles from './api/role/role.routes';
 import eqAnswers from './api/eqAnswer/eqAnswer.routes';
+import gtLtAnswers from './api/gtLtAnswer/gtLtAnswer.routes';
+import answer from './api/answers/answers.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
@@ -37,6 +39,8 @@ app.use('/api/labels', authenticateMiddleware, labels);
 app.use('/api/users', authenticateMiddleware, users);
 app.use('/api/roles', authenticateMiddleware, roles);
 app.use('/api/eqAnswers', authenticateMiddleware, eqAnswers);
+app.use('/api/gtLtAnswers', authenticateMiddleware, gtLtAnswers);
+app.use('/api/answers', authenticateMiddleware, answer);
 
 app.use(pageNotFound);
 app.use(errorHandler);
