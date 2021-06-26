@@ -18,6 +18,8 @@ export class GTLTAnswer
   public greaterThan!: number;
   public lowerThan!: number;
 
+  public answer?: Answer;
+
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 

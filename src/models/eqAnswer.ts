@@ -13,6 +13,8 @@ export class EqAnswer extends Model<EqAnswerAttributes, EqAnswerCreationAttribut
   public id!: number;
   public answerContent!: string;
 
+  public answer?: Answer;
+
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
