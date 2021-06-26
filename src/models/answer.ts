@@ -10,6 +10,14 @@ interface AnswerAttributes {
   answerType: string;
 }
 
+export interface FormatedAnswer {
+  id: number;
+  answerType: string;
+  typedAnswer: EqAnswer | GTLTAnswer | undefined;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface AnswerDataValues extends AnswerAttributes {
   eqAnswer?: EqAnswer;
   gtLtAnswer?: GTLTAnswer;
