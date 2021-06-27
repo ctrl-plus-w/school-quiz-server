@@ -17,6 +17,8 @@ import answer from './api/answers/answers.routes';
 import numericQuestion from './api/numericQuestion/numericQuestion.routes';
 import textualQuestion from './api/textualQuestion/textualQuestion.routes';
 import choiceQuestion from './api/choiceQuestion/choiceQuestion.routes';
+import verificationType from './api/verificationType/verificationType.routes';
+import questionTypeSpecification from './api/questionTypeSpecification/questionTypeSpecification.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
@@ -47,6 +49,8 @@ app.use('/api/answers', authenticateMiddleware, answer);
 app.use('/api/numericQuestions', authenticateMiddleware, numericQuestion);
 app.use('/api/textualQuestions', authenticateMiddleware, textualQuestion);
 app.use('/api/choiceQuestions', authenticateMiddleware, choiceQuestion);
+app.use('/api/verificationTypes', authenticateMiddleware, verificationType);
+app.use('/api/questionTypeSpecifications', authenticateMiddleware, questionTypeSpecification);
 
 app.use(pageNotFound);
 app.use(errorHandler);

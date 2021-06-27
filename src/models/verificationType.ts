@@ -6,7 +6,7 @@ interface VerificationTypeAttributes {
   name: string;
 }
 
-type VerificationTypeCreationAttributes = Optional<VerificationTypeAttributes, 'id'>;
+export type VerificationTypeCreationAttributes = Optional<VerificationTypeAttributes, 'id'>;
 
 export class VerificationType
   extends Model<VerificationTypeAttributes, VerificationTypeCreationAttributes>
