@@ -14,6 +14,9 @@ import roles from './api/role/role.routes';
 import eqAnswers from './api/eqAnswer/eqAnswer.routes';
 import gtLtAnswers from './api/gtLtAnswer/gtLtAnswer.routes';
 import answer from './api/answers/answers.routes';
+import numericQuestion from './api/numericQuestion/numericQuestion.routes';
+import textualQuestion from './api/textualQuestion/textualQuestion.routes';
+import choiceQuestion from './api/choiceQuestion/choiceQuestion.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
@@ -41,6 +44,9 @@ app.use('/api/roles', authenticateMiddleware, roles);
 app.use('/api/eqAnswers', authenticateMiddleware, eqAnswers);
 app.use('/api/gtLtAnswers', authenticateMiddleware, gtLtAnswers);
 app.use('/api/answers', authenticateMiddleware, answer);
+app.use('/api/numericQuestions', authenticateMiddleware, numericQuestion);
+app.use('/api/textualQuestions', authenticateMiddleware, textualQuestion);
+app.use('/api/choiceQuestions', authenticateMiddleware, choiceQuestion);
 
 app.use(pageNotFound);
 app.use(errorHandler);
