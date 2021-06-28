@@ -47,16 +47,6 @@ export default async (): Promise<void> => {
   Event.belongsTo(Group);
   Group.hasOne(Event);
 
-  Event.belongsTo(User, { as: 'owner' });
-  User.hasOne(Event);
-
-  const EVENT_COLLABORATORS_TABLENAME = 'Collaborators';
-  Event.belongsToMany(User, {
-    through: EVENT_COLLABORATORS_TABLENAME,
-    as: 'collaborators',
-  });
-  User.belongsToMany(Event, { through: EVENT_COLLABORATORS_TABLENAME });
-
   // Quiz & Question relation.
   const QUIZ_QUESTION_TABLENAME = 'QuizQuestion';
   Quiz.belongsToMany(Question, { through: QUIZ_QUESTION_TABLENAME });
