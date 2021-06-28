@@ -1,9 +1,11 @@
-export const slugify = (str: string): string => {
+export const slugify = (str: string | undefined): string | undefined => {
   return str
-    .toLowerCase()
-    .replace(/ /g, '-')
-    .replace(/[àáâãäå]/g, 'a')
-    .replace(/[èéêë]/g, 'e');
+    ? str
+        .toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[àáâãäå]/g, 'a')
+        .replace(/[èéêë]/g, 'e')
+    : undefined;
 };
 
 export const uppercaseFirst = (str: string): string => {
