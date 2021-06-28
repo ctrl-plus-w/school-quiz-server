@@ -13,7 +13,7 @@ import users from './api/user/user.routes';
 import roles from './api/role/role.routes';
 import eqAnswers from './api/eqAnswer/eqAnswer.routes';
 import gtLtAnswers from './api/gtLtAnswer/gtLtAnswer.routes';
-import answer from './api/answers/answers.routes';
+import answer from './api/answer/answer.routes';
 import numericQuestion from './api/numericQuestion/numericQuestion.routes';
 import textualQuestion from './api/textualQuestion/textualQuestion.routes';
 import choiceQuestion from './api/choiceQuestion/choiceQuestion.routes';

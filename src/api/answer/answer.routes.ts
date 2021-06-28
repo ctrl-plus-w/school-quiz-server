@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { deleteAnswer, getAnswer, getAnswers } from './answers.controller';
+import { createAnswer, deleteAnswer, getAnswer, getAnswers } from './answer.controller';
 
 import checkPermission from '../../middlewares/authorization.middleware';
 
@@ -10,6 +10,8 @@ const router = Router();
 
 router.get('/', checkPermission(roles.ADMIN.PERMISSION), getAnswers);
 router.get('/:answerId', checkPermission(roles.ADMIN.PERMISSION), getAnswer);
+
+router.post('/:answerType', checkPermission(roles.ADMIN.PERMISSION), createAnswer);
 
 router.delete('/:answerId', checkPermission(roles.ADMIN.PERMISSION), deleteAnswer);
 

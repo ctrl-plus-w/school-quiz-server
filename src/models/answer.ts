@@ -3,16 +3,14 @@ import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 import { EqAnswer } from './eqAnswer';
 import { GTLTAnswer } from './gtltAnswer';
 
-type TypedAnswer = EqAnswer | GTLTAnswer;
+export type TypedAnswer = EqAnswer | GTLTAnswer;
 
 interface AnswerAttributes {
   id: number;
   answerType: string;
 }
 
-export interface FormatedAnswer {
-  id: number;
-  answerType: string;
+export interface FormatedAnswer extends AnswerAttributes {
   typedAnswer: EqAnswer | GTLTAnswer | undefined;
   createdAt: Date;
   updatedAt: Date;

@@ -3,7 +3,13 @@ import { Request, Response, NextFunction } from 'express';
 import { Answer } from '../../models/answer';
 
 import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
+
 import { answerFormatter, answerMapper } from '../../helpers/mapper.helper';
+import { tryCreateEqAnswer, tryCreateGtLtAnswer } from '../../helpers/answer.helper';
+
+interface AnswerTypes {
+  [answerType: string]: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+}
 
 export const getAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -21,6 +27,22 @@ export const getAnswer = async (req: Request, res: Response, next: NextFunction)
 
     const answer = await Answer.findByPk(answerId);
     res.json(answerFormatter(answer));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const answerTypes: AnswerTypes = {
+      equal: tryCreateEqAnswer,
+      greaterlower: tryCreateGtLtAnswer,
+    };
+
+    const answerType = req.params.answerType.toLowerCase();
+    if (!Object.keys(answerTypes).includes(answerType)) return next(new InvalidInputError());
+
+    await answerTypes[answerType](req, res, next);
   } catch (err) {
     next(err);
   }
