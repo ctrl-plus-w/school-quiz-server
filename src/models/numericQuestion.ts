@@ -14,7 +14,7 @@ interface NumericQuestionAttributes {
   id: number;
 }
 
-type NumericQuestionCreationAttributes = Optional<NumericQuestionAttributes, 'id'>;
+export type NumericQuestionCreationAttributes = Optional<NumericQuestionAttributes, 'id'>;
 
 export class NumericQuestion
   extends Model<NumericQuestionAttributes, NumericQuestionCreationAttributes>

@@ -17,15 +17,21 @@ import { Choice } from './choice';
 import { UserAnswer } from './userAnswer';
 import { User } from './user';
 
-type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
+export type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
 
 interface QuestionAttributes {
   id: number;
   slug: string;
   title: string;
   description: string;
-  filename: string;
+  filename?: string;
   questionType: string;
+}
+
+export interface FormatedQuestion extends QuestionAttributes {
+  typedQuestion: TypedQuestion | undefined;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface QuestionDataValues extends QuestionAttributes {
@@ -125,7 +131,8 @@ export default (sequelize: Sequelize): typeof Question => {
         },
 
         afterFind: (instanceOrInstances: Array<Question> | Question) => {
-          const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [];
+          const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
           for (const instance of instances) {
             if (instance.questionType === 'numericQuestion' && instance.typedQuestionId != undefined) {

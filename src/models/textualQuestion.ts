@@ -17,7 +17,7 @@ interface TextualQuestionAttributes {
   accentSensitive: boolean;
 }
 
-type TextualQuestionCreationAttributes = Optional<TextualQuestionAttributes, 'id'>;
+export type TextualQuestionCreationAttributes = Optional<TextualQuestionAttributes, 'id'>;
 
 export class TextualQuestion
   extends Model<TextualQuestionAttributes, TextualQuestionCreationAttributes>

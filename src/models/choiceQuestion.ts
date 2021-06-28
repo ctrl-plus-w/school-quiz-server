@@ -19,7 +19,7 @@ interface ChoiceQuestionAttributes {
   shuffle: boolean;
 }
 
-type ChoiceQuestionCreationAttributes = Optional<ChoiceQuestionAttributes, 'id'>;
+export type ChoiceQuestionCreationAttributes = Optional<ChoiceQuestionAttributes, 'id'>;
 
 export class ChoiceQuestion
   extends Model<ChoiceQuestionAttributes, ChoiceQuestionCreationAttributes>
