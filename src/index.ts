@@ -20,6 +20,7 @@ import choiceQuestion from './api/choiceQuestion/choiceQuestion.routes';
 import verificationType from './api/verificationType/verificationType.routes';
 import questionTypeSpecification from './api/questionTypeSpecification/questionTypeSpecification.routes';
 import question from './api/question/question.routes';
+import quiz from './api/quiz/quiz.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
@@ -53,6 +54,7 @@ app.use('/api/choiceQuestions', authenticateMiddleware, choiceQuestion);
 app.use('/api/verificationTypes', authenticateMiddleware, verificationType);
 app.use('/api/questionTypeSpecifications', authenticateMiddleware, questionTypeSpecification);
 app.use('/api/questions', authenticateMiddleware, question);
+app.use('/api/quizzes', authenticateMiddleware, quiz);
 
 app.use(pageNotFound);
 app.use(errorHandler);
