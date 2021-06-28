@@ -131,7 +131,7 @@ export default (sequelize: Sequelize): typeof Question => {
         },
 
         afterFind: (instanceOrInstances: Array<Question> | Question) => {
-          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [];
+          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
           const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
           for (const instance of instances) {
