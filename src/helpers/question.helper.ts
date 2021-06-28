@@ -8,11 +8,12 @@ import { ChoiceQuestion, ChoiceQuestionCreationAttributes } from '../models/choi
 import { NumericQuestion, NumericQuestionCreationAttributes } from '../models/numericQuestion';
 import { TextualQuestion, TextualQuestionCreationAttributes } from '../models/textualQuestion';
 
-import { DuplicationError, InvalidInputError } from '../classes/StatusError';
+import { DuplicationError, InvalidInputError, NotFoundError } from '../classes/StatusError';
 
 import { questionFormatter } from './mapper.helper';
 
 import { slugify } from '../utils/string.utils';
+import { VerificationType } from '../models/verificationType';
 
 const questionSchema: Joi.SchemaMap = {
   title: Joi.string().min(5).max(35).required(),
@@ -22,6 +23,8 @@ const questionSchema: Joi.SchemaMap = {
 
 const textualQuestionSchema = Joi.object({
   ...questionSchema,
+
+  verificationType: Joi.string().required(),
 
   accentSensitive: Joi.boolean().required(),
   caseSensitive: Joi.boolean().required(),
@@ -37,7 +40,7 @@ const choiceQuestionSchema = Joi.object({
   shuffle: Joi.boolean().required(),
 });
 
-type TextualQuestionIntersection = Question & TextualQuestionCreationAttributes;
+type TextualQuestionIntersection = Question & TextualQuestionCreationAttributes & { verificationType: string };
 type NumericQuestionIntersection = Question & NumericQuestionCreationAttributes;
 type ChoiceQuestionIntersection = Question & ChoiceQuestionCreationAttributes;
 
@@ -47,7 +50,7 @@ const createQuestion = async (
   _req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+): Promise<Question | undefined> => {
   try {
     const createdQuestion = await createdTypedQuestion.createQuestion({
       title: validatedSchema.title,
@@ -55,7 +58,7 @@ const createQuestion = async (
       description: validatedSchema.description,
     });
 
-    res.json(questionFormatter(createdQuestion));
+    return createdQuestion;
   } catch (err) {
     next(err);
   }
@@ -76,12 +79,23 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     const question = await Question.findOne({ where: { slug: validatedTextualQuestion.slug } });
     if (question) return next(new DuplicationError('Question'));
 
+    const verificationType = await VerificationType.findOne({
+      where: { slug: validatedTextualQuestion.verificationType },
+    });
+    if (!verificationType) return next(new NotFoundError('Verification type'));
+
     const createdTextualQuestion = await TextualQuestion.create({
       accentSensitive: validatedTextualQuestion.accentSensitive,
       caseSensitive: validatedTextualQuestion.caseSensitive,
     });
 
-    return await createQuestion(createdTextualQuestion, validatedTextualQuestion, req, res, next);
+    const createdQuestion = await createQuestion(createdTextualQuestion, validatedTextualQuestion, req, res, next);
+    if (!createdQuestion) return;
+
+    const fetchedCreatedQuestion = await Question.findByPk(createdQuestion.id);
+    await fetchedCreatedQuestion?.textualQuestion?.setVerificationType(verificationType);
+
+    res.json(questionFormatter(createdQuestion));
   } catch (err) {
     next(err);
   }
@@ -104,7 +118,8 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
 
     const createdNumericQuestion = await NumericQuestion.create();
 
-    await createQuestion(createdNumericQuestion, validatedNumericQuestion, req, res, next);
+    const createdQuestion = await createQuestion(createdNumericQuestion, validatedNumericQuestion, req, res, next);
+    res.json(questionFormatter(createdQuestion));
   } catch (err) {
     next(err);
   }
@@ -130,7 +145,8 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
       shuffle: validatedChoiceQuestion.shuffle,
     });
 
-    await createQuestion(createdChoiceQuestion, validatedChoiceQuestion, req, res, next);
+    const createdQuestion = await createQuestion(createdChoiceQuestion, validatedChoiceQuestion, req, res, next);
+    res.json(questionFormatter(createdQuestion));
   } catch (err) {
     next(err);
   }
