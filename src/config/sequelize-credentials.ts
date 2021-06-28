@@ -7,9 +7,9 @@ interface Passport {
 const developmentCredentials: Options = {
   username: 'root',
   password: '!FreshRoot1',
-  database: 'SchoolQuiz',
+  database: 'school_quiz',
   host: '127.0.0.1',
-  dialect: 'mysql',
+  dialect: 'mariadb',
 };
 
 const productionCredentials: Options = {
