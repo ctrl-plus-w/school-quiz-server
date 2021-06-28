@@ -1,7 +1,7 @@
 import { Answer, FormatedAnswer } from '../models/answer';
 import { FormatedQuestion, Question } from '../models/question';
 
-export const answerFormatter = (answer: Answer | null): FormatedAnswer | null => {
+export const answerFormatter = (answer: Answer | null | undefined): FormatedAnswer | null | undefined => {
   return answer
     ? {
         id: answer.id,
@@ -13,11 +13,11 @@ export const answerFormatter = (answer: Answer | null): FormatedAnswer | null =>
     : null;
 };
 
-export const answerMapper = (answers: Array<Answer>): Array<FormatedAnswer | null> => {
+export const answerMapper = (answers: Array<Answer>): Array<FormatedAnswer | null | undefined> => {
   return answers.map(answerFormatter);
 };
 
-export const questionFormatter = (question: Question | null): FormatedQuestion | null => {
+export const questionFormatter = (question: Question | null | undefined): FormatedQuestion | null | undefined => {
   return question
     ? {
         id: question.id,
@@ -32,6 +32,6 @@ export const questionFormatter = (question: Question | null): FormatedQuestion |
     : null;
 };
 
-export const questionMapper = (questions: Array<Question>): Array<FormatedQuestion | null> => {
+export const questionMapper = (questions: Array<Question>): Array<FormatedQuestion | null | undefined> => {
   return questions.map(questionFormatter);
 };
