@@ -19,6 +19,12 @@ interface ChoiceQuestionAttributes {
   shuffle: boolean;
 }
 
+interface ChoiceQuestionDataValues extends ChoiceQuestionAttributes {
+  questionTypeSpecification?: QuestionTypeSpecification;
+
+  questionTypeSpecificationId?: number;
+}
+
 export type ChoiceQuestionCreationAttributes = Optional<ChoiceQuestionAttributes, 'id'>;
 
 export class ChoiceQuestion
@@ -33,6 +39,10 @@ export class ChoiceQuestion
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public questionTypeSpecificationId?: number;
+
+  public dataValues!: ChoiceQuestionDataValues;
 
   /* Choice properties */
   public addChoice!: BelongsToManyAddAssociationMixin<Choice, number>;
@@ -64,6 +74,22 @@ export default (sequelize: Sequelize): typeof ChoiceQuestion => {
       sequelize,
       modelName: 'choiceQuestion',
       tableName: 'ChoiceQuestion',
+
+      hooks: {
+        beforeFind: (options) => {
+          options.include = [{ model: QuestionTypeSpecification }];
+        },
+
+        afterFind: (instanceOrInstances: ChoiceQuestion | Array<ChoiceQuestion>) => {
+          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+          const instances = instanceOrInstances === null ? [] : arrayedInstances;
+
+          for (const instance of instances) {
+            delete instance.questionTypeSpecificationId;
+            delete instance.dataValues.questionTypeSpecificationId;
+          }
+        },
+      },
     }
   );
 

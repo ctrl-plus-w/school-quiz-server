@@ -17,6 +17,13 @@ interface TextualQuestionAttributes {
   accentSensitive: boolean;
 }
 
+interface TextualQuestionDataValues extends TextualQuestionAttributes {
+  verificationType?: VerificationType;
+
+  questionTypeSpecificationId?: number;
+  verificationTypeId?: number;
+}
+
 export type TextualQuestionCreationAttributes = Optional<TextualQuestionAttributes, 'id'>;
 
 export class TextualQuestion
@@ -28,11 +35,16 @@ export class TextualQuestion
   public caseSensitive!: boolean;
   public accentSensitive!: boolean;
 
-  public verificationType!: VerificationType;
-  public questionTypeSpecification!: QuestionTypeSpecification;
+  public verificationType?: VerificationType;
+  public questionTypeSpecification?: QuestionTypeSpecification;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public questionTypeSpecificationId?: number;
+  public verificationTypeId?: number;
+
+  public dataValues!: TextualQuestionDataValues;
 
   /* Question specification property */
   public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
@@ -67,6 +79,25 @@ export default (sequelize: Sequelize): typeof TextualQuestion => {
       sequelize,
       modelName: 'textualQuestion',
       tableName: 'TextualQuestion',
+
+      hooks: {
+        beforeFind: (options) => {
+          options.include = [{ model: VerificationType }, { model: QuestionTypeSpecification }];
+        },
+
+        afterFind: (instanceOrInstances: TextualQuestion | Array<TextualQuestion>) => {
+          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+          const instances = instanceOrInstances === null ? [] : arrayedInstances;
+
+          for (const instance of instances) {
+            delete instance.verificationTypeId;
+            delete instance.dataValues.verificationTypeId;
+
+            delete instance.questionTypeSpecificationId;
+            delete instance.dataValues.questionTypeSpecificationId;
+          }
+        },
+      },
     }
   );
 
