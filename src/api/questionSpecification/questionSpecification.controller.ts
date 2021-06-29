@@ -18,7 +18,6 @@ export const getQuestionSpecifications = async (req: Request, res: Response, nex
     const questionSpecifications = await QuestionSpecification.findAll();
     res.json(questionSpecifications);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };

@@ -10,7 +10,6 @@ export const getExactAnswers = async (req: Request, res: Response, next: NextFun
     const exactAnswers = await ExactAnswer.findAll();
     res.json(exactAnswers);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
