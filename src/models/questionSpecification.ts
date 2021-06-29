@@ -1,16 +1,16 @@
 import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 
-interface QuestionTypeSpecificationAttributes {
+interface QuestionSpecificationAttributes {
   id: number;
   slug: string;
   name: string;
 }
 
-export type QuestionTypeSpecificationCreationAttributes = Optional<QuestionTypeSpecificationAttributes, 'id'>;
+export type QuestionSpecificationCreationAttributes = Optional<QuestionSpecificationAttributes, 'id'>;
 
-export class QuestionTypeSpecification
-  extends Model<QuestionTypeSpecificationAttributes, QuestionTypeSpecificationCreationAttributes>
-  implements QuestionTypeSpecificationAttributes
+export class QuestionSpecification
+  extends Model<QuestionSpecificationAttributes, QuestionSpecificationCreationAttributes>
+  implements QuestionSpecificationAttributes
 {
   public id!: number;
   public slug!: string;
@@ -20,8 +20,8 @@ export class QuestionTypeSpecification
   public readonly updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize): typeof QuestionTypeSpecification => {
-  QuestionTypeSpecification.init(
+export default (sequelize: Sequelize): typeof QuestionSpecification => {
+  QuestionSpecification.init(
     {
       id: {
         type: DataTypes.INTEGER.UNSIGNED,
@@ -40,10 +40,10 @@ export default (sequelize: Sequelize): typeof QuestionTypeSpecification => {
     },
     {
       sequelize,
-      modelName: 'questionTypeSpecification',
-      tableName: 'QuestionTypeSpecification',
+      modelName: 'questionSpecification',
+      tableName: 'QuestionSpecification',
     }
   );
 
-  return QuestionTypeSpecification;
+  return QuestionSpecification;
 };

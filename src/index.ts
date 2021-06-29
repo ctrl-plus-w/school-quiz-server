@@ -18,7 +18,7 @@ import numericQuestion from './api/numericQuestion/numericQuestion.routes';
 import textualQuestion from './api/textualQuestion/textualQuestion.routes';
 import choiceQuestion from './api/choiceQuestion/choiceQuestion.routes';
 import verificationType from './api/verificationType/verificationType.routes';
-import questionTypeSpecification from './api/questionTypeSpecification/questionTypeSpecification.routes';
+import questionSpecification from './api/questionSpecification/questionSpecification.routes';
 import question from './api/question/question.routes';
 import quiz from './api/quiz/quiz.routes';
 
@@ -52,7 +52,7 @@ app.use('/api/numericQuestions', authenticateMiddleware, numericQuestion);
 app.use('/api/textualQuestions', authenticateMiddleware, textualQuestion);
 app.use('/api/choiceQuestions', authenticateMiddleware, choiceQuestion);
 app.use('/api/verificationTypes', authenticateMiddleware, verificationType);
-app.use('/api/questionTypeSpecifications', authenticateMiddleware, questionTypeSpecification);
+app.use('/api/questionSpecifications', authenticateMiddleware, questionSpecification);
 app.use('/api/questions', authenticateMiddleware, question);
 app.use('/api/quizzes', authenticateMiddleware, quiz);
 

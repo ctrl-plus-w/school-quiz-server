@@ -8,16 +8,16 @@ import {
 } from 'sequelize';
 
 import { Question } from './question';
-import { QuestionTypeSpecification } from './questionTypeSpecification';
+import { QuestionSpecification } from './questionSpecification';
 
 interface NumericQuestionAttributes {
   id: number;
 }
 
 interface NumericQuestionDataValues extends NumericQuestionAttributes {
-  questionTypeSpecification?: QuestionTypeSpecification;
+  questionSpecification?: QuestionSpecification;
 
-  questionTypeSpecificationId?: number;
+  questionSpecificationId?: number;
 }
 
 export type NumericQuestionCreationAttributes = Optional<NumericQuestionAttributes, 'id'>;
@@ -28,17 +28,17 @@ export class NumericQuestion
 {
   public id!: number;
 
-  public questionTypeSpecification!: QuestionTypeSpecification;
+  public questionSpecification!: QuestionSpecification;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  public questionTypeSpecificationId?: number;
+  public questionSpecificationId?: number;
 
   public dataValues!: NumericQuestionDataValues;
 
   /* Question specification property */
-  public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
+  public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
 
   /* Question property */
   public createQuestion!: HasOneCreateAssociationMixin<Question>;
@@ -60,7 +60,7 @@ export default (sequelize: Sequelize): typeof NumericQuestion => {
 
       hooks: {
         beforeFind: (options) => {
-          options.include = [{ model: QuestionTypeSpecification }];
+          options.include = [{ model: QuestionSpecification }];
         },
 
         afterFind: (instanceOrInstances: NumericQuestion | Array<NumericQuestion>) => {
@@ -68,8 +68,8 @@ export default (sequelize: Sequelize): typeof NumericQuestion => {
           const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
           for (const instance of instances) {
-            delete instance.questionTypeSpecificationId;
-            delete instance.dataValues.questionTypeSpecificationId;
+            delete instance.questionSpecificationId;
+            delete instance.dataValues.questionSpecificationId;
           }
         },
       },

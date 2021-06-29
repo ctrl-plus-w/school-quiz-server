@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 
-import { QuestionTypeSpecification } from '../models/questionTypeSpecification';
+import { QuestionSpecification } from '../models/questionSpecification';
 import { VerificationType } from '../models/verificationType';
 import { Group } from '../models/group';
 import { Role } from '../models/role';
@@ -85,7 +85,7 @@ export default async (): Promise<void> => {
     },
   ]);
 
-  await QuestionTypeSpecification.bulkCreate([
+  await QuestionSpecification.bulkCreate([
     {
       slug: 'nombre-entier',
       name: 'Nombre entier',

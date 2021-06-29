@@ -16,7 +16,7 @@ export default async (): Promise<void> => {
     NumericQuestion,
     ChoiceQuestion,
     VerificationType,
-    QuestionTypeSpecification,
+    QuestionSpecification,
     Answer,
     ExactAnswer,
     ComparisonAnswer,
@@ -79,9 +79,9 @@ export default async (): Promise<void> => {
   TextualQuestion.belongsTo(VerificationType);
 
   // Typed questions and Question type specification relation.
-  TextualQuestion.belongsTo(QuestionTypeSpecification);
-  NumericQuestion.belongsTo(QuestionTypeSpecification);
-  ChoiceQuestion.belongsTo(QuestionTypeSpecification);
+  TextualQuestion.belongsTo(QuestionSpecification);
+  NumericQuestion.belongsTo(QuestionSpecification);
+  ChoiceQuestion.belongsTo(QuestionSpecification);
 
   // Numeric question & Choice realtion.
   const CHOICE_QUESTION_CHOICE_TABLENAME = 'ChoiceQuestionChoice';

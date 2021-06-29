@@ -11,7 +11,7 @@ import {
 import { TextualQuestion } from './textualQuestion';
 import { ChoiceQuestion } from './choiceQuestion';
 import { NumericQuestion } from './numericQuestion';
-import { QuestionTypeSpecification } from './questionTypeSpecification';
+import { QuestionSpecification } from './questionSpecification';
 import { VerificationType } from './verificationType';
 import { Choice } from './choice';
 import { UserAnswer } from './userAnswer';
@@ -113,15 +113,15 @@ export default (sequelize: Sequelize): typeof Question => {
           options.include = [
             {
               model: TextualQuestion,
-              include: [VerificationType, QuestionTypeSpecification],
+              include: [VerificationType, QuestionSpecification],
             },
             {
               model: NumericQuestion,
-              include: [QuestionTypeSpecification],
+              include: [QuestionSpecification],
             },
             {
               model: ChoiceQuestion,
-              include: [QuestionTypeSpecification, Choice],
+              include: [QuestionSpecification, Choice],
             },
             {
               model: UserAnswer,

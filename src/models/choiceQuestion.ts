@@ -11,7 +11,7 @@ import {
 } from 'sequelize';
 
 import { Question } from './question';
-import { QuestionTypeSpecification } from './questionTypeSpecification';
+import { QuestionSpecification } from './questionSpecification';
 import { Choice } from './choice';
 
 interface ChoiceQuestionAttributes {
@@ -20,9 +20,9 @@ interface ChoiceQuestionAttributes {
 }
 
 interface ChoiceQuestionDataValues extends ChoiceQuestionAttributes {
-  questionTypeSpecification?: QuestionTypeSpecification;
+  questionSpecification?: QuestionSpecification;
 
-  questionTypeSpecificationId?: number;
+  questionSpecificationId?: number;
 }
 
 export type ChoiceQuestionCreationAttributes = Optional<ChoiceQuestionAttributes, 'id'>;
@@ -35,12 +35,12 @@ export class ChoiceQuestion
   public shuffle!: boolean;
 
   public choices!: Array<Choice>;
-  public questionTypeSpecification!: QuestionTypeSpecification;
+  public questionSpecification!: QuestionSpecification;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  public questionTypeSpecificationId?: number;
+  public questionSpecificationId?: number;
 
   public dataValues!: ChoiceQuestionDataValues;
 
@@ -50,7 +50,7 @@ export class ChoiceQuestion
   public removeChoice!: BelongsToManyRemoveAssociationMixin<Choice, number>;
 
   /* Question specification property */
-  public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
+  public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
 
   /* Question property */
   public createQuestion!: HasOneCreateAssociationMixin<Question>;
@@ -77,7 +77,7 @@ export default (sequelize: Sequelize): typeof ChoiceQuestion => {
 
       hooks: {
         beforeFind: (options) => {
-          options.include = [{ model: QuestionTypeSpecification }];
+          options.include = [{ model: QuestionSpecification }];
         },
 
         afterFind: (instanceOrInstances: ChoiceQuestion | Array<ChoiceQuestion>) => {
@@ -85,8 +85,8 @@ export default (sequelize: Sequelize): typeof ChoiceQuestion => {
           const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
           for (const instance of instances) {
-            delete instance.questionTypeSpecificationId;
-            delete instance.dataValues.questionTypeSpecificationId;
+            delete instance.questionSpecificationId;
+            delete instance.dataValues.questionSpecificationId;
           }
         },
       },

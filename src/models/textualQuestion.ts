@@ -9,7 +9,7 @@ import {
 
 import { Question } from './question';
 import { VerificationType } from './verificationType';
-import { QuestionTypeSpecification } from './questionTypeSpecification';
+import { QuestionSpecification } from './questionSpecification';
 
 interface TextualQuestionAttributes {
   id: number;
@@ -20,7 +20,7 @@ interface TextualQuestionAttributes {
 interface TextualQuestionDataValues extends TextualQuestionAttributes {
   verificationType?: VerificationType;
 
-  questionTypeSpecificationId?: number;
+  questionSpecificationId?: number;
   verificationTypeId?: number;
 }
 
@@ -36,18 +36,18 @@ export class TextualQuestion
   public accentSensitive!: boolean;
 
   public verificationType?: VerificationType;
-  public questionTypeSpecification?: QuestionTypeSpecification;
+  public questionSpecification?: QuestionSpecification;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  public questionTypeSpecificationId?: number;
+  public questionSpecificationId?: number;
   public verificationTypeId?: number;
 
   public dataValues!: TextualQuestionDataValues;
 
   /* Question specification property */
-  public setQuestionTypeSpecification!: BelongsToSetAssociationMixin<QuestionTypeSpecification, number>;
+  public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
 
   /*  Question verification type property */
   public setVerificationType!: BelongsToSetAssociationMixin<VerificationType, number>;
@@ -82,7 +82,7 @@ export default (sequelize: Sequelize): typeof TextualQuestion => {
 
       hooks: {
         beforeFind: (options) => {
-          options.include = [{ model: VerificationType }, { model: QuestionTypeSpecification }];
+          options.include = [{ model: VerificationType }, { model: QuestionSpecification }];
         },
 
         afterFind: (instanceOrInstances: TextualQuestion | Array<TextualQuestion>) => {
@@ -93,8 +93,8 @@ export default (sequelize: Sequelize): typeof TextualQuestion => {
             delete instance.verificationTypeId;
             delete instance.dataValues.verificationTypeId;
 
-            delete instance.questionTypeSpecificationId;
-            delete instance.dataValues.questionTypeSpecificationId;
+            delete instance.questionSpecificationId;
+            delete instance.dataValues.questionSpecificationId;
           }
         },
       },
