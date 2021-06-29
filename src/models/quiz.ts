@@ -10,6 +10,7 @@ import {
 } from 'sequelize';
 
 import { Question } from './question';
+import { User } from './user';
 
 interface QuizAttributes {
   id: number;
@@ -18,6 +19,14 @@ interface QuizAttributes {
   description: string;
   strict: boolean;
   shuffle: boolean;
+}
+
+export interface FormatedQuiz extends QuizAttributes {
+  owner?: User;
+  questions?: Array<Question>;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type QuizCreationAttributes = Optional<QuizAttributes, 'id'>;
@@ -30,7 +39,18 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public strict!: boolean;
   public shuffle!: boolean;
 
+  private user?: User;
+  private userId?: number;
+
   public questions?: Array<Question>;
+
+  public get ownerId(): number | undefined {
+    return this.userId;
+  }
+
+  public get owner(): User | undefined {
+    return this.user;
+  }
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;

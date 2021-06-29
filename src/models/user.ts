@@ -7,12 +7,14 @@ import {
   Model,
   DataTypes,
   BelongsToManyAddAssociationsMixin,
+  HasManyCreateAssociationMixin,
 } from 'sequelize';
 
 import { Role } from './role';
 import { Event } from './event';
 import { State } from './state';
 import { Group } from './group';
+import { Quiz } from './quiz';
 
 interface UserAttributes {
   id: number;
@@ -38,6 +40,12 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public events?: Array<Event>;
   public groups?: Array<Group>;
 
+  private quizs?: Array<Quiz>;
+
+  public get quizzes(): Array<Quiz> | undefined {
+    return this.quizs;
+  }
+
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
@@ -57,6 +65,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public addEvent!: BelongsToManyAddAssociationMixin<Event, number>;
   public addEvents!: BelongsToManyAddAssociationsMixin<Event, number>;
   public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
+
+  /* Quiz properties */
+  public createQuiz!: HasManyCreateAssociationMixin<Quiz>;
 }
 
 export default (sequelize: Sequelize): typeof User => {

@@ -47,6 +47,9 @@ export default async (): Promise<void> => {
   Event.belongsTo(Group);
   Group.hasOne(Event);
 
+  Quiz.belongsTo(User);
+  User.hasMany(Quiz);
+
   // Quiz & Question relation.
   Question.belongsTo(Quiz);
   Quiz.hasMany(Question);

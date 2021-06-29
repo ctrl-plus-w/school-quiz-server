@@ -5,9 +5,10 @@ import { createQuiz, deleteQuiz, getQuiz, getQuizzes } from './quiz.controller';
 import questionRoutes from '../question/quizQuestion.routes';
 
 import checkPermission from '../../middlewares/authorization.middleware';
+import { checkQuizExists } from '../../middlewares/checkExists.middleware';
+import { checkQuizPossesion } from '../../middlewares/checkPossesion.middleware';
 
 import roles from '../../constants/roles';
-import { checkQuizExists } from '../../middlewares/checkExists.middleware';
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.get('/:quizId', checkPermission(roles.ADMIN.PERMISSION), getQuiz);
 
 router.post('/', checkPermission(roles.ADMIN.PERMISSION), createQuiz);
 
-router.delete('/:quizId', checkPermission(roles.ADMIN.PERMISSION), deleteQuiz);
+router.delete('/:quizId', checkPermission(roles.ADMIN.PERMISSION), checkQuizPossesion, deleteQuiz);
 
 /* Quiz -> Question */
 
