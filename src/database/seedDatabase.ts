@@ -119,4 +119,10 @@ export default async (): Promise<void> => {
       name: 'Choix multiple',
     },
   ]);
+
+  const lukas = await User.findOne({ where: { username: 'llaudrain' } });
+  const admin = await Role.findOne({ where: { slug: 'admin ' } });
+  if (!lukas || !admin) return;
+
+  await lukas.setRole(admin);
 };
