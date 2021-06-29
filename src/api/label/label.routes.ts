@@ -2,17 +2,15 @@ import { Router } from 'express';
 
 import { createLabel, deleteLabel, getLabel, getLabels } from './label.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
-
-import roles from '../../constants/roles';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getLabels);
-router.get('/:labelId', checkPermission(roles.ADMIN.PERMISSION), getLabel);
+router.get('/', checkIsAdmin, getLabels);
+router.get('/:labelId', checkIsAdmin, getLabel);
 
-router.post('/', checkPermission(roles.ADMIN.PERMISSION), createLabel);
+router.post('/', checkIsAdmin, createLabel);
 
-router.delete('/:labelId', checkPermission(roles.ADMIN.PERMISSION), deleteLabel);
+router.delete('/:labelId', checkIsAdmin, deleteLabel);
 
 export default router;

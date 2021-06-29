@@ -2,17 +2,15 @@ import { Router } from 'express';
 
 import { createRole, deleteRole, getRole, getRoles } from './role.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
-
-import roles from '../../constants/roles';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getRoles);
-router.get('/:roleId', checkPermission(roles.ADMIN.PERMISSION), getRole);
+router.get('/', checkIsAdmin, getRoles);
+router.get('/:roleId', checkIsAdmin, getRole);
 
-router.post('/', checkPermission(roles.ADMIN.PERMISSION), createRole);
+router.post('/', checkIsAdmin, createRole);
 
-router.delete('/:roleId', checkPermission(roles.ADMIN.PERMISSION), deleteRole);
+router.delete('/:roleId', checkIsAdmin, deleteRole);
 
 export default router;

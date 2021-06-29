@@ -11,21 +11,19 @@ import {
   removeLabel,
 } from './group.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
-
-import roles from '../../constants/roles';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getGroups);
-router.get('/:groupId', checkPermission(roles.ADMIN.PERMISSION), getGroup);
-router.get('/:groupId/labels', checkPermission(roles.ADMIN.PERMISSION), getGroupLabels);
-router.get('/:groupId/labels/:labelId', checkPermission(roles.ADMIN.PERMISSION), getGroupLabel);
+router.get('/', checkIsAdmin, getGroups);
+router.get('/:groupId', checkIsAdmin, getGroup);
+router.get('/:groupId/labels', checkIsAdmin, getGroupLabels);
+router.get('/:groupId/labels/:labelId', checkIsAdmin, getGroupLabel);
 
-router.post('/', checkPermission(roles.ADMIN.PERMISSION), createGroup);
-router.post('/:groupId/labels', checkPermission(roles.ADMIN.PERMISSION), addLabel);
+router.post('/', checkIsAdmin, createGroup);
+router.post('/:groupId/labels', checkIsAdmin, addLabel);
 
-router.delete('/:groupId', checkPermission(roles.ADMIN.PERMISSION), deleteGroup);
-router.delete('/:groupId/labels', checkPermission(roles.ADMIN.PERMISSION), removeLabel);
+router.delete('/:groupId', checkIsAdmin, deleteGroup);
+router.delete('/:groupId/labels', checkIsAdmin, removeLabel);
 
 export default router;

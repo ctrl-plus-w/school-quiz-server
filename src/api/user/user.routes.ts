@@ -13,23 +13,21 @@ import {
   removeGroup,
 } from './user.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
-
-import roles from '../../constants/roles';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getUsers);
-router.get('/:userId', checkPermission(roles.ADMIN.PERMISSION), getUser);
-router.get('/:userId/role', checkPermission(roles.ADMIN.PERMISSION), getRole);
-router.get('/:userId/groups', checkPermission(roles.ADMIN.PERMISSION), getGroups);
-router.get('/:userId/groups/:groupId', checkPermission(roles.ADMIN.PERMISSION), getGroup);
+router.get('/', checkIsAdmin, getUsers);
+router.get('/:userId', checkIsAdmin, getUser);
+router.get('/:userId/role', checkIsAdmin, getRole);
+router.get('/:userId/groups', checkIsAdmin, getGroups);
+router.get('/:userId/groups/:groupId', checkIsAdmin, getGroup);
 
-router.post('/', checkPermission(roles.ADMIN.PERMISSION), createUser);
-router.post('/:userId/role', checkPermission(roles.ADMIN.PERMISSION), setRole);
-router.post('/:userId/groups', checkPermission(roles.ADMIN.PERMISSION), addGroup);
+router.post('/', checkIsAdmin, createUser);
+router.post('/:userId/role', checkIsAdmin, setRole);
+router.post('/:userId/groups', checkIsAdmin, addGroup);
 
-router.delete('/:userId', checkPermission(roles.ADMIN.PERMISSION), deleteUser);
-router.delete('/:userId/groups', checkPermission(roles.ADMIN.PERMISSION), removeGroup);
+router.delete('/:userId', checkIsAdmin, deleteUser);
+router.delete('/:userId/groups', checkIsAdmin, removeGroup);
 
 export default router;

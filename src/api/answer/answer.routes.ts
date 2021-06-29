@@ -2,17 +2,15 @@ import { Router } from 'express';
 
 import { createAnswer, deleteAnswer, getAnswer, getAnswers } from './answer.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
-
-import roles from '../../constants/roles';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getAnswers);
-router.get('/:answerId', checkPermission(roles.ADMIN.PERMISSION), getAnswer);
+router.get('/', checkIsAdmin, getAnswers);
+router.get('/:answerId', checkIsAdmin, getAnswer);
 
-router.post('/:answerType', checkPermission(roles.ADMIN.PERMISSION), createAnswer);
+router.post('/:answerType', checkIsAdmin, createAnswer);
 
-router.delete('/:answerId', checkPermission(roles.ADMIN.PERMISSION), deleteAnswer);
+router.delete('/:answerId', checkIsAdmin, deleteAnswer);
 
 export default router;

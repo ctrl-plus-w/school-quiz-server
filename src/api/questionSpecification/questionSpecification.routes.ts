@@ -7,21 +7,15 @@ import {
   getQuestionSpecifications,
 } from './questionSpecification.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
-
-import roles from '../../constants/roles';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getQuestionSpecifications);
-router.get('/:questionSpecificationId', checkPermission(roles.ADMIN.PERMISSION), getQuestionSpecification);
+router.get('/', checkIsAdmin, getQuestionSpecifications);
+router.get('/:questionSpecificationId', checkIsAdmin, getQuestionSpecification);
 
-router.post('/', checkPermission(roles.ADMIN.PERMISSION), createQuestionSpecification);
+router.post('/', checkIsAdmin, createQuestionSpecification);
 
-router.delete(
-  '/:questionSpecificationId',
-  checkPermission(roles.ADMIN.PERMISSION),
-  deleteQuestionSpecification
-);
+router.delete('/:questionSpecificationId', checkIsAdmin, deleteQuestionSpecification);
 
 export default router;

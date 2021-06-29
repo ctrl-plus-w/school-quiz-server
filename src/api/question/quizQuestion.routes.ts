@@ -2,18 +2,16 @@ import { Router } from 'express';
 
 import { createQuestion, deleteQuestion, getQuestion, getQuestions } from './question.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 import { checkQuizPossesion } from '../../middlewares/checkPossesion.middleware';
-
-import roles from '../../constants/roles';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getQuestions);
-router.get('/:questionId', checkPermission(roles.ADMIN.PERMISSION), getQuestion);
+router.get('/', checkIsAdmin, getQuestions);
+router.get('/:questionId', checkIsAdmin, getQuestion);
 
-router.post('/:questionType', checkPermission(roles.ADMIN.PERMISSION), checkQuizPossesion, createQuestion);
+router.post('/:questionType', checkIsAdmin, checkQuizPossesion, createQuestion);
 
-router.delete('/:questionId', checkPermission(roles.ADMIN.PERMISSION), checkQuizPossesion, deleteQuestion);
+router.delete('/:questionId', checkIsAdmin, checkQuizPossesion, deleteQuestion);
 
 export default router;

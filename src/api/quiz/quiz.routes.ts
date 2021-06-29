@@ -4,22 +4,20 @@ import { createQuiz, deleteQuiz, getQuiz, getQuizzes } from './quiz.controller';
 
 import questionRoutes from '../question/quizQuestion.routes';
 
-import checkPermission from '../../middlewares/authorization.middleware';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 import { checkQuizExists } from '../../middlewares/checkExists.middleware';
 import { checkQuizPossesion } from '../../middlewares/checkPossesion.middleware';
-
-import roles from '../../constants/roles';
 
 const router = Router();
 
 /* Quiz */
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getQuizzes);
-router.get('/:quizId', checkPermission(roles.ADMIN.PERMISSION), getQuiz);
+router.get('/', checkIsAdmin, getQuizzes);
+router.get('/:quizId', checkIsAdmin, getQuiz);
 
-router.post('/', checkPermission(roles.ADMIN.PERMISSION), createQuiz);
+router.post('/', checkIsAdmin, createQuiz);
 
-router.delete('/:quizId', checkPermission(roles.ADMIN.PERMISSION), checkQuizPossesion, deleteQuiz);
+router.delete('/:quizId', checkIsAdmin, checkQuizPossesion, deleteQuiz);
 
 /* Quiz -> Question */
 
