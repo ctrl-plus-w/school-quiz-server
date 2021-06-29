@@ -22,6 +22,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     if (!passwordValid) return next(new InvalidCredentialsError());
 
     const payload = {
+      userId: user.id,
       username: user.username,
       role: user.role?.slug,
       rolePermission: user.role?.permission,
