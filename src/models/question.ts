@@ -11,11 +11,7 @@ import {
 import { TextualQuestion } from './textualQuestion';
 import { ChoiceQuestion } from './choiceQuestion';
 import { NumericQuestion } from './numericQuestion';
-import { QuestionSpecification } from './questionSpecification';
-import { VerificationType } from './verificationType';
-import { Choice } from './choice';
 import { UserAnswer } from './userAnswer';
-import { User } from './user';
 
 export type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
 
@@ -83,7 +79,6 @@ export default (sequelize: Sequelize): typeof Question => {
       },
       slug: {
         type: DataTypes.STRING,
-        unique: true,
         allowNull: false,
       },
       title: {
@@ -109,27 +104,6 @@ export default (sequelize: Sequelize): typeof Question => {
       tableName: 'Question',
 
       hooks: {
-        beforeFind: (options) => {
-          options.include = [
-            {
-              model: TextualQuestion,
-              include: [VerificationType, QuestionSpecification],
-            },
-            {
-              model: NumericQuestion,
-              include: [QuestionSpecification],
-            },
-            {
-              model: ChoiceQuestion,
-              include: [QuestionSpecification, Choice],
-            },
-            {
-              model: UserAnswer,
-              include: [User],
-            },
-          ];
-        },
-
         afterFind: (instanceOrInstances: Array<Question> | Question) => {
           const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
           const instances = instanceOrInstances === null ? [] : arrayedInstances;

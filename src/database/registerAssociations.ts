@@ -48,9 +48,8 @@ export default async (): Promise<void> => {
   Group.hasOne(Event);
 
   // Quiz & Question relation.
-  const QUIZ_QUESTION_TABLENAME = 'QuizQuestion';
-  Quiz.belongsToMany(Question, { through: QUIZ_QUESTION_TABLENAME });
-  Question.belongsToMany(Quiz, { through: QUIZ_QUESTION_TABLENAME });
+  Question.belongsTo(Quiz);
+  Quiz.hasMany(Question);
 
   const QUESTION_TYPES_DEFAULT_PROPERTIES = {
     foreignKey: 'typedQuestionId',

@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 
 import Joi from 'joi';
 
+import { VerificationType } from '../models/verificationType';
 import { Question, TypedQuestion } from '../models/question';
+import { Quiz } from '../models/quiz';
 
 import { ChoiceQuestion, ChoiceQuestionCreationAttributes } from '../models/choiceQuestion';
 import { NumericQuestion, NumericQuestionCreationAttributes } from '../models/numericQuestion';
@@ -13,7 +15,6 @@ import { DuplicationError, InvalidInputError, NotFoundError } from '../classes/S
 import { questionFormatter } from './mapper.helper';
 
 import { slugify } from '../utils/string.utils';
-import { VerificationType } from '../models/verificationType';
 
 const questionSchema: Joi.SchemaMap = {
   title: Joi.string().min(5).max(35).required(),
@@ -76,8 +77,8 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
 
     if (validationError) return next(new InvalidInputError());
 
-    const question = await Question.findOne({ where: { slug: validatedTextualQuestion.slug } });
-    if (question) return next(new DuplicationError('Question'));
+    const quiz: Quiz = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
 
     const verificationType = await VerificationType.findOne({
       where: { slug: validatedTextualQuestion.verificationType },
@@ -90,10 +91,13 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     });
 
     const createdQuestion = await createQuestion(createdTextualQuestion, validatedTextualQuestion, req, res, next);
-    if (!createdQuestion) return;
+    if (!createdQuestion) return next(new Error());
 
     const fetchedCreatedQuestion = await Question.findByPk(createdQuestion.id);
+    if (!fetchedCreatedQuestion) return next(new Error());
+
     await fetchedCreatedQuestion?.textualQuestion?.setVerificationType(verificationType);
+    await quiz.addQuestion(fetchedCreatedQuestion);
 
     res.json(questionFormatter(createdQuestion));
   } catch (err) {

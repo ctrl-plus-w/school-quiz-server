@@ -1,11 +1,12 @@
 import {
   Model,
   DataTypes,
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyAddAssociationsMixin,
-  BelongsToManyRemoveAssociationsMixin,
   Optional,
   Sequelize,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManyCreateAssociationMixin,
 } from 'sequelize';
 
 import { Question } from './question';
@@ -35,9 +36,10 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public readonly updatedAt!: Date;
 
   /* Question properties */
-  public addQuestion!: BelongsToManyAddAssociationMixin<Question, number>;
-  public addQuestions!: BelongsToManyAddAssociationsMixin<Question, number>;
-  public removeQuestion!: BelongsToManyRemoveAssociationsMixin<Question, number>;
+  public addQuestion!: HasManyAddAssociationMixin<Question, number>;
+  public addQuestions!: HasManyAddAssociationsMixin<Question, number>;
+  public createQuestion!: HasManyCreateAssociationMixin<Question>;
+  public removeQuestion!: HasManyRemoveAssociationsMixin<Question, number>;
 }
 
 export default (sequelize: Sequelize): typeof Quiz => {
