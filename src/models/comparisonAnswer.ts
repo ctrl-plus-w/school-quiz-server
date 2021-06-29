@@ -2,17 +2,17 @@ import { HasOneCreateAssociationMixin, Optional, Sequelize, Model, DataTypes } f
 
 import { Answer } from './answer';
 
-interface GTLTAnswerAttributes {
+interface ComparisonAnswerAttributes {
   id: number;
   greaterThan: number;
   lowerThan: number;
 }
 
-type GTLTAnswerCreationAttributes = Optional<GTLTAnswerAttributes, 'id'>;
+type ComparisonAnswerCreationAttributes = Optional<ComparisonAnswerAttributes, 'id'>;
 
-export class GTLTAnswer
-  extends Model<GTLTAnswerAttributes, GTLTAnswerCreationAttributes>
-  implements GTLTAnswerAttributes
+export class ComparisonAnswer
+  extends Model<ComparisonAnswerAttributes, ComparisonAnswerCreationAttributes>
+  implements ComparisonAnswerAttributes
 {
   public id!: number;
   public greaterThan!: number;
@@ -27,8 +27,8 @@ export class GTLTAnswer
   public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 }
 
-export default (sequelize: Sequelize): typeof GTLTAnswer => {
-  GTLTAnswer.init(
+export default (sequelize: Sequelize): typeof ComparisonAnswer => {
+  ComparisonAnswer.init(
     {
       id: {
         type: DataTypes.INTEGER.UNSIGNED,
@@ -46,10 +46,10 @@ export default (sequelize: Sequelize): typeof GTLTAnswer => {
     },
     {
       sequelize,
-      modelName: 'gtLtAnswer',
-      tableName: 'GTLTAnswer',
+      modelName: 'comparisonAnswer',
+      tableName: 'ComparisonAnswer',
     }
   );
 
-  return GTLTAnswer;
+  return ComparisonAnswer;
 };

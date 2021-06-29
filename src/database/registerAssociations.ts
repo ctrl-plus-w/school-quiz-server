@@ -18,8 +18,8 @@ export default async (): Promise<void> => {
     VerificationType,
     QuestionTypeSpecification,
     Answer,
-    EqAnswer,
-    GTLTAnswer,
+    ExactAnswer,
+    ComparisonAnswer,
   } = database.models;
 
   // User & Role relation.
@@ -103,16 +103,16 @@ export default async (): Promise<void> => {
     constraints: false,
   };
 
-  Answer.belongsTo(EqAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
-  EqAnswer.hasOne(Answer, {
+  Answer.belongsTo(ExactAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
+  ExactAnswer.hasOne(Answer, {
     ...ANSWER_TYPES_DEFAULT_PROPERTIES,
-    scope: { answerType: 'eqAnswer' },
+    scope: { answerType: 'exactAnswer' },
   });
 
-  Answer.belongsTo(GTLTAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
-  GTLTAnswer.hasOne(Answer, {
+  Answer.belongsTo(ComparisonAnswer, ANSWER_TYPES_DEFAULT_PROPERTIES);
+  ComparisonAnswer.hasOne(Answer, {
     ...ANSWER_TYPES_DEFAULT_PROPERTIES,
-    scope: { answerType: 'gtLtAnswer' },
+    scope: { answerType: 'comparisonAnswer' },
   });
 
   // UserAnswers & (User / Question) relation.

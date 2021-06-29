@@ -4,15 +4,15 @@ import Joi from 'joi';
 import { DuplicationError, InvalidInputError } from '../classes/StatusError';
 import { TypedAnswer } from '../models/answer';
 
-import { EqAnswer } from '../models/eqAnswer';
-import { GTLTAnswer } from '../models/gtltAnswer';
+import { ExactAnswer } from '../models/exactAnswer';
+import { ComparisonAnswer } from '../models/comparisonAnswer';
 import { answerFormatter } from './mapper.helper';
 
-const eqAnswerSchema = Joi.object({
+const exactAnswerSchema = Joi.object({
   answerContent: Joi.string().min(1).max(25).required(),
 });
 
-const gtLtAnswerSchema = Joi.object({
+const comparisonAnswerSchema = Joi.object({
   greaterThan: Joi.number().positive().required(),
   lowerThan: Joi.number().positive().min(Joi.ref('greaterThan')).required(),
 });
@@ -31,47 +31,47 @@ const createAnswer = async (
   }
 };
 
-export const tryCreateEqAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const tryCreateExactAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
-      value: validatedEqAnswer,
+      value: validatedExactAnswer,
       error: validationError,
     }: {
-      value: EqAnswer;
+      value: ExactAnswer;
       error?: Error;
-    } = eqAnswerSchema.validate(req.body);
+    } = exactAnswerSchema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
 
-    const eqAnswer = await EqAnswer.findOne({ where: validatedEqAnswer });
-    if (eqAnswer) return next(new DuplicationError('Equal Answer'));
+    const exactAnswer = await ExactAnswer.findOne({ where: validatedExactAnswer });
+    if (exactAnswer) return next(new DuplicationError('Exact Answer'));
 
-    const createdEqAnswer = await EqAnswer.create(validatedEqAnswer);
+    const createdExactAnswer = await ExactAnswer.create(validatedExactAnswer);
 
-    await createAnswer(createdEqAnswer, req, res, next);
+    await createAnswer(createdExactAnswer, req, res, next);
   } catch (err) {
     next(err);
   }
 };
 
-export const tryCreateGtLtAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const tryCreateComparisonAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
-      value: validatedGtLtAnswer,
+      value: validatedComparisonAnswer,
       error: validationError,
     }: {
-      value: GTLTAnswer;
+      value: ComparisonAnswer;
       error?: Error;
-    } = gtLtAnswerSchema.validate(req.body);
+    } = comparisonAnswerSchema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
 
-    const gtLtAnswer = await GTLTAnswer.findOne({ where: validatedGtLtAnswer });
-    if (gtLtAnswer) return next(new DuplicationError('Greater/Lower Answer'));
+    const comparisonAnswer = await ComparisonAnswer.findOne({ where: validatedComparisonAnswer });
+    if (comparisonAnswer) return next(new DuplicationError('Comparison Answer'));
 
-    const createdGtLtAnswer = await GTLTAnswer.create(validatedGtLtAnswer);
+    const createdComparisonAnswer = await ComparisonAnswer.create(validatedComparisonAnswer);
 
-    await createAnswer(createdGtLtAnswer, req, res, next);
+    await createAnswer(createdComparisonAnswer, req, res, next);
   } catch (err) {
     next(err);
   }

@@ -14,8 +14,8 @@ import question from './question';
 import questionTypeSpecification from './questionTypeSpecification';
 import verificationType from './verificationType';
 import state from './state';
-import eqAnswer from './eqAnswer';
-import gtltAnswer from './gtltAnswer';
+import exactAnswer from './exactAnswer';
+import comparisonAnswer from './comparisonAnswer';
 import answer from './answer';
 import userAnswer from './userAnswer';
 import choice from './choice';
@@ -53,7 +53,7 @@ export default {
 
     UserAnswer: userAnswer(sequelize),
 
-    EqAnswer: eqAnswer(sequelize),
-    GTLTAnswer: gtltAnswer(sequelize),
+    ExactAnswer: exactAnswer(sequelize),
+    ComparisonAnswer: comparisonAnswer(sequelize),
   },
 };

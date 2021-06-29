@@ -5,7 +5,7 @@ import { Answer } from '../../models/answer';
 import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { answerFormatter, answerMapper } from '../../helpers/mapper.helper';
-import { tryCreateEqAnswer, tryCreateGtLtAnswer } from '../../helpers/answer.helper';
+import { tryCreateExactAnswer, tryCreateComparisonAnswer } from '../../helpers/answer.helper';
 
 interface AnswerTypes {
   [answerType: string]: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -35,8 +35,8 @@ export const getAnswer = async (req: Request, res: Response, next: NextFunction)
 export const createAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const answerTypes: AnswerTypes = {
-      equal: tryCreateEqAnswer,
-      greaterlower: tryCreateGtLtAnswer,
+      exact: tryCreateExactAnswer,
+      comparison: tryCreateComparisonAnswer,
     };
 
     const answerType = req.params.answerType.toLowerCase();

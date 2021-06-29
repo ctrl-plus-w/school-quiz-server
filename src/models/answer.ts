@@ -1,9 +1,9 @@
 import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 
-import { EqAnswer } from './eqAnswer';
-import { GTLTAnswer } from './gtltAnswer';
+import { ExactAnswer } from './exactAnswer';
+import { ComparisonAnswer } from './comparisonAnswer';
 
-export type TypedAnswer = EqAnswer | GTLTAnswer;
+export type TypedAnswer = ExactAnswer | ComparisonAnswer;
 
 interface AnswerAttributes {
   id: number;
@@ -11,14 +11,14 @@ interface AnswerAttributes {
 }
 
 export interface FormatedAnswer extends AnswerAttributes {
-  typedAnswer: EqAnswer | GTLTAnswer | undefined;
+  typedAnswer: ExactAnswer | ComparisonAnswer | undefined;
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface AnswerDataValues extends AnswerAttributes {
-  eqAnswer?: EqAnswer;
-  gtLtAnswer?: GTLTAnswer;
+  exactAnswer?: ExactAnswer;
+  comparisonAnswer?: ComparisonAnswer;
 
   typedAnswer?: TypedAnswer;
 }
@@ -29,8 +29,8 @@ export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> im
   public id!: number;
   public answerType!: string;
 
-  public eqAnswer?: EqAnswer;
-  public gtLtAnswer?: GTLTAnswer;
+  public exactAnswer?: ExactAnswer;
+  public comparisonAnswer?: ComparisonAnswer;
 
   public dataValues!: AnswerDataValues;
 
@@ -61,24 +61,24 @@ export default (sequelize: Sequelize): typeof Answer => {
 
       hooks: {
         beforeFind: (options) => {
-          options.include = [EqAnswer, GTLTAnswer];
+          options.include = [ExactAnswer, ComparisonAnswer];
         },
 
         afterFind: (instanceOrInstances: Array<Answer> | Answer) => {
           const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
 
           for (const instance of instances) {
-            if (instance.answerType === 'eqAnswer' && instance.typedAnswerId != undefined) {
-              instance.typedAnswer = instance.eqAnswer;
-            } else if (instance.answerType === 'gtLtAnswer' && instance.typedAnswerId != undefined) {
-              instance.typedAnswer = instance.gtLtAnswer;
+            if (instance.answerType === 'exactAnswer' && instance.typedAnswerId != undefined) {
+              instance.typedAnswer = instance.exactAnswer;
+            } else if (instance.answerType === 'comparisonAnswer' && instance.typedAnswerId != undefined) {
+              instance.typedAnswer = instance.comparisonAnswer;
             }
 
-            delete instance.eqAnswer;
-            delete instance.dataValues.eqAnswer;
+            delete instance.exactAnswer;
+            delete instance.dataValues.exactAnswer;
 
-            delete instance.gtLtAnswer;
-            delete instance.dataValues.gtLtAnswer;
+            delete instance.comparisonAnswer;
+            delete instance.dataValues.comparisonAnswer;
           }
         },
       },

@@ -2,14 +2,14 @@ import { HasOneCreateAssociationMixin, Optional, Sequelize, Model, DataTypes } f
 
 import { Answer } from './answer';
 
-interface EqAnswerAttributes {
+interface ExactAnswerAttributes {
   id: number;
   answerContent: string;
 }
 
-type EqAnswerCreationAttributes = Optional<EqAnswerAttributes, 'id'>;
+type ExactAnswerCreationAttributes = Optional<ExactAnswerAttributes, 'id'>;
 
-export class EqAnswer extends Model<EqAnswerAttributes, EqAnswerCreationAttributes> implements EqAnswerAttributes {
+export class ExactAnswer extends Model<ExactAnswerAttributes, ExactAnswerCreationAttributes> implements ExactAnswerAttributes {
   public id!: number;
   public answerContent!: string;
 
@@ -22,8 +22,8 @@ export class EqAnswer extends Model<EqAnswerAttributes, EqAnswerCreationAttribut
   public createAnswer!: HasOneCreateAssociationMixin<Answer>;
 }
 
-export default (sequelize: Sequelize): typeof EqAnswer => {
-  EqAnswer.init(
+export default (sequelize: Sequelize): typeof ExactAnswer => {
+  ExactAnswer.init(
     {
       id: {
         type: DataTypes.INTEGER.UNSIGNED,
@@ -38,10 +38,10 @@ export default (sequelize: Sequelize): typeof EqAnswer => {
     },
     {
       sequelize,
-      modelName: 'eqAnswer',
-      tableName: 'EqAnswer',
+      modelName: 'exactAnswer',
+      tableName: 'ExactAnswer',
     }
   );
 
-  return EqAnswer;
+  return ExactAnswer;
 };
