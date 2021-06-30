@@ -2,13 +2,11 @@ import { Router } from 'express';
 
 import { getGlobalQuestion, getGlobalQuestions } from './question.controller';
 
-import checkPermission from '../../middlewares/authorization.middleware';
-
-import roles from '../../constants/roles';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkPermission(roles.ADMIN.PERMISSION), getGlobalQuestions);
-router.get('/:questionId', checkPermission(roles.ADMIN.PERMISSION), getGlobalQuestion);
+router.get('/', checkIsAdmin, getGlobalQuestions);
+router.get('/:questionId', checkIsAdmin, getGlobalQuestion);
 
 export default router;
