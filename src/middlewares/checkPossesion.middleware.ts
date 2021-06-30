@@ -18,7 +18,7 @@ export const checkQuizPossesion = async (req: Request, res: Response, next: Next
     const quiz = <Quiz | null>res.locals.quiz || (await Quiz.findByPk(quizId));
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    if (quiz.ownerId === undefined || quiz.ownerId !== user.id) return next(new AcccessForbiddenError());
+    if (!quiz.ownerId || quiz.ownerId !== user.id) return next(new AcccessForbiddenError());
 
     res.locals.quiz = quiz;
     res.locals.user = user;

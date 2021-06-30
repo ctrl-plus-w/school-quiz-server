@@ -50,6 +50,12 @@ export default async (): Promise<void> => {
   Quiz.belongsTo(User);
   User.hasMany(Quiz);
 
+  Quiz.belongsTo(User);
+  User.hasMany(Quiz);
+
+  Quiz.belongsToMany(User, { through: 'QuizCollaborators' });
+  User.belongsToMany(Quiz, { through: 'QuizCollaborators' });
+
   // Quiz & Question relation.
   Question.belongsTo(Quiz);
   Quiz.hasMany(Question);

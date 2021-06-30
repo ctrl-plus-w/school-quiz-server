@@ -40,6 +40,45 @@ export const getQuiz = async (req: Request, res: Response, next: NextFunction): 
   }
 };
 
+export const getQuizOwner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const owner = await quiz.getOwner();
+    res.json(owner);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getQuizCollaborators = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const collaborators = await quiz.getCollaborators();
+    res.json(collaborators);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getQuizCollaborator = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.collaboratorId;
+    if (!userId) return next(new InvalidInputError());
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const collaborators = await quiz.getCollaborators();
+    res.json(collaborators.find((user) => user.id === parseInt(userId)));
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createQuiz = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
@@ -65,6 +104,26 @@ export const createQuiz = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+export const addCollaborator = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.body.userId;
+    if (!userId) return next(new InvalidInputError());
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    await quiz.addCollaborator(user);
+
+    res.json({ added: true });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
 export const deleteQuiz = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const quizId = req.params.quizId;
@@ -76,6 +135,30 @@ export const deleteQuiz = async (req: Request, res: Response, next: NextFunction
     await quiz.destroy();
 
     res.json({ deleted: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const removeCollaborator = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.collaboratorId;
+    if (!userId) return next(new InvalidInputError());
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const quizCollaborators = await quiz.getCollaborators({ attributes: ['id'] });
+
+    if (!quizCollaborators || !quizCollaborators.some((collaborator) => collaborator.id === parseInt(userId)))
+      return next(new NotFoundError('Collaborators'));
+
+    await quiz.removeCollaborator(user);
+
+    res.json({ removed: true });
   } catch (err) {
     next(err);
   }

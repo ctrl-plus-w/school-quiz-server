@@ -49,7 +49,6 @@ export const quizFormatter = (quiz: Quiz | null | undefined): FormatedQuiz | nul
         createdAt: quiz.createdAt,
         updatedAt: quiz.updatedAt,
         questions: quiz.questions,
-        owner: quiz.owner,
       }
     : null;
 };

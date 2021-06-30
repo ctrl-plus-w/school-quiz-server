@@ -7,6 +7,11 @@ import {
   HasManyAddAssociationsMixin,
   HasManyRemoveAssociationsMixin,
   HasManyCreateAssociationMixin,
+  BelongsToSetAssociationMixin,
+  BelongsToGetAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyRemoveAssociationMixin,
 } from 'sequelize';
 
 import { Question } from './question';
@@ -39,21 +44,32 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public strict!: boolean;
   public shuffle!: boolean;
 
-  private user?: User;
   private userId?: number;
-
-  public questions?: Array<Question>;
 
   public get ownerId(): number | undefined {
     return this.userId;
   }
 
-  public get owner(): User | undefined {
-    return this.user;
-  }
+  public questions?: Array<Question>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* User properties */
+  private setUser!: BelongsToSetAssociationMixin<User, number>;
+  public setOwner = this.setUser;
+
+  private addUser!: BelongsToManyAddAssociationMixin<User, number>;
+  public addCollaborator = this.addUser;
+
+  private removeUser!: BelongsToManyRemoveAssociationMixin<User, number>;
+  public removeCollaborator = this.removeUser;
+
+  private getUser!: BelongsToGetAssociationMixin<User>;
+  public getOwner = this.getUser;
+
+  private getUsers!: BelongsToManyGetAssociationsMixin<User>;
+  public getCollaborators = this.getUsers;
 
   /* Question properties */
   public addQuestion!: HasManyAddAssociationMixin<Question, number>;
