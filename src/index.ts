@@ -21,6 +21,7 @@ import verificationType from './api/verificationType/verificationType.routes';
 import questionSpecification from './api/questionSpecification/questionSpecification.routes';
 import question from './api/question/question.routes';
 import quiz from './api/quiz/quiz.routes';
+import state from './api/state/state.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
@@ -55,6 +56,7 @@ app.use('/api/verificationTypes', authenticateMiddleware, verificationType);
 app.use('/api/questionSpecifications', authenticateMiddleware, questionSpecification);
 app.use('/api/questions', authenticateMiddleware, question);
 app.use('/api/quizzes', authenticateMiddleware, quiz);
+app.use('/api/states', authenticateMiddleware, state);
 
 app.use(pageNotFound);
 app.use(errorHandler);

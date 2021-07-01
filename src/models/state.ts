@@ -6,7 +6,7 @@ interface StateAttributes {
   name: string;
 }
 
-type StateCreationAttributes = Optional<StateAttributes, 'id'>;
+export type StateCreationAttributes = Optional<StateAttributes, 'id'>;
 
 export class State extends Model<StateAttributes, StateCreationAttributes> implements StateAttributes {
   public id!: number;
