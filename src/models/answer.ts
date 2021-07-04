@@ -60,10 +60,6 @@ export default (sequelize: Sequelize): typeof Answer => {
       tableName: 'Answer',
 
       hooks: {
-        beforeFind: (options) => {
-          options.include = [ExactAnswer, ComparisonAnswer];
-        },
-
         afterFind: (instanceOrInstances: Array<Answer> | Answer) => {
           const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
 

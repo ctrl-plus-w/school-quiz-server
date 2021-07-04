@@ -6,12 +6,17 @@ import {
   HasManyRemoveAssociationMixin,
   Optional,
   Sequelize,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyRemoveAssociationMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
 } from 'sequelize';
 
 import { TextualQuestion } from './textualQuestion';
 import { ChoiceQuestion } from './choiceQuestion';
 import { NumericQuestion } from './numericQuestion';
 import { UserAnswer } from './userAnswer';
+import { Answer, FormatedAnswer } from './answer';
 
 export type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
 
@@ -26,6 +31,7 @@ interface QuestionAttributes {
 
 export interface FormatedQuestion extends QuestionAttributes {
   typedQuestion: TypedQuestion | undefined;
+  answers?: Array<FormatedAnswer>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,7 +44,7 @@ interface QuestionDataValues extends QuestionAttributes {
   typedQuestion?: TypedQuestion;
 }
 
-type QuestionCreationAttributes = Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'>;
+export type QuestionCreationAttributes = Optional<QuestionAttributes, 'id' | 'filename' | 'questionType'>;
 
 export class Question extends Model<QuestionAttributes, QuestionCreationAttributes> implements QuestionAttributes {
   public id!: number;
@@ -55,6 +61,7 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public typedQuestion?: TypedQuestion;
   public typedQuestionId?: number;
 
+  public answers?: Array<Answer>;
   public userAnswers?: Array<UserAnswer>;
 
   /* Additional property */
@@ -62,6 +69,12 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Answer properties */
+  public getAnswers!: BelongsToManyGetAssociationsMixin<Answer>;
+  public addAnswer!: BelongsToManyAddAssociationMixin<Answer, number>;
+  public removeAnswer!: BelongsToManyRemoveAssociationMixin<Answer, number>;
+  public createAnswer!: BelongsToManyCreateAssociationMixin<Answer>;
 
   /* User answer properties */
   public addUserAnswer!: HasManyAddAssociationMixin<UserAnswer, number>;

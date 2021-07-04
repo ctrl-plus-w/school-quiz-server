@@ -8,7 +8,7 @@ interface ComparisonAnswerAttributes {
   lowerThan: number;
 }
 
-type ComparisonAnswerCreationAttributes = Optional<ComparisonAnswerAttributes, 'id'>;
+export type ComparisonAnswerCreationAttributes = Optional<ComparisonAnswerAttributes, 'id'>;
 
 export class ComparisonAnswer
   extends Model<ComparisonAnswerAttributes, ComparisonAnswerCreationAttributes>

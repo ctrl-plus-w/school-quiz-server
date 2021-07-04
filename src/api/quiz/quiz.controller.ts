@@ -119,7 +119,6 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
 
     res.json({ added: true });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };

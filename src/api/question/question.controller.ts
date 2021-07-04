@@ -17,6 +17,9 @@ import {
   tryCreateNumericQuestion,
   tryCreateTextualQuestion,
 } from '../../helpers/question.helper';
+import { Answer } from '../../models/answer';
+import { ExactAnswer } from '../../models/exactAnswer';
+import { ComparisonAnswer } from '../../models/comparisonAnswer';
 
 interface QuestionTypes {
   [questionType: string]: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -34,6 +37,10 @@ const questionIncludes = [
   {
     model: ChoiceQuestion,
     include: [QuestionSpecification],
+  },
+  {
+    model: Answer,
+    include: [ExactAnswer, ComparisonAnswer],
   },
 ];
 
