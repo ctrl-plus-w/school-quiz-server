@@ -5,6 +5,7 @@ import { Quiz } from '../models/quiz';
 import { InvalidInputError, NotFoundError } from '../classes/StatusError';
 import { Question } from '../models/question';
 import { Answer } from '../models/answer';
+import { UserAnswer } from '../models/userAnswer';
 
 export const checkQuizExists = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -28,7 +29,10 @@ export const checkQuestionExists = async (req: Request, res: Response, next: Nex
     if (!questionId) return next(new InvalidInputError());
 
     const question = await Question.findByPk(questionId, {
-      include: { model: Answer, attributes: ['id'] },
+      include: [
+        { model: Answer, attributes: ['id'] },
+        { model: UserAnswer, attributes: ['id'] },
+      ],
       attributes: ['id'],
     });
 

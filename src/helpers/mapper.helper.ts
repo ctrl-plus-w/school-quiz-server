@@ -1,6 +1,7 @@
 import { Answer, FormatedAnswer } from '../models/answer';
 import { FormatedQuestion, Question } from '../models/question';
 import { FormatedQuiz, Quiz } from '../models/quiz';
+import { FormatedUserAnswer, UserAnswer } from '../models/userAnswer';
 
 const isNull = <Type>(value: Type | null | undefined): value is Type => {
   return value === null || value === undefined;
@@ -26,6 +27,22 @@ export const answerMapper = (answers: Array<Answer>): Array<FormatedAnswer> => {
   return answers.map(answerFormatter).filter(isNotNull);
 };
 
+export const userAnswerFormatter = (userAnswer: UserAnswer | null | undefined): FormatedUserAnswer | null => {
+  return userAnswer
+    ? {
+        id: userAnswer.id,
+        answerContent: userAnswer.answerContent,
+        user: userAnswer.user,
+        createdAt: userAnswer.createdAt,
+        updatedAt: userAnswer.updatedAt,
+      }
+    : null;
+};
+
+export const userAnswerMapper = (userAnswers: Array<UserAnswer>): Array<FormatedUserAnswer> => {
+  return userAnswers.map(userAnswerFormatter).filter(isNotNull);
+};
+
 export const questionFormatter = (question: Question | null | undefined): FormatedQuestion | null => {
   return question
     ? {
@@ -36,6 +53,7 @@ export const questionFormatter = (question: Question | null | undefined): Format
         questionType: question.questionType,
         typedQuestion: question.typedQuestion,
         answers: question.answers ? answerMapper(question.answers) : question.answers,
+        userAnswers: question.userAnswers ? userAnswerMapper(question.userAnswers) : question.userAnswers,
         createdAt: question.createdAt,
         updatedAt: question.updatedAt,
       }

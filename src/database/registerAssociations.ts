@@ -124,9 +124,9 @@ export default async (): Promise<void> => {
   });
 
   // UserAnswers & (User / Question) relation.
-  Question.hasMany(UserAnswer);
   UserAnswer.belongsTo(Question);
+  Question.hasMany(UserAnswer);
 
-  User.hasMany(UserAnswer);
   UserAnswer.belongsTo(User);
+  User.hasMany(UserAnswer);
 };

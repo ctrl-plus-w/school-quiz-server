@@ -15,7 +15,7 @@ import {
 import { TextualQuestion } from './textualQuestion';
 import { ChoiceQuestion } from './choiceQuestion';
 import { NumericQuestion } from './numericQuestion';
-import { UserAnswer } from './userAnswer';
+import { FormatedUserAnswer, UserAnswer } from './userAnswer';
 import { Answer, FormatedAnswer } from './answer';
 
 export type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
@@ -32,6 +32,7 @@ interface QuestionAttributes {
 export interface FormatedQuestion extends QuestionAttributes {
   typedQuestion: TypedQuestion | undefined;
   answers?: Array<FormatedAnswer>;
+  userAnswers?: Array<FormatedUserAnswer>;
   createdAt: Date;
   updatedAt: Date;
 }

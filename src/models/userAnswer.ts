@@ -8,7 +8,14 @@ interface UserAnswerAttributes {
   answerContent: string;
 }
 
-type UserAnswerCreationAttributes = Optional<UserAnswerAttributes, 'id'>;
+export interface FormatedUserAnswer extends UserAnswerAttributes {
+  user?: User;
+
+  updatedAt: Date;
+  createdAt: Date;
+}
+
+export type UserAnswerCreationAttributes = Optional<UserAnswerAttributes, 'id'>;
 
 export class UserAnswer
   extends Model<UserAnswerAttributes, UserAnswerCreationAttributes>
@@ -26,6 +33,9 @@ export class UserAnswer
 
   /* User property */
   public setUser!: BelongsToSetAssociationMixin<User, number>;
+
+  /* Question property */
+  public setQuestion!: BelongsToSetAssociationMixin<Question, number>;
 }
 
 export default (sequelize: Sequelize): typeof UserAnswer => {

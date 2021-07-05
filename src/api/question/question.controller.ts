@@ -1,12 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import { Includeable } from 'sequelize';
 
 import { QuestionSpecification } from '../../models/questionSpecification';
+import { ComparisonAnswer } from '../../models/comparisonAnswer';
 import { VerificationType } from '../../models/verificationType';
 import { NumericQuestion } from '../../models/numericQuestion';
 import { TextualQuestion } from '../../models/textualQuestion';
 import { ChoiceQuestion } from '../../models/choiceQuestion';
+import { ExactAnswer } from '../../models/exactAnswer';
+import { UserAnswer } from '../../models/userAnswer';
 import { Question } from '../../models/question';
+import { Answer } from '../../models/answer';
 import { Quiz } from '../../models/quiz';
+import { User } from '../../models/user';
 
 import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
@@ -17,15 +23,12 @@ import {
   tryCreateNumericQuestion,
   tryCreateTextualQuestion,
 } from '../../helpers/question.helper';
-import { Answer } from '../../models/answer';
-import { ExactAnswer } from '../../models/exactAnswer';
-import { ComparisonAnswer } from '../../models/comparisonAnswer';
 
 interface QuestionTypes {
   [questionType: string]: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
 
-const questionIncludes = [
+const questionIncludes: Includeable | Array<Includeable> = [
   {
     model: TextualQuestion,
     include: [QuestionSpecification, VerificationType],
@@ -41,6 +44,10 @@ const questionIncludes = [
   {
     model: Answer,
     include: [ExactAnswer, ComparisonAnswer],
+  },
+  {
+    model: UserAnswer,
+    include: [{ model: User, attributes: ['id', 'username'] }],
   },
 ];
 
