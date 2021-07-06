@@ -6,6 +6,7 @@ import { InvalidInputError, NotFoundError } from '../classes/StatusError';
 import { Question } from '../models/question';
 import { Answer } from '../models/answer';
 import { UserAnswer } from '../models/userAnswer';
+import { ChoiceQuestion } from '../models/choiceQuestion';
 
 export const checkQuizExists = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -32,6 +33,7 @@ export const checkQuestionExists = async (req: Request, res: Response, next: Nex
       include: [
         { model: Answer, attributes: ['id'] },
         { model: UserAnswer, attributes: ['id'] },
+        { model: ChoiceQuestion, attributes: ['id'] },
       ],
       attributes: ['id'],
     });

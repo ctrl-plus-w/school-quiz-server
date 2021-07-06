@@ -91,14 +91,9 @@ export default async (): Promise<void> => {
   NumericQuestion.belongsTo(QuestionSpecification);
   ChoiceQuestion.belongsTo(QuestionSpecification);
 
-  // Numeric question & Choice realtion.
-  const CHOICE_QUESTION_CHOICE_TABLENAME = 'ChoiceQuestionChoice';
-  ChoiceQuestion.belongsToMany(Choice, {
-    through: CHOICE_QUESTION_CHOICE_TABLENAME,
-  });
-  Choice.belongsToMany(ChoiceQuestion, {
-    through: CHOICE_QUESTION_CHOICE_TABLENAME,
-  });
+  // Choice question & Choice realtion.
+  Choice.belongsTo(ChoiceQuestion);
+  ChoiceQuestion.hasMany(Choice);
 
   // Question & QuestionAnswer relation.
   const QUESTION_ANSWER_TABLENAME = 'QuestionAnswer';

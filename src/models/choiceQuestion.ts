@@ -1,13 +1,14 @@
 import {
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyAddAssociationsMixin,
-  BelongsToManyRemoveAssociationMixin,
   BelongsToSetAssociationMixin,
   HasOneCreateAssociationMixin,
   Optional,
   Sequelize,
   Model,
   DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManyCreateAssociationMixin,
 } from 'sequelize';
 
 import { Question } from './question';
@@ -34,8 +35,8 @@ export class ChoiceQuestion
   public id!: number;
   public shuffle!: boolean;
 
-  public choices!: Array<Choice>;
-  public questionSpecification!: QuestionSpecification;
+  public choices?: Array<Choice>;
+  public questionSpecification?: QuestionSpecification;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -45,9 +46,10 @@ export class ChoiceQuestion
   public dataValues!: ChoiceQuestionDataValues;
 
   /* Choice properties */
-  public addChoice!: BelongsToManyAddAssociationMixin<Choice, number>;
-  public addChoices!: BelongsToManyAddAssociationsMixin<Choice, number>;
-  public removeChoice!: BelongsToManyRemoveAssociationMixin<Choice, number>;
+  public addChoice!: HasManyAddAssociationMixin<Choice, number>;
+  public addChoices!: HasManyAddAssociationsMixin<Choice, number>;
+  public createChoice!: HasManyCreateAssociationMixin<Choice>;
+  public removeChoice!: HasManyRemoveAssociationMixin<Choice, number>;
 
   /* Question specification property */
   public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
@@ -76,10 +78,6 @@ export default (sequelize: Sequelize): typeof ChoiceQuestion => {
       tableName: 'ChoiceQuestion',
 
       hooks: {
-        beforeFind: (options) => {
-          options.include = [{ model: QuestionSpecification }];
-        },
-
         afterFind: (instanceOrInstances: ChoiceQuestion | Array<ChoiceQuestion>) => {
           const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
           const instances = instanceOrInstances === null ? [] : arrayedInstances;

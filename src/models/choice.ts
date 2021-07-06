@@ -7,7 +7,7 @@ interface ChoiceAttributes {
   name: string;
 }
 
-type ChoiceCreationAttributes = Optional<ChoiceAttributes, 'id'>;
+export type ChoiceCreationAttributes = Optional<ChoiceAttributes, 'id'>;
 
 export class Choice extends Model<ChoiceAttributes, ChoiceCreationAttributes> implements ChoiceAttributes {
   public id!: number;

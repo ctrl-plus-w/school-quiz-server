@@ -23,6 +23,7 @@ import question from './api/question/question.routes';
 import quiz from './api/quiz/quiz.routes';
 import state from './api/state/state.routes';
 import userAnswer from './api/userAnswer/userAnswer.routes';
+import choice from './api/choice/choice.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
@@ -59,6 +60,7 @@ app.use('/api/questions', authenticateMiddleware, question);
 app.use('/api/quizzes', authenticateMiddleware, quiz);
 app.use('/api/states', authenticateMiddleware, state);
 app.use('/api/userAnswers', authenticateMiddleware, userAnswer);
+app.use('/api/choices', authenticateMiddleware, choice);
 
 app.use(pageNotFound);
 app.use(errorHandler);

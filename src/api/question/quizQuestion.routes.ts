@@ -4,10 +4,12 @@ import { createQuestion, deleteQuestion, getQuestion, getQuestions } from './que
 
 import answerRoutes from '../answer/questionAnswer.routes';
 import userAnswerRoutes from '../userAnswer/questionUserAnswer.routes';
+import choiceRoutes from '../choice/questionChoice.routes';
 
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 import { checkQuizPossesion } from '../../middlewares/checkPossesion.middleware';
 import { checkQuestionExists } from '../../middlewares/checkExists.middleware';
+import { checkIsNumeric } from '../../middlewares/checkQuestionType';
 
 const router = Router();
 
@@ -27,5 +29,9 @@ router.use('/:questionId/answers', checkQuestionExists, answerRoutes);
 /* Quiz -> Question -> User Answer */
 
 router.use('/:questionId/userAnswers', checkQuestionExists, userAnswerRoutes);
+
+/* Quiz -> Question -> Choice */
+
+router.use('/:questionId/choices', checkQuestionExists, checkIsNumeric, choiceRoutes);
 
 export default router;
