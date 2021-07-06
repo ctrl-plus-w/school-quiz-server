@@ -59,10 +59,6 @@ export default (sequelize: Sequelize): typeof NumericQuestion => {
       tableName: 'NumericQuestion',
 
       hooks: {
-        beforeFind: (options) => {
-          options.include = [{ model: QuestionSpecification }];
-        },
-
         afterFind: (instanceOrInstances: NumericQuestion | Array<NumericQuestion>) => {
           const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
           const instances = instanceOrInstances === null ? [] : arrayedInstances;

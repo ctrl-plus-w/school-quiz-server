@@ -81,10 +81,6 @@ export default (sequelize: Sequelize): typeof TextualQuestion => {
       tableName: 'TextualQuestion',
 
       hooks: {
-        beforeFind: (options) => {
-          options.include = [{ model: VerificationType }, { model: QuestionSpecification }];
-        },
-
         afterFind: (instanceOrInstances: TextualQuestion | Array<TextualQuestion>) => {
           const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
           const instances = instanceOrInstances === null ? [] : arrayedInstances;

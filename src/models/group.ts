@@ -1,6 +1,5 @@
 import {
   BelongsToManyAddAssociationMixin,
-  FindOptions,
   Optional,
   Sequelize,
   Model,
@@ -57,16 +56,6 @@ export default (sequelize: Sequelize): typeof Group => {
       sequelize,
       modelName: 'group',
       tableName: 'Group',
-
-      hooks: {
-        beforeFind: (options: FindOptions<GroupAttributes>) => {
-          options.include = [
-            {
-              model: Label,
-            },
-          ];
-        },
-      },
     }
   );
 
