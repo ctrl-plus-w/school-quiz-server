@@ -10,6 +10,8 @@ import { DuplicationError, InvalidInputError, NotFoundError } from '../../classe
 
 import { slugify } from '../../utils/string.utils';
 import { quizFormatter, quizMapper } from '../../helpers/mapper.helper';
+import { Role } from '../../models/role';
+import roles from '../../constants/roles';
 
 const schema = Joi.object({
   title: Joi.string().min(5).max(25).required(),
@@ -116,8 +118,14 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
     const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const user = await User.findByPk(userId, { attributes: ['id'] });
-    if (!user) return next(new NotFoundError('User'));
+    const collaboratorsWithSameId = await quiz.getCollaborators({ where: { id: userId } });
+    if (collaboratorsWithSameId.length > 0) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId, { include: { model: Role }, attributes: ['id'] });
+
+    if (!user || !user.role) return next(new NotFoundError('User'));
+
+    if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new InvalidInputError());
 
     await quiz.addCollaborator(user);
 
