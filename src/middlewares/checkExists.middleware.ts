@@ -7,6 +7,23 @@ import { Question } from '../models/question';
 import { Answer } from '../models/answer';
 import { UserAnswer } from '../models/userAnswer';
 import { ChoiceQuestion } from '../models/choiceQuestion';
+import { Event } from '../models/event';
+
+export const checkEventExists = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const eventId = req.params.eventId;
+    if (!eventId) return next(new InvalidInputError());
+
+    const event = await Event.findByPk(eventId);
+    if (!event) return next(new NotFoundError('Event'));
+
+    res.locals.event = event;
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const checkQuizExists = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

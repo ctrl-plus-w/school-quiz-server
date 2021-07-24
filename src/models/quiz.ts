@@ -29,6 +29,7 @@ interface QuizAttributes {
 export interface FormatedQuiz extends QuizAttributes {
   owner?: User;
   questions?: Array<Question>;
+  collaborators?: Array<User>;
 
   createdAt: Date;
   updatedAt: Date;

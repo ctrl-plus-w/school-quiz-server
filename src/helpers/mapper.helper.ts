@@ -1,7 +1,10 @@
 import { Answer, FormatedAnswer } from '../models/answer';
 import { FormatedQuestion, Question } from '../models/question';
 import { FormatedQuiz, Quiz } from '../models/quiz';
+import { User } from '../models/user';
 import { FormatedUserAnswer, UserAnswer } from '../models/userAnswer';
+import { Event, FormatedEvent } from '../models/event';
+import { Group } from '../models/group';
 
 const isNull = <Type>(value: Type | null | undefined): value is Type => {
   return value === null || value === undefined;
@@ -64,7 +67,7 @@ export const questionMapper = (questions: Array<Question>): Array<FormatedQuesti
   return questions.map(questionFormatter).filter(isNotNull);
 };
 
-export const quizFormatter = (quiz: Quiz | null | undefined): FormatedQuiz | null => {
+export const quizFormatter = (quiz?: Quiz | null, owner?: User, collaborators?: Array<User>): FormatedQuiz | null => {
   return quiz
     ? {
         id: quiz.id,
@@ -76,10 +79,38 @@ export const quizFormatter = (quiz: Quiz | null | undefined): FormatedQuiz | nul
         createdAt: quiz.createdAt,
         updatedAt: quiz.updatedAt,
         questions: quiz.questions,
+        owner: owner,
+        collaborators: collaborators,
       }
     : null;
 };
 
 export const quizMapper = (quizzes: Array<Quiz>): Array<FormatedQuiz> => {
-  return quizzes.map(quizFormatter).filter(isNotNull);
+  return quizzes.map((quiz) => quizFormatter(quiz)).filter(isNotNull);
+};
+
+export const eventFormatter = (
+  event: Event | null | undefined,
+  owner?: User,
+  collaborators?: Array<User>,
+  group?: Group,
+  quiz?: Quiz
+): FormatedEvent | null => {
+  return event
+    ? {
+        id: event.id,
+        start: event.start,
+        quiz: event.quiz || quiz,
+        countdown: event.countdown,
+        owner: owner,
+        collaborators: collaborators,
+        group: group,
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt,
+      }
+    : null;
+};
+
+export const eventMapper = (events: Array<Event>): Array<FormatedEvent> => {
+  return events.map((event) => eventFormatter(event)).filter(isNotNull);
 };

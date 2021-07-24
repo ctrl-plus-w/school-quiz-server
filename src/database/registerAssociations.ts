@@ -42,19 +42,26 @@ export default async (): Promise<void> => {
 
   // Event, Quiz, Group, Owner & Collaborators relations.
   Event.belongsTo(Quiz);
-  Quiz.hasOne(Event);
+  Quiz.hasMany(Event);
+
+  const QUIZ_COLLABORATORS_TABLENAME = 'QuizCollaborators';
+
+  Quiz.belongsTo(User);
+  User.hasMany(Quiz);
+
+  Quiz.belongsToMany(User, { through: QUIZ_COLLABORATORS_TABLENAME });
+  User.belongsToMany(Quiz, { through: QUIZ_COLLABORATORS_TABLENAME });
+
+  const EVENT_COLLABORATORS_TABLENAME = 'EventCollaborators';
+
+  Event.belongsTo(User);
+  User.hasMany(Event);
 
   Event.belongsTo(Group);
-  Group.hasOne(Event);
+  Group.hasMany(Event);
 
-  Quiz.belongsTo(User);
-  User.hasMany(Quiz);
-
-  Quiz.belongsTo(User);
-  User.hasMany(Quiz);
-
-  Quiz.belongsToMany(User, { through: 'QuizCollaborators' });
-  User.belongsToMany(Quiz, { through: 'QuizCollaborators' });
+  Event.belongsToMany(User, { through: EVENT_COLLABORATORS_TABLENAME });
+  User.belongsToMany(Event, { through: EVENT_COLLABORATORS_TABLENAME });
 
   // Quiz & Question relation.
   Question.belongsTo(Quiz);

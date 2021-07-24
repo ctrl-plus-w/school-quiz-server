@@ -24,13 +24,14 @@ import quiz from './api/quiz/quiz.routes';
 import state from './api/state/state.routes';
 import userAnswer from './api/userAnswer/userAnswer.routes';
 import choice from './api/choice/choice.routes';
+import event from './api/event/event.routes';
 
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
 import pageNotFound from './middlewares/pageNotFound.middleware';
 
-// import seedDatabase from './database/seedDatabase';
-// import database from './models/index';
+import seedDatabase from './database/seedDatabase';
+import database from './models/index';
 
 // Constants
 const PORT = process.env.PORT || 6000;
@@ -61,6 +62,7 @@ app.use('/api/quizzes', authenticateMiddleware, quiz);
 app.use('/api/states', authenticateMiddleware, state);
 app.use('/api/userAnswers', authenticateMiddleware, userAnswer);
 app.use('/api/choices', authenticateMiddleware, choice);
+app.use('/api/events', authenticateMiddleware, event);
 
 app.use(pageNotFound);
 app.use(errorHandler);
@@ -68,8 +70,8 @@ app.use(errorHandler);
 (async () => {
   await registerAssociations();
 
-  // await database.sequelize.sync({ force: true });
-  // await seedDatabase();
+  await database.sequelize.sync({ force: true });
+  await seedDatabase();
 
   app.listen(PORT, () => {
     console.log(`App started, listening on port : ${PORT}.`);
