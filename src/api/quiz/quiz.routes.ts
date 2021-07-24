@@ -16,7 +16,7 @@ import questionRoutes from '../question/quizQuestion.routes';
 
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 import { checkQuizExists } from '../../middlewares/checkExists.middleware';
-import { checkQuizPossesion } from '../../middlewares/checkPossesion.middleware';
+import { checkQuizOwner } from '../../middlewares/checkPossesion.middleware';
 
 const router = Router();
 
@@ -29,10 +29,10 @@ router.get('/:quizId/collaborators', checkIsAdmin, checkQuizExists, getQuizColla
 router.get('/:quizId/collaborators/:collaboratorId', checkIsAdmin, checkQuizExists, getQuizCollaborator);
 
 router.post('/', checkIsAdmin, createQuiz);
-router.post('/:quizId/collaborators', checkIsAdmin, checkQuizPossesion, addCollaborator);
+router.post('/:quizId/collaborators', checkIsAdmin, checkQuizOwner, addCollaborator);
 
-router.delete('/:quizId', checkIsAdmin, checkQuizPossesion, deleteQuiz);
-router.delete('/:quizId/collaborators/:collaboratorId', checkIsAdmin, checkQuizPossesion, removeCollaborator);
+router.delete('/:quizId', checkIsAdmin, checkQuizOwner, deleteQuiz);
+router.delete('/:quizId/collaborators/:collaboratorId', checkIsAdmin, checkQuizOwner, removeCollaborator);
 
 /* Quiz -> Question */
 

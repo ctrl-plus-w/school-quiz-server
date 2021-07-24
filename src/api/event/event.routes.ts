@@ -13,7 +13,7 @@ import {
 
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 import { checkEventExists } from '../../middlewares/checkExists.middleware';
-import { checkEventPossesion } from '../../middlewares/checkPossesion.middleware';
+import { checkEventOwner } from '../../middlewares/checkPossesion.middleware';
 
 const router = Router();
 
@@ -25,9 +25,9 @@ router.get('/:eventId/owner', checkIsAdmin, checkEventExists, getEventOwner);
 router.get('/:eventId/collaborators', checkIsAdmin, checkEventExists, getEventCollaborator);
 
 router.post('/', checkIsAdmin, createEvent);
-router.post('/:eventId/collaborators', checkIsAdmin, checkEventPossesion, addCollaborator);
+router.post('/:eventId/collaborators', checkIsAdmin, checkEventOwner, addCollaborator);
 
-router.delete('/:eventId', checkIsAdmin, checkEventPossesion, deleteEvent);
-router.delete('/:eventId/collaborators/:collaboratorId', checkIsAdmin, checkEventPossesion, removeCollaborator);
+router.delete('/:eventId', checkIsAdmin, checkEventOwner, deleteEvent);
+router.delete('/:eventId/collaborators/:collaboratorId', checkIsAdmin, checkEventOwner, removeCollaborator);
 
 export default router;
