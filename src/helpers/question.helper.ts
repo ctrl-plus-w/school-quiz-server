@@ -117,12 +117,19 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
 
     if (validationError) return next(new InvalidInputError());
 
+    const quiz: Quiz = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
     const question = await Question.findOne({ where: { slug: validatedNumericQuestion.slug } });
     if (question) return next(new DuplicationError('Question'));
 
     const createdNumericQuestion = await NumericQuestion.create();
 
     const createdQuestion = await createQuestion(createdNumericQuestion, validatedNumericQuestion, req, res, next);
+    if (!createdQuestion) return next(new Error());
+
+    await quiz.addQuestion(createdQuestion);
+
     res.json(questionFormatter(createdQuestion));
   } catch (err) {
     next(err);
@@ -141,6 +148,9 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
 
     if (validationError) return next(new InvalidInputError());
 
+    const quiz: Quiz = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
     const question = await Question.findOne({ where: { slug: validatedChoiceQuestion.slug } });
 
     if (question) return next(new DuplicationError('Question'));
@@ -150,6 +160,10 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
     });
 
     const createdQuestion = await createQuestion(createdChoiceQuestion, validatedChoiceQuestion, req, res, next);
+    if (!createdQuestion) return next(new Error());
+
+    await quiz.addQuestion(createdQuestion);
+
     res.json(questionFormatter(createdQuestion));
   } catch (err) {
     next(err);

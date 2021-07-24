@@ -52,6 +52,7 @@ export const questionFormatter = (question: Question | null | undefined): Format
         id: question.id,
         slug: question.slug,
         title: question.title,
+        shuffle: question?.choiceQuestion?.shuffle,
         description: question.description,
         questionType: question.questionType,
         typedQuestion: question.typedQuestion,

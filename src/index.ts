@@ -70,8 +70,12 @@ app.use(errorHandler);
 (async () => {
   await registerAssociations();
 
-  await database.sequelize.sync({ force: true });
-  await seedDatabase();
+  const DEV = false;
+
+  if (DEV) {
+    await database.sequelize.sync({ force: true });
+    await seedDatabase();
+  }
 
   app.listen(PORT, () => {
     console.log(`App started, listening on port : ${PORT}.`);

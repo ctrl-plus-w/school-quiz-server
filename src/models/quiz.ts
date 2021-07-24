@@ -12,6 +12,7 @@ import {
   BelongsToManyAddAssociationMixin,
   BelongsToManyGetAssociationsMixin,
   BelongsToManyRemoveAssociationMixin,
+  HasManyGetAssociationsMixin,
 } from 'sequelize';
 
 import { Question } from './question';
@@ -55,6 +56,9 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  /* Question properties */
+  public getQuestions!: HasManyGetAssociationsMixin<Question>;
 
   /* User properties */
   private setUser!: BelongsToSetAssociationMixin<User, number>;

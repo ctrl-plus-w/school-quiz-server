@@ -33,6 +33,9 @@ export interface FormatedQuestion extends QuestionAttributes {
   typedQuestion: TypedQuestion | undefined;
   answers?: Array<FormatedAnswer>;
   userAnswers?: Array<FormatedUserAnswer>;
+
+  shuffle?: boolean;
+
   createdAt: Date;
   updatedAt: Date;
 }

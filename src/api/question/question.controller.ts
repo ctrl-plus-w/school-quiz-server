@@ -62,7 +62,9 @@ export const getGlobalQuestions = async (req: Request, res: Response, next: Next
 
 export const getQuestions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const questions = await Question.findAll();
+    const quiz = <Quiz>res.locals.quiz;
+
+    const questions = await quiz.getQuestions();
     res.json(questionMapper(questions));
   } catch (err) {
     next(err);
@@ -89,11 +91,11 @@ export const getQuestion = async (req: Request, res: Response, next: NextFunctio
     const questionId = req.params.questionId;
     if (!questionId) return next(new InvalidInputError());
 
-    const question = await Question.findByPk(questionId, {
-      include: [{ model: Quiz, where: { id: res.locals.quiz.id } }, ...questionIncludes],
-    });
+    const quiz = <Quiz>res.locals.quiz;
 
-    res.json(questionFormatter(question));
+    const question = await quiz.getQuestions({ where: { id: questionId }, include: questionIncludes });
+
+    res.json(questionFormatter(question[0]));
   } catch (err) {
     next(err);
   }
