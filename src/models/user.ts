@@ -8,6 +8,8 @@ import {
   DataTypes,
   BelongsToManyAddAssociationsMixin,
   HasManyCreateAssociationMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
 } from 'sequelize';
 
 import { Role } from './role';
@@ -62,8 +64,10 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public setState!: BelongsToSetAssociationMixin<State, number>;
 
   /* Event properties */
+  public getEvents!: BelongsToManyGetAssociationsMixin<Event>;
   public addEvent!: BelongsToManyAddAssociationMixin<Event, number>;
   public addEvents!: BelongsToManyAddAssociationsMixin<Event, number>;
+  public createEvent!: BelongsToManyCreateAssociationMixin<Event>;
   public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
 
   /* Quiz properties */
