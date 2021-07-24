@@ -80,6 +80,9 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     const quiz: Quiz = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
+    const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedTextualQuestion.slug } });
+    if (questionsWithSameSlug.length > 0) return next(new DuplicationError('Question'));
+
     const verificationType = await VerificationType.findOne({
       where: { slug: validatedTextualQuestion.verificationType },
     });
@@ -120,6 +123,9 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
     const quiz: Quiz = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
+    const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedNumericQuestion.slug } });
+    if (questionsWithSameSlug.length > 0) return next(new DuplicationError('Question'));
+
     const question = await Question.findOne({ where: { slug: validatedNumericQuestion.slug } });
     if (question) return next(new DuplicationError('Question'));
 
@@ -150,6 +156,9 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
 
     const quiz: Quiz = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedChoiceQuestion.slug } });
+    if (questionsWithSameSlug.length > 0) return next(new DuplicationError('Question'));
 
     const question = await Question.findOne({ where: { slug: validatedChoiceQuestion.slug } });
 
