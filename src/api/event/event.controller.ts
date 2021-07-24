@@ -4,12 +4,21 @@ import Joi from 'joi';
 
 import { Event, EventCreationAttributes } from '../../models/event';
 import { User } from '../../models/user';
-
-import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
-
-import { eventFormatter, eventMapper } from '../../helpers/mapper.helper';
 import { Group } from '../../models/group';
 import { Quiz } from '../../models/quiz';
+import { Role } from '../../models/role';
+
+import {
+  DuplicationError,
+  ForbiddenAccessParameterError,
+  InvalidInputError,
+  ModelRoleDuplicationError,
+  NotFoundError,
+} from '../../classes/StatusError';
+
+import { eventFormatter, eventMapper } from '../../helpers/mapper.helper';
+
+import roles from '../../constants/roles';
 
 const schema = Joi.object({
   start: Joi.date().required(),
@@ -130,8 +139,17 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
     const event: Event | undefined = res.locals.event;
     if (!event) return next(new NotFoundError('Event'));
 
-    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (event.ownerId === userId) return next(new ModelRoleDuplicationError());
+
+    const collaboratorsWithSameId = await event.getCollaborators({ where: { id: userId } });
+    if (collaboratorsWithSameId.length > 0) return next(new DuplicationError('Collaborator'));
+
+    const user = await User.findByPk(userId, { attributes: ['id'], include: Role });
+
     if (!user) return next(new NotFoundError('User'));
+    if (!user.role) return next(new NotFoundError('Role'));
+
+    if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
 
     await event.addCollaborator(user);
 

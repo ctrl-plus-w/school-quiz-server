@@ -5,12 +5,20 @@ import Joi from 'joi';
 import { Quiz, QuizCreationAttributes } from '../../models/quiz';
 import { Question } from '../../models/question';
 import { User } from '../../models/user';
+import { Role } from '../../models/role';
 
-import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
+import {
+  DuplicationError,
+  ForbiddenAccessParameterError,
+  InvalidInputError,
+  ModelRoleDuplicationError,
+  NotFoundError,
+} from '../../classes/StatusError';
 
 import { slugify } from '../../utils/string.utils';
+
 import { quizFormatter, quizMapper } from '../../helpers/mapper.helper';
-import { Role } from '../../models/role';
+
 import roles from '../../constants/roles';
 
 const schema = Joi.object({
@@ -118,14 +126,17 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
     const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
+    if (quiz.ownerId === userId) return next(new ModelRoleDuplicationError());
+
     const collaboratorsWithSameId = await quiz.getCollaborators({ where: { id: userId } });
     if (collaboratorsWithSameId.length > 0) return next(new InvalidInputError());
 
     const user = await User.findByPk(userId, { include: { model: Role }, attributes: ['id'] });
 
-    if (!user || !user.role) return next(new NotFoundError('User'));
+    if (!user) return next(new NotFoundError('User'));
+    if (!user.role) return next(new NotFoundError('Role'));
 
-    if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new InvalidInputError());
+    if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
 
     await quiz.addCollaborator(user);
 

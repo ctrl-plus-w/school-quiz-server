@@ -37,3 +37,15 @@ export class InvalidCredentialsError extends StatusError {
     super(`The username or the password is invalid.`, 422);
   }
 }
+
+export class ModelRoleDuplicationError extends StatusError {
+  constructor() {
+    super(`The owner of the event cannot collaborate on his own project`, 409);
+  }
+}
+
+export class ForbiddenAccessParameterError extends StatusError {
+  constructor() {
+    super("Collaborator doesn't have the right permissions", 422);
+  }
+}
