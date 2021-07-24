@@ -17,6 +17,7 @@ import { Quiz } from './quiz';
 interface EventAttributes {
   id: number;
   start: Date;
+  end: Date;
   countdown: Date;
 }
 
@@ -35,6 +36,7 @@ export type EventCreationAttributes = Optional<EventAttributes, 'id'>;
 export class Event extends Model<EventAttributes, EventCreationAttributes> implements EventAttributes {
   public id!: number;
   public start!: Date;
+  public end!: Date;
   public countdown!: Date;
 
   public quiz?: Quiz;
@@ -82,6 +84,10 @@ export default (sequelize: Sequelize): typeof Event => {
         primaryKey: true,
       },
       start: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      end: {
         type: DataTypes.DATE,
         allowNull: false,
       },

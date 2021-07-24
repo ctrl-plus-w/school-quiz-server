@@ -8,6 +8,10 @@ import { UserAnswer, UserAnswerCreationAttributes } from '../../models/userAnswe
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 import { userAnswerFormatter, userAnswerMapper } from '../../helpers/mapper.helper';
 import { User } from '../../models/user';
+import { Group } from '../../models/group';
+import { Quiz } from '../../models/quiz';
+import { Event } from '../../models/event';
+import { Op } from 'sequelize';
 
 const schema = Joi.object({
   answerContent: Joi.string().min(1).max(45),
@@ -75,8 +79,8 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    const user = await User.findByPk(res.locals.jwt.userId);
-    if (!user) return next(new NotFoundError('User'));
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
 
     const {
       value: validatedUserAnswer,
@@ -87,6 +91,19 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
     } = schema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
+
+    const user = await User.findByPk(res.locals.jwt.userId, { include: Group });
+    if (!user) return next(new NotFoundError('User'));
+
+    const possibleEvents = await Event.findAll({
+      where: { start: { [Op.lt]: new Date() }, end: { [Op.gt]: new Date() } },
+      include: [
+        { model: Quiz, where: { id: quiz.id } },
+        { model: Group, where: { id: user.groups?.map(({ id }) => id) } },
+      ],
+    });
+
+    if (possibleEvents.length === 0) return next(new NotFoundError('Event'));
 
     const userAnswer = await UserAnswer.findOne({
       include: { model: User, where: { id: user?.id } },

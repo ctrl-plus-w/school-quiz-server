@@ -101,11 +101,12 @@ export const eventFormatter = (
     ? {
         id: event.id,
         start: event.start,
+        end: event.end,
         quiz: event.quiz || quiz,
         countdown: event.countdown,
         owner: owner,
         collaborators: collaborators,
-        group: group,
+        group: event.group || group,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
       }

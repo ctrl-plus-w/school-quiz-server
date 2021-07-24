@@ -13,6 +13,7 @@ import { Quiz } from '../../models/quiz';
 
 const schema = Joi.object({
   start: Joi.date().required(),
+  end: Joi.date().greater(Joi.ref('start')).required(),
   countdown: Joi.date().required(),
   groupId: Joi.number().required(),
   quizId: Joi.number().required(),
@@ -32,7 +33,7 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction):
     const eventId = req.params.eventId;
     if (!eventId) return next(new InvalidInputError());
 
-    const event = await Event.findByPk(eventId, { include: [Quiz] });
+    const event = await Event.findByPk(eventId, { include: [Quiz, Group] });
 
     const owner = await event?.getOwner();
     const collaborators = await event?.getCollaborators();
@@ -103,10 +104,14 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findByPk(res.locals.jwt.userId);
     if (!user) return next(new NotFoundError('User'));
 
-    const events = await user.getEvents({ where: { start: validatedEvent.start } });
+    const events = await user.getEvents({ where: { start: validatedEvent.start, end: validatedEvent.end } });
     if (events.length > 0) return next(new DuplicationError('Event'));
 
-    const createdEvent = await user.createEvent({ start: validatedEvent.start, countdown: validatedEvent.countdown });
+    const createdEvent = await user.createEvent({
+      start: validatedEvent.start,
+      end: validatedEvent.end,
+      countdown: validatedEvent.countdown,
+    });
 
     await createdEvent.setQuiz(quiz);
     await createdEvent.setGroup(group);
