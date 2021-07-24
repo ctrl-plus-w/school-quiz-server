@@ -9,7 +9,7 @@ import choiceRoutes from '../choice/questionChoice.routes';
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 import { checkQuizPossesion } from '../../middlewares/checkPossesion.middleware';
 import { checkQuestionExists } from '../../middlewares/checkExists.middleware';
-import { checkIsNumeric } from '../../middlewares/checkQuestionType';
+import { checkIsChoice } from '../../middlewares/checkQuestionType';
 
 const router = Router();
 
@@ -32,6 +32,6 @@ router.use('/:questionId/userAnswers', checkQuestionExists, userAnswerRoutes);
 
 /* Quiz -> Question -> Choice */
 
-router.use('/:questionId/choices', checkQuestionExists, checkIsNumeric, choiceRoutes);
-
+router.use('/:questionId/choices', checkQuestionExists, checkIsChoice, choiceRoutes);
+  
 export default router;

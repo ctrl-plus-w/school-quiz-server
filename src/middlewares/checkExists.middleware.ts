@@ -52,7 +52,6 @@ export const checkQuestionExists = async (req: Request, res: Response, next: Nex
         { model: UserAnswer, attributes: ['id'] },
         { model: ChoiceQuestion, attributes: ['id'] },
       ],
-      attributes: ['id'],
     });
 
     if (!question) return next(new NotFoundError('Question'));

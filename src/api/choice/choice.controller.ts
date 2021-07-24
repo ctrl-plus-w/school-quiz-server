@@ -29,9 +29,9 @@ export const getChoices = async (req: Request, res: Response, next: NextFunction
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    if (!question.choiceQuestion) return next(new NotFoundError('Choice question'));
+    if (!question.typedQuestion) return next(new NotFoundError('Choice question'));
 
-    const choiceQuestion = await ChoiceQuestion.findByPk(question.choiceQuestion.id, {
+    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, {
       include: Choice,
       attributes: ['id'],
     });
@@ -66,9 +66,9 @@ export const getChoice = async (req: Request, res: Response, next: NextFunction)
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    if (!question.choiceQuestion) return next(new NotFoundError('Choice question'));
+    if (!question.typedQuestion) return next(new NotFoundError('Choice question'));
 
-    const choiceQuestion = await ChoiceQuestion.findByPk(question.choiceQuestion.id, {
+    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, {
       include: { model: Choice, attributes: ['id'] },
       attributes: ['id'],
     });
@@ -102,9 +102,9 @@ export const createChoice = async (req: Request, res: Response, next: NextFuncti
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    if (!question.choiceQuestion) return next(new NotFoundError('Choice question'));
+    if (!question.typedQuestion) return next(new NotFoundError('Choice question'));
 
-    const choiceQuestion = await ChoiceQuestion.findByPk(question.choiceQuestion.id, {
+    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, {
       include: { model: Choice, attributes: ['id', 'slug'] },
       attributes: ['id'],
     });
@@ -115,6 +115,7 @@ export const createChoice = async (req: Request, res: Response, next: NextFuncti
       return next(new DuplicationError('Choice'));
 
     const createdChoice = await choiceQuestion.createChoice(validatedChoice);
+
     res.json(createdChoice);
   } catch (err) {
     next(err);
