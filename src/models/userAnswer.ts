@@ -8,7 +8,7 @@ interface UserAnswerAttributes {
   answerContent: string;
 }
 
-export interface FormatedUserAnswer extends UserAnswerAttributes {
+export interface FormattedUserAnswer extends UserAnswerAttributes {
   user?: User;
 
   updatedAt: Date;

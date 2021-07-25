@@ -10,7 +10,7 @@ interface AnswerAttributes {
   answerType: string;
 }
 
-export interface FormatedAnswer extends AnswerAttributes {
+export interface FormattedAnswer extends AnswerAttributes {
   typedAnswer: ExactAnswer | ComparisonAnswer | undefined;
   createdAt: Date;
   updatedAt: Date;

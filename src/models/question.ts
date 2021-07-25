@@ -15,8 +15,8 @@ import {
 import { TextualQuestion } from './textualQuestion';
 import { ChoiceQuestion } from './choiceQuestion';
 import { NumericQuestion } from './numericQuestion';
-import { FormatedUserAnswer, UserAnswer } from './userAnswer';
-import { Answer, FormatedAnswer } from './answer';
+import { FormattedUserAnswer, UserAnswer } from './userAnswer';
+import { Answer, FormattedAnswer } from './answer';
 
 export type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
 
@@ -29,10 +29,10 @@ interface QuestionAttributes {
   questionType: string;
 }
 
-export interface FormatedQuestion extends QuestionAttributes {
+export interface FormattedQuestion extends QuestionAttributes {
   typedQuestion: TypedQuestion | undefined;
-  answers?: Array<FormatedAnswer>;
-  userAnswers?: Array<FormatedUserAnswer>;
+  answers?: Array<FormattedAnswer>;
+  userAnswers?: Array<FormattedUserAnswer>;
 
   shuffle?: boolean;
 

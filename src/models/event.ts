@@ -21,7 +21,7 @@ interface EventAttributes {
   countdown: Date;
 }
 
-export interface FormatedEvent extends EventAttributes {
+export interface FormattedEvent extends EventAttributes {
   owner?: User;
   collaborators?: Array<User>;
   quiz?: Quiz;

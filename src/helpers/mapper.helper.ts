@@ -1,9 +1,9 @@
-import { Answer, FormatedAnswer } from '../models/answer';
-import { FormatedQuestion, Question } from '../models/question';
-import { FormatedQuiz, Quiz } from '../models/quiz';
+import { Answer, FormattedAnswer } from '../models/answer';
+import { FormattedQuestion, Question } from '../models/question';
+import { FormattedQuiz, Quiz } from '../models/quiz';
 import { User } from '../models/user';
-import { FormatedUserAnswer, UserAnswer } from '../models/userAnswer';
-import { Event, FormatedEvent } from '../models/event';
+import { FormattedUserAnswer, UserAnswer } from '../models/userAnswer';
+import { Event, FormattedEvent } from '../models/event';
 import { Group } from '../models/group';
 
 const isNull = <Type>(value: Type | null | undefined): value is Type => {
@@ -14,7 +14,7 @@ const isNotNull = <Type>(value: Type | null | undefined): value is Type => {
   return !isNull(value);
 };
 
-export const answerFormatter = (answer: Answer | null | undefined): FormatedAnswer | null => {
+export const answerFormatter = (answer: Answer | null | undefined): FormattedAnswer | null => {
   return answer
     ? {
         id: answer.id,
@@ -26,11 +26,11 @@ export const answerFormatter = (answer: Answer | null | undefined): FormatedAnsw
     : null;
 };
 
-export const answerMapper = (answers: Array<Answer>): Array<FormatedAnswer> => {
+export const answerMapper = (answers: Array<Answer>): Array<FormattedAnswer> => {
   return answers.map(answerFormatter).filter(isNotNull);
 };
 
-export const userAnswerFormatter = (userAnswer: UserAnswer | null | undefined): FormatedUserAnswer | null => {
+export const userAnswerFormatter = (userAnswer: UserAnswer | null | undefined): FormattedUserAnswer | null => {
   return userAnswer
     ? {
         id: userAnswer.id,
@@ -42,11 +42,11 @@ export const userAnswerFormatter = (userAnswer: UserAnswer | null | undefined): 
     : null;
 };
 
-export const userAnswerMapper = (userAnswers: Array<UserAnswer>): Array<FormatedUserAnswer> => {
+export const userAnswerMapper = (userAnswers: Array<UserAnswer>): Array<FormattedUserAnswer> => {
   return userAnswers.map(userAnswerFormatter).filter(isNotNull);
 };
 
-export const questionFormatter = (question: Question | null | undefined): FormatedQuestion | null => {
+export const questionFormatter = (question: Question | null | undefined): FormattedQuestion | null => {
   return question
     ? {
         id: question.id,
@@ -64,11 +64,11 @@ export const questionFormatter = (question: Question | null | undefined): Format
     : null;
 };
 
-export const questionMapper = (questions: Array<Question>): Array<FormatedQuestion> => {
+export const questionMapper = (questions: Array<Question>): Array<FormattedQuestion> => {
   return questions.map(questionFormatter).filter(isNotNull);
 };
 
-export const quizFormatter = (quiz?: Quiz | null, owner?: User, collaborators?: Array<User>): FormatedQuiz | null => {
+export const quizFormatter = (quiz?: Quiz | null, owner?: User, collaborators?: Array<User>): FormattedQuiz | null => {
   return quiz
     ? {
         id: quiz.id,
@@ -86,17 +86,17 @@ export const quizFormatter = (quiz?: Quiz | null, owner?: User, collaborators?: 
     : null;
 };
 
-export const quizMapper = (quizzes: Array<Quiz>): Array<FormatedQuiz> => {
+export const quizMapper = (quizzes: Array<Quiz>): Array<FormattedQuiz> => {
   return quizzes.map((quiz) => quizFormatter(quiz)).filter(isNotNull);
 };
 
 export const eventFormatter = (
-  event: Event | null | undefined,
+  event?: Event | null,
   owner?: User,
   collaborators?: Array<User>,
   group?: Group,
   quiz?: Quiz
-): FormatedEvent | null => {
+): FormattedEvent | null => {
   return event
     ? {
         id: event.id,
@@ -113,6 +113,6 @@ export const eventFormatter = (
     : null;
 };
 
-export const eventMapper = (events: Array<Event>): Array<FormatedEvent> => {
+export const eventMapper = (events: Array<Event>): Array<FormattedEvent> => {
   return events.map((event) => eventFormatter(event)).filter(isNotNull);
 };

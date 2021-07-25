@@ -27,7 +27,7 @@ interface QuizAttributes {
   shuffle: boolean;
 }
 
-export interface FormatedQuiz extends QuizAttributes {
+export interface FormattedQuiz extends QuizAttributes {
   owner?: User;
   questions?: Array<Question>;
   collaborators?: Array<User>;
