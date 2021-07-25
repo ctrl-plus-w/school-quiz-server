@@ -11,7 +11,7 @@ import {
 } from 'sequelize';
 
 import { Group } from './group';
-import { User } from './user';
+import { FormattedUser, User } from './user';
 import { Quiz } from './quiz';
 
 interface EventAttributes {
@@ -22,8 +22,8 @@ interface EventAttributes {
 }
 
 export interface FormattedEvent extends EventAttributes {
-  owner?: User;
-  collaborators?: Array<User>;
+  owner?: FormattedUser;
+  collaborators?: Array<FormattedUser>;
   quiz?: Quiz;
   group?: Group;
 

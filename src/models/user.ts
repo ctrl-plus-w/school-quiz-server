@@ -13,10 +13,10 @@ import {
 } from 'sequelize';
 
 import { Role } from './role';
-import { Event } from './event';
+import { Event, FormattedEvent } from './event';
 import { State } from './state';
 import { Group } from './group';
-import { Quiz } from './quiz';
+import { FormattedQuiz, Quiz } from './quiz';
 
 interface UserAttributes {
   id: number;
@@ -25,6 +25,17 @@ interface UserAttributes {
   lastName: string;
   password: string;
   gender: boolean | null;
+}
+
+export interface FormattedUser extends Optional<UserAttributes, 'password'> {
+  state?: State;
+  role?: Role;
+  events?: Array<FormattedEvent>;
+  groups?: Array<Group>;
+  quizzes?: Array<FormattedQuiz>;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type UserCreationAttributes = Optional<UserAttributes, 'id'>;
@@ -42,11 +53,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public events?: Array<Event>;
   public groups?: Array<Group>;
 
-  private quizs?: Array<Quiz>;
-
-  public get quizzes(): Array<Quiz> | undefined {
-    return this.quizs;
-  }
+  public quizzes?: Array<Quiz>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;

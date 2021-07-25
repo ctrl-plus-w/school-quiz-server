@@ -15,8 +15,8 @@ import {
   HasManyGetAssociationsMixin,
 } from 'sequelize';
 
-import { Question } from './question';
-import { User } from './user';
+import { FormattedQuestion, Question } from './question';
+import { FormattedUser, User } from './user';
 
 interface QuizAttributes {
   id: number;
@@ -28,9 +28,9 @@ interface QuizAttributes {
 }
 
 export interface FormattedQuiz extends QuizAttributes {
-  owner?: User;
-  questions?: Array<Question>;
-  collaborators?: Array<User>;
+  owner?: FormattedUser;
+  questions?: Array<FormattedQuestion>;
+  collaborators?: Array<FormattedUser>;
 
   createdAt: Date;
   updatedAt: Date;
@@ -119,6 +119,10 @@ export default (sequelize: Sequelize): typeof Quiz => {
       sequelize,
       modelName: 'quiz',
       tableName: 'Quiz',
+      name: {
+        singular: 'quiz',
+        plural: 'quizzes',
+      },
     }
   );
 

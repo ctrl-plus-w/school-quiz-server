@@ -4,10 +4,16 @@ import Joi from 'joi';
 import bcrypt from 'bcrypt';
 
 import { User, UserCreationAttributes } from '../../models/user';
-
-import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 import { Group } from '../../models/group';
 import { Role } from '../../models/role';
+import { Quiz } from '../../models/quiz';
+import { State } from '../../models/state';
+import { Event } from '../../models/event';
+
+import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
+
+import { userFormatter, userMapper } from '../../helpers/mapper.helper';
+import roles from '../../constants/roles';
 
 const schema = Joi.object({
   username: Joi.string().min(5).max(25).required(),
@@ -19,8 +25,11 @@ const schema = Joi.object({
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const loggedInUserPermission = res.locals.jwt.rolePermission;
+    const isAdmin = loggedInUserPermission === roles.ADMIN.PERMISSION;
+
     const users = await User.findAll();
-    res.json(users);
+    res.json(userMapper(users, isAdmin ? 2 : 3));
   } catch (err) {
     next(err);
   }
@@ -28,8 +37,14 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
 
 export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const user = await User.findByPk(req.params.userId);
-    res.json(user);
+    const loggedInUserPermission = res.locals.jwt.rolePermission;
+    const isAdmin = loggedInUserPermission === roles.ADMIN.PERMISSION;
+
+    const user = await User.findByPk(req.params.userId, {
+      include: [Event, Group, Role, State, Quiz],
+    });
+
+    res.json(userFormatter(user, isAdmin ? 0 : 1));
   } catch (err) {
     next(err);
   }
@@ -99,7 +114,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     const password = bcrypt.hashSync(validatedUser.password, 12);
 
     const createdUser = await User.create({ ...validatedUser, password });
-    res.json(createdUser);
+    res.json(userFormatter(createdUser, 2));
   } catch (err) {
     next(err);
   }
