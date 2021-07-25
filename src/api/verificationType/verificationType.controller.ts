@@ -25,6 +25,8 @@ export const getVerificationTypes = async (req: Request, res: Response, next: Ne
 export const getVerificationType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const verificationType = await VerificationType.findByPk(req.params.verificationTypeId);
+    if (!verificationType) return next(new NotFoundError('Verification type'));
+
     res.json(verificationType);
   } catch (err) {
     next(err);

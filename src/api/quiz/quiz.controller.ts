@@ -44,6 +44,7 @@ export const getQuiz = async (req: Request, res: Response, next: NextFunction): 
     if (!quizId) return next(new InvalidInputError());
 
     const quiz = await Quiz.findByPk(quizId, { include: [Question] });
+    if (!quiz) return next(new NotFoundError('Quiz'));
 
     const owner = await quiz?.getOwner();
     const collaborators = await quiz?.getCollaborators();

@@ -19,6 +19,8 @@ export const getComparisonAnswer = async (req: Request, res: Response, next: Nex
     if (!comparisonAnswerId) return next(new InvalidInputError());
 
     const comparisonAnswer = await ComparisonAnswer.findByPk(comparisonAnswerId);
+    if (!comparisonAnswer) return next(new NotFoundError('Answer'));
+
     res.json(comparisonAnswer);
   } catch (err) {
     next(err);

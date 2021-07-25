@@ -45,6 +45,8 @@ export const getGlobalAnswer = async (req: Request, res: Response, next: NextFun
     if (!answerId) return next(new InvalidInputError());
 
     const answer = await Answer.findByPk(answerId, { include: [ExactAnswer, ComparisonAnswer] });
+    if (!answer) return next(new NotFoundError('Answer'));
+
     res.json(answerFormatter(answer));
   } catch (err) {
     next(err);
@@ -59,6 +61,7 @@ export const getAnswer = async (req: Request, res: Response, next: NextFunction)
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
+    // Fetch the answer from the getAnswers() property.
     if (!question?.answers?.some((answer) => answer.id === parseInt(answerId)))
       return next(new NotFoundError('Answer'));
 

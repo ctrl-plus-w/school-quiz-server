@@ -25,6 +25,8 @@ export const getQuestionSpecifications = async (req: Request, res: Response, nex
 export const getQuestionSpecification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const questionSpecification = await QuestionSpecification.findByPk(req.params.questionSpecificationId);
+    if (!questionSpecification) return next(new NotFoundError('Specification'));
+
     res.json(questionSpecification);
   } catch (err) {
     next(err);

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 import { TextualQuestion } from '../../models/textualQuestion';
 
-import { InvalidInputError } from '../../classes/StatusError';
+import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 export const getTextualQuestions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -19,6 +19,8 @@ export const getTextualQuestion = async (req: Request, res: Response, next: Next
     if (!textualQuestionId) return next(new InvalidInputError());
 
     const textualQuestion = await TextualQuestion.findByPk(textualQuestionId);
+    if (!textualQuestion) return next(new NotFoundError('Question'));
+
     res.json(textualQuestion);
   } catch (err) {
     next(err);

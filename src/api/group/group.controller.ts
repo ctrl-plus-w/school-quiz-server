@@ -23,10 +23,24 @@ export const getGroups = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export const getGroupLabels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const group = await Group.findByPk(req.params.groupId);
-    res.json(group?.labels);
+    if (!group) return next(new NotFoundError('Group'));
+
+    res.json(group);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getGroupLabels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // Fetch the label from the getLabels() method.
+    const group = await Group.findByPk(req.params.groupId, { include: Label });
+    if (!group) return next(new NotFoundError('Group'));
+
+    res.json(group.labels);
   } catch (err) {
     next(err);
   }
@@ -34,17 +48,14 @@ export const getGroupLabels = async (req: Request, res: Response, next: NextFunc
 
 export const getGroupLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const group = await Group.findByPk(req.params.groupId);
-    res.json(group?.labels?.find((label) => label.id === parseInt(req.params.labelId)));
-  } catch (err) {
-    next(err);
-  }
-};
+    const group = await Group.findByPk(req.params.groupId, { include: Label });
+    if (!group) return next(new NotFoundError('Group'));
 
-export const getGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const group = await Group.findByPk(req.params.groupId);
-    res.json(group);
+    // Fetch the label from the getLabels() method.
+    const label = group.labels?.find((label) => label.id === parseInt(req.params.labelId));
+    if (!label) return next(new NotFoundError('Label'));
+
+    res.json(label);
   } catch (err) {
     next(err);
   }

@@ -19,8 +19,10 @@ export const getExactAnswer = async (req: Request, res: Response, next: NextFunc
     const exactAnswerId = req.params.exactAnswerId;
     if (!exactAnswerId) return next(new InvalidInputError());
 
-    const exactAnswers = await ExactAnswer.findByPk(exactAnswerId);
-    res.json(exactAnswers);
+    const exactAnswer = await ExactAnswer.findByPk(exactAnswerId);
+    if (!exactAnswer) return next(new NotFoundError('Answer'));
+
+    res.json(exactAnswer);
   } catch (err) {
     next(err);
   }

@@ -63,6 +63,7 @@ export const getGlobalQuestions = async (req: Request, res: Response, next: Next
 export const getQuestions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const quiz = <Quiz>res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
 
     const questions = await quiz.getQuestions();
     res.json(questionMapper(questions));
@@ -80,6 +81,8 @@ export const getGlobalQuestion = async (req: Request, res: Response, next: NextF
       include: [{ model: Quiz, where: { id: res.locals.quiz.id } }, ...questionIncludes],
     });
 
+    if (!question) return next(new NotFoundError('Question'));
+
     res.json(questionFormatter(question));
   } catch (err) {
     next(err);
@@ -92,8 +95,10 @@ export const getQuestion = async (req: Request, res: Response, next: NextFunctio
     if (!questionId) return next(new InvalidInputError());
 
     const quiz = <Quiz>res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
 
     const question = await quiz.getQuestions({ where: { id: questionId }, include: questionIncludes });
+    if (question.length === 0) return next(new NotFoundError('Question'));
 
     res.json(questionFormatter(question[0]));
   } catch (err) {

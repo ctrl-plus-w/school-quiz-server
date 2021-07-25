@@ -48,6 +48,8 @@ export const getGlobalUserAnswer = async (req: Request, res: Response, next: Nex
     if (!userAnswerId) return next(new InvalidInputError());
 
     const userAnswer = await UserAnswer.findByPk(userAnswerId);
+    if (!userAnswer) return next(new NotFoundError('User answer'));
+
     res.json(userAnswerFormatter(userAnswer));
   } catch (err) {
     next(err);

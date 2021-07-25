@@ -43,6 +43,7 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction):
     if (!eventId) return next(new InvalidInputError());
 
     const event = await Event.findByPk(eventId, { include: [Quiz, Group] });
+    if (!event) return next(new NotFoundError('Event'));
 
     const owner = await event?.getOwner();
     const collaborators = await event?.getCollaborators();

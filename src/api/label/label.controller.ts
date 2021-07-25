@@ -24,6 +24,8 @@ export const getLabels = async (req: Request, res: Response, next: NextFunction)
 export const getLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const label = await Label.findByPk(req.params.labelId);
+    if (!label) return next(new NotFoundError('Label'));
+
     res.json(label);
   } catch (err) {
     next(err);

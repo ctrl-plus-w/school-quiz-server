@@ -27,6 +27,8 @@ export const getState = async (req: Request, res: Response, next: NextFunction):
     if (!stateId) return next(new InvalidInputError());
 
     const state = await State.findByPk(stateId);
+    if (!state) return next(new NotFoundError('State'));
+
     res.json(state);
   } catch (err) {
     next(err);

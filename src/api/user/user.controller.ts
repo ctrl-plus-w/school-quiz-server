@@ -44,6 +44,8 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
       include: [Event, Group, Role, State, Quiz],
     });
 
+    if (!user) return next(new NotFoundError('User'));
+
     res.json(userFormatter(user, isAdmin ? 0 : 1));
   } catch (err) {
     next(err);
@@ -90,7 +92,10 @@ export const getRole = async (req: Request, res: Response, next: NextFunction): 
     const user = await User.findByPk(userId, { include: Role });
     if (!user) return next(new NotFoundError('User'));
 
-    res.json(user.role);
+    const role = user.role;
+    if (!role) return next(new NotFoundError('Role'));
+
+    res.json(role);
   } catch (err) {
     next(err);
   }

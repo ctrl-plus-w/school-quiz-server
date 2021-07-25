@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { InvalidInputError } from '../../classes/StatusError';
+import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { NumericQuestion } from '../../models/numericQuestion';
 
@@ -18,6 +18,8 @@ export const getNumericQuestion = async (req: Request, res: Response, next: Next
     if (!numericQuestionId) return next(new InvalidInputError());
 
     const numericQuestion = await NumericQuestion.findByPk(numericQuestionId);
+    if (!numericQuestion) return next(new NotFoundError('Question'));
+
     res.json(numericQuestion);
   } catch (err) {
     next(err);
