@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { Op, WhereOptions } from 'sequelize';
 
 import Joi from 'joi';
 
@@ -114,7 +115,37 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findByPk(res.locals.jwt.userId);
     if (!user) return next(new NotFoundError('User'));
 
-    const events = await user.getEvents({ where: { start: validatedEvent.start, end: validatedEvent.end } });
+    const groupUsers = await group.getUsers({ attributes: ['id'] });
+    const groupUsersId = groupUsers.map((user) => user.id);
+
+    const relatedGroups = await Group.findAll({
+      include: { model: User, where: { id: groupUsersId }, attributes: ['id'] },
+    });
+
+    const relatedGroupsId = relatedGroups.reduce((acc: Array<number>, curr: Group) => {
+      return !acc.includes(curr.id) ? [...acc, curr.id] : acc;
+    }, []);
+
+    console.log(relatedGroupsId);
+
+    const eventConditions: WhereOptions = {
+      [Op.or]: [
+        // Get every events that ends between the datetimes
+        { end: { [Op.gte]: validatedEvent.start, [Op.lte]: validatedEvent.end } },
+        // Get every events that starts between the datetimes
+        { start: { [Op.gte]: validatedEvent.start, [Op.lte]: validatedEvent.end } },
+        // Get every events that start between and ends after the datetimes
+        { start: { [Op.lte]: validatedEvent.start }, end: { [Op.gte]: validatedEvent.end } },
+        // Get every events that start after and ends before the datetimes
+        { start: { [Op.gte]: validatedEvent.start }, end: { [Op.lte]: validatedEvent.end } },
+      ],
+    };
+
+    const events = await Event.findAll({
+      where: eventConditions,
+      include: { model: Group, where: { id: relatedGroupsId } },
+    });
+
     if (events.length > 0) return next(new DuplicationError('Event'));
 
     const createdEvent = await user.createEvent({

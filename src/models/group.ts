@@ -6,9 +6,11 @@ import {
   DataTypes,
   BelongsToManyAddAssociationsMixin,
   BelongsToManyRemoveAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
 } from 'sequelize';
 
 import { Label } from './label';
+import { User } from './user';
 
 interface GroupAttributes {
   id: number;
@@ -32,6 +34,9 @@ export class Group extends Model<GroupAttributes, GroupCreationAttributes> imple
   public addLabel!: BelongsToManyAddAssociationMixin<Label, number>;
   public addLabels!: BelongsToManyAddAssociationsMixin<Label, number>;
   public removeLabel!: BelongsToManyRemoveAssociationMixin<Label, number>;
+
+  /* Users property */
+  public getUsers!: BelongsToManyGetAssociationsMixin<User>;
 }
 
 export default (sequelize: Sequelize): typeof Group => {
