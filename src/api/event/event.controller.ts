@@ -22,7 +22,7 @@ import { eventFormatter, eventMapper } from '../../helpers/mapper.helper';
 import roles from '../../constants/roles';
 
 const schema = Joi.object({
-  start: Joi.date().required(),
+  start: Joi.date().required().greater(new Date()),
   end: Joi.date().greater(Joi.ref('start')).required(),
   countdown: Joi.date().required(),
   groupId: Joi.number().required(),
