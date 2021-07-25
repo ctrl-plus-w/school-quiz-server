@@ -126,8 +126,6 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
       return !acc.includes(curr.id) ? [...acc, curr.id] : acc;
     }, []);
 
-    console.log(relatedGroupsId);
-
     const eventConditions: WhereOptions = {
       [Op.or]: [
         // Get every events that ends between the datetimes
