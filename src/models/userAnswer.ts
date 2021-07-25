@@ -1,7 +1,7 @@
 import { Model, DataTypes, BelongsToSetAssociationMixin, Optional, Sequelize } from 'sequelize';
 
 import { Question } from './question';
-import { User } from './user';
+import { FormattedUser, User } from './user';
 
 interface UserAnswerAttributes {
   id: number;
@@ -9,7 +9,7 @@ interface UserAnswerAttributes {
 }
 
 export interface FormattedUserAnswer extends UserAnswerAttributes {
-  user?: User;
+  user?: FormattedUser;
 
   updatedAt: Date;
   createdAt: Date;

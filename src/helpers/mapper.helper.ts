@@ -35,7 +35,7 @@ export const userAnswerFormatter = (userAnswer?: UserAnswer | null): FormattedUs
     ? {
         id: userAnswer.id,
         answerContent: userAnswer.answerContent,
-        user: userAnswer.user,
+        user: userFormatter(userAnswer.user),
         createdAt: userAnswer.createdAt,
         updatedAt: userAnswer.updatedAt,
       }
