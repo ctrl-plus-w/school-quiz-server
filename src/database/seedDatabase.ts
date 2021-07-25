@@ -68,6 +68,14 @@ export default async (): Promise<void> => {
       slug: '1ere2',
       name: '1ère2',
     },
+    {
+      slug: '1ere3',
+      name: '1ère3',
+    },
+    {
+      slug: '1ere4',
+      name: '1ère4',
+    },
   ]);
 
   await VerificationType.bulkCreate([
@@ -121,8 +129,21 @@ export default async (): Promise<void> => {
   ]);
 
   const lukas = await User.findOne({ where: { username: 'llaudrain' } });
+  const rose = await User.findOne({ where: { username: 'ryazid' } });
   const admin = await Role.findOne({ where: { slug: 'admin ' } });
-  if (!lukas || !admin) return;
+  const group = await Group.findOne({ where: { slug: '1ere3' } });
+  if (!lukas || !rose || !admin || !group) return;
 
   await lukas.setRole(admin);
+  await rose.setRole(admin);
+  await lukas.addGroup(group);
+
+  const groupBis = await Group.findOne({ where: { slug: '1ere2' } });
+  if (!groupBis) return;
+
+  const users = await User.findAll();
+
+  users.forEach(async (user) => {
+    await user.addGroup(groupBis);
+  });
 };
