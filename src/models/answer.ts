@@ -1,4 +1,4 @@
-import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
+import { Model, DataTypes, Optional, Sequelize, BelongsToGetAssociationMixin } from 'sequelize';
 
 import { ExactAnswer } from './exactAnswer';
 import { ComparisonAnswer } from './comparisonAnswer';
@@ -7,7 +7,7 @@ export type TypedAnswer = ExactAnswer | ComparisonAnswer;
 
 interface AnswerAttributes {
   id: number;
-  answerType: string;
+  answerType: 'exactAnswer' | 'comparisonAnswer';
 }
 
 export interface FormattedAnswer extends AnswerAttributes {
@@ -27,7 +27,7 @@ type AnswerCreationAttributes = Optional<AnswerAttributes, 'id' | 'answerType'>;
 
 export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> implements AnswerAttributes {
   public id!: number;
-  public answerType!: string;
+  public answerType!: 'exactAnswer' | 'comparisonAnswer';
 
   public exactAnswer?: ExactAnswer;
   public comparisonAnswer?: ComparisonAnswer;
@@ -36,6 +36,10 @@ export class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> im
 
   public typedAnswer?: TypedAnswer;
   public typedAnswerId?: number;
+
+  /* Typed answer properties */
+  public getExactAnswer!: BelongsToGetAssociationMixin<ExactAnswer>;
+  public getComparisonAnswer!: BelongsToGetAssociationMixin<ComparisonAnswer>;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;

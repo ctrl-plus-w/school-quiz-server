@@ -15,6 +15,7 @@ import {
   getUserQuizzes,
   getUserQuiz,
   getUserState,
+  updateUser,
 } from './user.controller';
 
 import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
@@ -33,8 +34,10 @@ router.get('/:userId/quizzes', authorize([checkIsProfessor]), getUserQuizzes);
 router.get('/:userId/quizzes/:quizId', authorize([checkIsProfessor]), getUserQuiz);
 
 router.post('/', authorize([checkIsAdmin]), createUser);
-router.post('/:userId/role', authorize([checkIsAdmin]), setRole);
 router.post('/:userId/groups', authorize([checkIsAdmin]), addGroup);
+
+router.put('/:userId', authorize([checkIsAdmin]), updateUser);
+router.put('/:userId/role', authorize([checkIsAdmin]), setRole);
 
 router.delete('/:userId', authorize([checkIsAdmin]), deleteUser);
 router.delete('/:userId/groups', authorize([checkIsAdmin]), removeGroup);

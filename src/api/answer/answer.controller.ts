@@ -5,7 +5,7 @@ import { Answer } from '../../models/answer';
 import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { answerFormatter, answerMapper } from '../../helpers/mapper.helper';
-import { tryCreateExactAnswer, tryCreateComparisonAnswer } from '../../helpers/answer.helper';
+import { tryUpdateExactAnswer, tryCreateExactAnswer, tryUpdateComparisonAnswer, tryCreateComparisonAnswer } from '../../helpers/answer.helper';
 import { Question } from '../../models/question';
 import { ExactAnswer } from '../../models/exactAnswer';
 import { ComparisonAnswer } from '../../models/comparisonAnswer';
@@ -84,6 +84,26 @@ export const createAnswer = async (req: Request, res: Response, next: NextFuncti
     if (!Object.keys(answerTypes).includes(answerType)) return next(new InvalidInputError());
 
     await answerTypes[answerType](req, res, next);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const answerId = req.params.answerId;
+    if (!answerId) return next(new InvalidInputError());
+
+    const question: Question | undefined = res.locals.question;
+    if (!question) return next(new NotFoundError('Question'));
+
+    const [answer] = await question.getAnswers({ where: { id: answerId } });
+    if (!answer) return next(new NotFoundError('Answer'));
+
+    if (answer.answerType === 'exactAnswer') return tryUpdateExactAnswer(req, res, next, answer);
+    if (answer.answerType === 'comparisonAnswer') return tryUpdateComparisonAnswer(req, res, next, answer);
+
+    next();
   } catch (err) {
     next(err);
   }

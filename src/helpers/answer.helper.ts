@@ -2,21 +2,27 @@ import { Request, Response, NextFunction } from 'express';
 
 import Joi from 'joi';
 import { InvalidInputError, NotFoundError } from '../classes/StatusError';
-import { TypedAnswer } from '../models/answer';
+import { Answer, TypedAnswer } from '../models/answer';
 
 import { ExactAnswer, ExactAnswerCreationAttributes } from '../models/exactAnswer';
 import { ComparisonAnswer, ComparisonAnswerCreationAttributes } from '../models/comparisonAnswer';
 import { answerFormatter } from './mapper.helper';
 import { Question } from '../models/question';
+import { AllOptional } from '../types/optional.types';
 
 const exactAnswerSchema = Joi.object({
   answerContent: Joi.string().min(1).max(25).required(),
 });
 
-const comparisonAnswerSchema = Joi.object({
-  greaterThan: Joi.number().positive().required(),
-  lowerThan: Joi.number().positive().min(Joi.ref('greaterThan')).required(),
+const comparisonAnswerCreationSchema = Joi.object({
+  greaterThan: Joi.number().required(),
+  lowerThan: Joi.number().min(Joi.ref('greaterThan')).required(),
 });
+
+const comparisonAnswerUpdateSchema = Joi.object({
+  greaterThan: Joi.number(),
+  lowerThan: Joi.number(),
+}).min(1);
 
 const createAnswer = async (question: Question, createdTypedAnswer: TypedAnswer, _req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -53,6 +59,32 @@ export const tryCreateExactAnswer = async (req: Request, res: Response, next: Ne
   }
 };
 
+export const tryUpdateExactAnswer = async (req: Request, res: Response, next: NextFunction, answer: Answer): Promise<void> => {
+  try {
+    const answerId = req.params.answerId;
+    if (!answerId) return next(new InvalidInputError());
+
+    const {
+      value: validatedExactAnswer,
+      error: validationError,
+    }: {
+      value: ExactAnswerCreationAttributes;
+      error?: Error;
+    } = exactAnswerSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    const exactAnswer = await answer.getExactAnswer();
+    if (!exactAnswer) return next(new NotFoundError('Exact answer'));
+
+    await exactAnswer.update(validatedExactAnswer);
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const tryCreateComparisonAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
@@ -61,7 +93,7 @@ export const tryCreateComparisonAnswer = async (req: Request, res: Response, nex
     }: {
       value: ComparisonAnswerCreationAttributes;
       error?: Error;
-    } = comparisonAnswerSchema.validate(req.body);
+    } = comparisonAnswerCreationSchema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
 
@@ -71,6 +103,41 @@ export const tryCreateComparisonAnswer = async (req: Request, res: Response, nex
     const [createdComparisonAnswer] = await ComparisonAnswer.findOrCreate({ where: validatedComparisonAnswer });
 
     await createAnswer(question, createdComparisonAnswer, req, res, next);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const tryUpdateComparisonAnswer = async (req: Request, res: Response, next: NextFunction, answer: Answer): Promise<void> => {
+  try {
+    const {
+      value: validatedComparisonAnswer,
+      error: validationError,
+    }: {
+      value: AllOptional<ComparisonAnswerCreationAttributes>;
+      error?: Error;
+    } = comparisonAnswerUpdateSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    const comparisonAnswer = await answer.getComparisonAnswer();
+    if (!comparisonAnswer) return next(new NotFoundError('Comparison answer'));
+
+    if (validatedComparisonAnswer.greaterThan && validatedComparisonAnswer.lowerThan) {
+      if (validatedComparisonAnswer.greaterThan >= validatedComparisonAnswer.lowerThan) return next(new InvalidInputError());
+    }
+
+    if (validatedComparisonAnswer.greaterThan) {
+      if (validatedComparisonAnswer.greaterThan >= comparisonAnswer.lowerThan) return next(new InvalidInputError());
+    }
+
+    if (validatedComparisonAnswer.lowerThan) {
+      if (validatedComparisonAnswer.lowerThan <= comparisonAnswer.greaterThan) return next(new InvalidInputError());
+    }
+
+    await comparisonAnswer.update(validatedComparisonAnswer);
+
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

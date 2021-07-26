@@ -15,14 +15,23 @@ import { DuplicationError, InvalidInputError, NotFoundError } from '../../classe
 import { eventFormatter, eventMapper, quizFormatter, quizMapper, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
 import roles from '../../constants/roles';
+import { AllOptional } from '../../types/optional.types';
 
-const schema = Joi.object({
+const creationSchema = Joi.object({
   username: Joi.string().min(5).max(25).required(),
   firstName: Joi.string().min(5).max(25).required(),
   lastName: Joi.string().min(5).max(25).required(),
   password: Joi.string().min(7).max(35).required(),
   gender: Joi.boolean().allow(null),
 });
+
+const updateSchema = Joi.object({
+  username: Joi.string().min(5).max(25),
+  firstName: Joi.string().min(5).max(25),
+  lastName: Joi.string().min(5).max(25),
+  password: Joi.string().min(7).max(35),
+  gender: Joi.boolean().allow(null),
+}).min(1);
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -190,7 +199,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     }: {
       value: UserCreationAttributes;
       error?: Error;
-    } = schema.validate(req.body);
+    } = creationSchema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
 
@@ -201,6 +210,37 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
     const createdUser = await User.create({ ...validatedUser, password });
     res.json(userFormatter(createdUser, 2));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId);
+    if (!user) return next(new NotFoundError('User'));
+
+    const {
+      value: validatedUser,
+      error: validationError,
+    }: {
+      value: AllOptional<UserCreationAttributes>;
+      error?: Error;
+    } = updateSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    if (validatedUser.password) {
+      const password = bcrypt.hashSync(validatedUser.password, 12);
+      await user.update({ ...validatedUser, password });
+    } else {
+      await user.update(validatedUser);
+    }
+
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }
