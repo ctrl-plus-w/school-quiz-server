@@ -55,6 +55,32 @@ export const createVerificationType = async (req: Request, res: Response, next: 
   }
 };
 
+export const updateVerificationType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const verificationTypeId = req.params.verificationTypeId;
+    if (!verificationTypeId) return next(new InvalidInputError());
+
+    const {
+      value: validatedVerificationType,
+      error: validationError,
+    }: {
+      value: VerificationTypeCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
+
+    if (validationError) return next(new InvalidInputError());
+
+    const verificationType = await VerificationType.findByPk(verificationTypeId);
+    if (!verificationType) return next(new NotFoundError('Verification type'));
+
+    await verificationType.update(validatedVerificationType);
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deleteVerificationType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const verificationType = await VerificationType.findByPk(req.params.verificationTypeId);
