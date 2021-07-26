@@ -36,7 +36,7 @@ const updateSchema = Joi.object({
   start: Joi.date().greater(new Date()),
   end: Joi.date().greater(new Date()),
   countdown: Joi.date(),
-});
+}).min(1);
 
 export const getEvents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
