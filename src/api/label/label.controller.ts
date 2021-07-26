@@ -54,6 +54,32 @@ export const createLabel = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const updateLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const labelId = req.params.labelId;
+    if (!labelId) return next(new InvalidInputError());
+
+    const {
+      value: validatedLabel,
+      error: validationError,
+    }: {
+      value: LabelCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
+
+    if (validationError) return next(new InvalidInputError());
+
+    const label = await Label.findByPk(labelId);
+    if (!label) return next(new NotFoundError('Label'));
+
+    await label.update(validatedLabel);
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deleteLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const label = await Label.findByPk(req.params.labelId);
