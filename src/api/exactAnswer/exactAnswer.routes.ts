@@ -2,13 +2,13 @@ import { Router } from 'express';
 
 import { deleteExactAnswer, getExactAnswer, getExactAnswers } from './exactAnswer.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getExactAnswers);
-router.get('/:exactAnswerId', checkIsAdmin, getExactAnswer);
+router.get('/', authorize([checkIsProfessor]), getExactAnswers);
+router.get('/:exactAnswerId', authorize([checkIsProfessor]), getExactAnswer);
 
-router.delete('/:exactAnswerId', checkIsAdmin, deleteExactAnswer);
+router.delete('/:exactAnswerId', authorize([checkIsAdmin]), deleteExactAnswer);
 
 export default router;

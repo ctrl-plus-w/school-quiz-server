@@ -7,15 +7,15 @@ import {
   getVerificationTypes,
 } from './verificationType.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getVerificationTypes);
-router.get('/:verificationTypeId', checkIsAdmin, getVerificationType);
+router.get('/', authorize([checkIsProfessor]), getVerificationTypes);
+router.get('/:verificationTypeId', authorize([checkIsProfessor]), getVerificationType);
 
-router.post('/', checkIsAdmin, createVerificationType);
+router.post('/', authorize([checkIsAdmin]), createVerificationType);
 
-router.delete('/:verificationTypeId', checkIsAdmin, deleteVerificationType);
+router.delete('/:verificationTypeId', authorize([checkIsAdmin]), deleteVerificationType);
 
 export default router;

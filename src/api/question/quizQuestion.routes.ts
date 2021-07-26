@@ -6,7 +6,7 @@ import answerRoutes from '../answer/questionAnswer.routes';
 import userAnswerRoutes from '../userAnswer/questionUserAnswer.routes';
 import choiceRoutes from '../choice/questionChoice.routes';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsProfessor } from '../../middlewares/authorization.middleware';
 import { checkQuizModifyPermission } from '../../middlewares/checkPossesion.middleware';
 import { checkQuestionExists } from '../../middlewares/checkExists.middleware';
 import { checkIsChoice, checkIsTextualOrNumeric, checkQuestionHasType } from '../../middlewares/checkQuestionType';
@@ -15,23 +15,31 @@ const router = Router();
 
 /* Quiz -> Question */
 
-router.get('/', checkIsAdmin, getQuestions);
-router.get('/:questionId', checkIsAdmin, getQuestion);
+router.get('/', authorize([checkIsProfessor]), getQuestions);
+router.get('/:questionId', authorize([checkIsProfessor]), getQuestion);
 
-router.post('/:questionType', checkIsAdmin, checkQuizModifyPermission, createQuestion);
+router.post('/:questionType', authorize([checkIsProfessor, checkQuizModifyPermission]), createQuestion);
 
-router.delete('/:questionId', checkIsAdmin, checkQuizModifyPermission, deleteQuestion);
+router.delete('/:questionId', authorize([checkIsProfessor, checkQuizModifyPermission]), deleteQuestion);
 
 /* Quiz -> Question -> Answer */
 
-router.use('/:questionId/answers', checkQuestionExists, checkQuestionHasType, checkIsTextualOrNumeric, answerRoutes);
+router.use(
+  '/:questionId/answers',
+  authorize([], [checkQuestionExists, checkQuestionHasType, checkIsTextualOrNumeric]),
+  answerRoutes
+);
 
 /* Quiz -> Question -> User Answer */
 
-router.use('/:questionId/userAnswers', checkQuestionExists, userAnswerRoutes);
+router.use('/:questionId/userAnswers', authorize([], [checkQuestionExists]), userAnswerRoutes);
 
 /* Quiz -> Question -> Choice */
 
-router.use('/:questionId/choices', checkQuestionExists, checkQuestionHasType, checkIsChoice, choiceRoutes);
+router.use(
+  '/:questionId/choices',
+  authorize([], [checkQuestionExists, checkQuestionHasType, checkIsChoice]),
+  choiceRoutes
+);
 
 export default router;

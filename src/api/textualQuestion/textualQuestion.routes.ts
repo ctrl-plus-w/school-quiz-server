@@ -2,11 +2,11 @@ import { Router } from 'express';
 
 import { getTextualQuestions } from './textualQuestion.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getTextualQuestions);
-router.get('/:textualQuestionId', checkIsAdmin, getTextualQuestions);
+router.get('/', authorize([checkIsAdmin]), getTextualQuestions);
+router.get('/:textualQuestionId', authorize([checkIsAdmin]), getTextualQuestions);
 
 export default router;

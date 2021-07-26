@@ -8,6 +8,12 @@ export default class StatusError {
   }
 }
 
+export class UnknownError extends StatusError {
+  constructor() {
+    super('Something wrong happened', 400);
+  }
+}
+
 export class AcccessForbiddenError extends StatusError {
   constructor() {
     super(`Access forbidden`, 403);

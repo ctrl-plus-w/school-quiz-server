@@ -2,16 +2,16 @@ import { Router } from 'express';
 
 import { createUserAnswer, deleteUserAnswer, getUserAnswer, getUserAnswers } from './userAnswer.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsProfessor, checkIsStudent } from '../../middlewares/authorization.middleware';
 import { checkQuizModifyPermission } from '../../middlewares/checkPossesion.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getUserAnswers);
-router.get('/:userAnswerId', checkIsAdmin, getUserAnswer);
+router.get('/', authorize([checkIsStudent]), getUserAnswers);
+router.get('/:userAnswerId', authorize([checkIsStudent]), getUserAnswer);
 
-router.post('/', checkIsAdmin, createUserAnswer);
+router.post('/', authorize([checkIsProfessor]), createUserAnswer);
 
-router.delete('/:userAnswerId', checkIsAdmin, checkQuizModifyPermission, deleteUserAnswer);
+router.delete('/:userAnswerId', authorize([checkIsProfessor, checkQuizModifyPermission]), deleteUserAnswer);
 
 export default router;

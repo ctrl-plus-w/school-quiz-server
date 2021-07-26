@@ -11,7 +11,7 @@ import {
   removeCollaborator,
 } from './event.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsProfessor, checkIsStudent } from '../../middlewares/authorization.middleware';
 import { checkEventExists } from '../../middlewares/checkExists.middleware';
 import { checkEventOwner } from '../../middlewares/checkPossesion.middleware';
 
@@ -19,15 +19,20 @@ const router = Router();
 
 /* Event */
 
-router.get('/', checkIsAdmin, getEvents);
-router.get('/:eventId', checkIsAdmin, getEvent);
-router.get('/:eventId/owner', checkIsAdmin, checkEventExists, getEventOwner);
-router.get('/:eventId/collaborators', checkIsAdmin, checkEventExists, getEventCollaborator);
+router.get('/', authorize([checkIsStudent]), getEvents);
+router.get('/:eventId', authorize([checkIsStudent]), getEvent);
+router.get('/:eventId/owner', authorize([checkIsStudent], [checkEventExists]), getEventOwner);
+router.get('/:eventId/collaborators', authorize([checkIsStudent], [checkEventExists]), getEventCollaborator);
 
-router.post('/', checkIsAdmin, createEvent);
-router.post('/:eventId/collaborators', checkIsAdmin, checkEventOwner, addCollaborator);
+router.post('/', authorize([checkIsProfessor]), createEvent);
+router.post('/:eventId/collaborators', authorize([checkIsProfessor, checkEventOwner]), addCollaborator);
 
-router.delete('/:eventId', checkIsAdmin, checkEventOwner, deleteEvent);
-router.delete('/:eventId/collaborators/:collaboratorId', checkIsAdmin, checkEventOwner, removeCollaborator);
+router.delete('/:eventId', authorize([checkIsProfessor, checkEventOwner]), deleteEvent);
+
+router.delete(
+  '/:eventId/collaborators/:collaboratorId',
+  authorize([checkIsProfessor, checkEventOwner]),
+  removeCollaborator
+);
 
 export default router;

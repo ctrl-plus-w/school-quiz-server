@@ -2,15 +2,15 @@ import { Router } from 'express';
 
 import { createLabel, deleteLabel, getLabel, getLabels } from './label.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getLabels);
-router.get('/:labelId', checkIsAdmin, getLabel);
+router.get('/', authorize([checkIsProfessor]), getLabels);
+router.get('/:labelId', authorize([checkIsProfessor]), getLabel);
 
-router.post('/', checkIsAdmin, createLabel);
+router.post('/', authorize([checkIsAdmin]), createLabel);
 
-router.delete('/:labelId', checkIsAdmin, deleteLabel);
+router.delete('/:labelId', authorize([checkIsAdmin]), deleteLabel);
 
 export default router;

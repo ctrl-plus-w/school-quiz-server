@@ -2,15 +2,15 @@ import { Router } from 'express';
 
 import { createState, deleteState, getState, getStates } from './state.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsAdmin, checkIsStudent } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getStates);
-router.get('/:stateId', checkIsAdmin, getState);
+router.get('/', authorize([checkIsStudent]), getStates);
+router.get('/:stateId', authorize([checkIsStudent]), getState);
 
-router.post('/', checkIsAdmin, createState);
+router.post('/', authorize([checkIsAdmin]), createState);
 
-router.delete('/:stateId', checkIsAdmin, deleteState);
+router.delete('/:stateId', authorize([checkIsAdmin]), deleteState);
 
 export default router;

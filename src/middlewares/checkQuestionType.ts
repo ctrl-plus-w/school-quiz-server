@@ -2,36 +2,41 @@ import { Request, Response, NextFunction } from 'express';
 
 import { Question } from '../models/question';
 
-import StatusError, { NotFoundError } from '../classes/StatusError';
+import StatusError, { NotFoundError, UnknownError } from '../classes/StatusError';
 
-type QuestionTypes = 'textualQuestion' | 'numericQuestion' | 'choiceQuestion';
+import { QuestionTypes } from '../types/question.types';
+import { MiddlewareValidationPayload } from '../types/middlewares.types';
 
 export const checkQuestionTypes = (types: Array<QuestionTypes>) => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
     try {
       const question: Question | undefined = res.locals.question;
-      if (!question) return next(new NotFoundError('Question'));
+      if (!question) return [false, new NotFoundError('Question')];
 
       if (!types.some((type) => type === question.questionType))
-        return next(new StatusError('Ressource not found on this type of question', 404));
+        return [false, new StatusError('Ressource not found on this type of question', 404)];
 
-      next();
+      return [true, null];
     } catch (err) {
-      next(err);
+      return err instanceof Error ? [false, err] : [false, new UnknownError()];
     }
   };
 };
 
-export const checkQuestionHasType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const checkQuestionHasType = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<MiddlewareValidationPayload> => {
   try {
     const question: Question | undefined = res.locals.question;
-    if (!question) return next(new NotFoundError('Question'));
+    if (!question) return [false, new NotFoundError('Question')];
 
-    if (!question.questionType) return next(new StatusError("Question doesn't have a type", 404));
+    if (!question.questionType) return [false, new StatusError("Question doesn't have a type", 404)];
 
-    next();
+    return [true, null];
   } catch (err) {
-    next(err);
+    return err instanceof Error ? [false, err] : [false, new UnknownError()];
   }
 };
 

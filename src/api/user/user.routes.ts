@@ -13,21 +13,21 @@ import {
   removeGroup,
 } from './user.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getUsers);
-router.get('/:userId', checkIsAdmin, getUser);
-router.get('/:userId/role', checkIsAdmin, getRole);
-router.get('/:userId/groups', checkIsAdmin, getGroups);
-router.get('/:userId/groups/:groupId', checkIsAdmin, getGroup);
+router.get('/', authorize([checkIsProfessor]), getUsers);
+router.get('/:userId', authorize([checkIsProfessor]), getUser);
+router.get('/:userId/role', authorize([checkIsProfessor]), getRole);
+router.get('/:userId/groups', authorize([checkIsProfessor]), getGroups);
+router.get('/:userId/groups/:groupId', authorize([checkIsProfessor]), getGroup);
 
-router.post('/', checkIsAdmin, createUser);
-router.post('/:userId/role', checkIsAdmin, setRole);
-router.post('/:userId/groups', checkIsAdmin, addGroup);
+router.post('/', authorize([checkIsAdmin]), createUser);
+router.post('/:userId/role', authorize([checkIsAdmin]), setRole);
+router.post('/:userId/groups', authorize([checkIsAdmin]), addGroup);
 
-router.delete('/:userId', checkIsAdmin, deleteUser);
-router.delete('/:userId/groups', checkIsAdmin, removeGroup);
+router.delete('/:userId', authorize([checkIsAdmin]), deleteUser);
+router.delete('/:userId/groups', authorize([checkIsAdmin]), removeGroup);
 
 export default router;

@@ -11,19 +11,19 @@ import {
   removeLabel,
 } from './group.controller';
 
-import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
 
 const router = Router();
 
-router.get('/', checkIsAdmin, getGroups);
-router.get('/:groupId', checkIsAdmin, getGroup);
-router.get('/:groupId/labels', checkIsAdmin, getGroupLabels);
-router.get('/:groupId/labels/:labelId', checkIsAdmin, getGroupLabel);
+router.get('/', authorize([checkIsProfessor]), getGroups);
+router.get('/:groupId', authorize([checkIsProfessor]), getGroup);
+router.get('/:groupId/labels', authorize([checkIsProfessor]), getGroupLabels);
+router.get('/:groupId/labels/:labelId', authorize([checkIsProfessor]), getGroupLabel);
 
-router.post('/', checkIsAdmin, createGroup);
-router.post('/:groupId/labels', checkIsAdmin, addLabel);
+router.post('/', authorize([checkIsAdmin]), createGroup);
+router.post('/:groupId/labels', authorize([checkIsAdmin]), addLabel);
 
-router.delete('/:groupId', checkIsAdmin, deleteGroup);
-router.delete('/:groupId/labels', checkIsAdmin, removeLabel);
+router.delete('/:groupId', authorize([checkIsAdmin]), deleteGroup);
+router.delete('/:groupId/labels', authorize([checkIsAdmin]), removeLabel);
 
 export default router;
