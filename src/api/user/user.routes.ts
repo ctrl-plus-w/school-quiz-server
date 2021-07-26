@@ -3,11 +3,11 @@ import { Router } from 'express';
 import {
   createUser,
   deleteUser,
-  getRole,
+  getUserRole,
   getUser,
   getUsers,
-  getGroups,
-  getGroup,
+  getUserGroups,
+  getUserGroup,
   setRole,
   addGroup,
   removeGroup,
@@ -19,9 +19,9 @@ const router = Router();
 
 router.get('/', authorize([checkIsProfessor]), getUsers);
 router.get('/:userId', authorize([checkIsProfessor]), getUser);
-router.get('/:userId/role', authorize([checkIsProfessor]), getRole);
-router.get('/:userId/groups', authorize([checkIsProfessor]), getGroups);
-router.get('/:userId/groups/:groupId', authorize([checkIsProfessor]), getGroup);
+router.get('/:userId/role', authorize([checkIsProfessor]), getUserRole);
+router.get('/:userId/groups', authorize([checkIsProfessor]), getUserGroups);
+router.get('/:userId/groups/:groupId', authorize([checkIsProfessor]), getUserGroup);
 
 router.post('/', authorize([checkIsAdmin]), createUser);
 router.post('/:userId/role', authorize([checkIsAdmin]), setRole);

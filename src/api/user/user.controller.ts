@@ -52,7 +52,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
   }
 };
 
-export const getGroups = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserGroups = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.params.userId;
     if (!userId) return next(new InvalidInputError());
@@ -66,7 +66,7 @@ export const getGroups = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export const getGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.params.userId;
     const groupId = req.params.groupId;
@@ -84,7 +84,7 @@ export const getGroup = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
-export const getRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.params.userId;
     if (!userId) return next(new InvalidInputError());
