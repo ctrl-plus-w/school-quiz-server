@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Op, WhereOptions } from 'sequelize';
+import { Op } from 'sequelize';
 
 import Joi from 'joi';
 
@@ -21,13 +21,21 @@ import {
 import { eventFormatter, eventMapper, quizFormatter } from '../../helpers/mapper.helper';
 
 import roles from '../../constants/roles';
+import { AllOptional } from '../../types/optional.types';
+import { getEventDateConditions } from '../../helpers/event.helper';
 
-const schema = Joi.object({
+const createSchema = Joi.object({
   start: Joi.date().required().greater(new Date()),
   end: Joi.date().greater(Joi.ref('start')).required(),
   countdown: Joi.date().required(),
   groupId: Joi.number().required(),
   quizId: Joi.number().required(),
+});
+
+const updateSchema = Joi.object({
+  start: Joi.date().greater(new Date()),
+  end: Joi.date().greater(new Date()),
+  countdown: Joi.date(),
 });
 
 export const getEvents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -142,7 +150,7 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     }: {
       value: EventCreationAttributes;
       error?: Error;
-    } = schema.validate(req.body);
+    } = createSchema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
 
@@ -155,32 +163,11 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findByPk(res.locals.jwt.userId);
     if (!user) return next(new NotFoundError('User'));
 
-    const groupUsers = await group.getUsers({ attributes: ['id'] });
-    const groupUsersId = groupUsers.map((user) => user.id);
-
-    const relatedGroups = await Group.findAll({
-      include: { model: User, where: { id: groupUsersId }, attributes: ['id'] },
-    });
-
-    const relatedGroupsId = relatedGroups.reduce((acc: Array<number>, curr: Group) => {
-      return !acc.includes(curr.id) ? [...acc, curr.id] : acc;
-    }, []);
-
-    const eventConditions: WhereOptions = {
-      [Op.or]: [
-        // Get every events that ends between the datetimes
-        { end: { [Op.gte]: validatedEvent.start, [Op.lte]: validatedEvent.end } },
-        // Get every events that starts between the datetimes
-        { start: { [Op.gte]: validatedEvent.start, [Op.lte]: validatedEvent.end } },
-        // Get every events that start between and ends after the datetimes
-        { start: { [Op.lte]: validatedEvent.start }, end: { [Op.gte]: validatedEvent.end } },
-        // Get every events that start after and ends before the datetimes
-        { start: { [Op.gte]: validatedEvent.start }, end: { [Op.lte]: validatedEvent.end } },
-      ],
-    };
+    const relatedGroups = await group.getRelatedGroups();
+    const relatedGroupsId = relatedGroups.map((group) => group.id);
 
     const events = await Event.findAll({
-      where: eventConditions,
+      where: getEventDateConditions(validatedEvent.start, validatedEvent.end),
       include: { model: Group, where: { id: relatedGroupsId } },
     });
 
@@ -196,6 +183,48 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     await createdEvent.setGroup(group);
 
     res.json(eventFormatter(createdEvent, user, undefined, group, quiz));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const eventId = req.params.eventId;
+    if (!eventId) return next(new InvalidInputError());
+
+    const {
+      value: validatedEvent,
+      error: validationError,
+    }: {
+      value: AllOptional<EventCreationAttributes>;
+      error?: Error;
+    } = updateSchema.validate(req.body);
+
+    const event = await Event.findByPk(eventId);
+    if (!event) return next(new NotFoundError('Event'));
+
+    if (validationError) return next(new InvalidInputError());
+
+    const group = await event.getGroup();
+    if (!group) return next(new NotFoundError('Group'));
+
+    const relatedGroups = await group.getRelatedGroups();
+    const relatedGroupsId = relatedGroups.map((group) => group.id);
+
+    const start = validatedEvent.start || event.start;
+    const end = validatedEvent.end || event.end;
+
+    const events = await Event.findAll({
+      where: { ...getEventDateConditions(start, end), id: { [Op.not]: event.id } },
+      include: { model: Group, where: { id: relatedGroupsId } },
+    });
+
+    if (events.length > 0) return next(new DuplicationError('Event'));
+
+    await event.update(validatedEvent);
+
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

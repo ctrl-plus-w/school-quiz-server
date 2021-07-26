@@ -11,6 +11,7 @@ import {
   getEventQuiz,
   getEvents,
   removeCollaborator,
+  updateEvent,
 } from './event.controller';
 
 import { authorize, checkIsProfessor, checkIsStudent } from '../../middlewares/authorization.middleware';
@@ -32,8 +33,9 @@ router.get('/:eventId/group', authorize([checkIsStudent], [checkEventExists]), g
 router.post('/', authorize([checkIsProfessor]), createEvent);
 router.post('/:eventId/collaborators', authorize([checkIsProfessor, checkEventOwner]), addCollaborator);
 
-router.delete('/:eventId', authorize([checkIsProfessor, checkEventOwner]), deleteEvent);
+router.put('/:eventId', authorize([checkIsProfessor, checkEventOwner]), updateEvent);
 
+router.delete('/:eventId', authorize([checkIsProfessor, checkEventOwner]), deleteEvent);
 router.delete('/:eventId/collaborators/:collaboratorId', authorize([checkIsProfessor, checkEventOwner]), removeCollaborator);
 
 export default router;

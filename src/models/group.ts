@@ -7,6 +7,7 @@ import {
   BelongsToManyAddAssociationsMixin,
   BelongsToManyRemoveAssociationMixin,
   BelongsToManyGetAssociationsMixin,
+  FindAttributeOptions,
 } from 'sequelize';
 
 import { Label } from './label';
@@ -37,6 +38,8 @@ export class Group extends Model<GroupAttributes, GroupCreationAttributes> imple
 
   /* Users property */
   public getUsers!: BelongsToManyGetAssociationsMixin<User>;
+
+  public getRelatedGroups!: (attributes?: FindAttributeOptions) => Promise<Array<Group>>;
 }
 
 export default (sequelize: Sequelize): typeof Group => {
@@ -63,6 +66,14 @@ export default (sequelize: Sequelize): typeof Group => {
       tableName: 'Group',
     }
   );
+
+  Group.prototype.getRelatedGroups = async function (attributes?: FindAttributeOptions) {
+    const groupUsers = await this.getUsers({ attributes: ['id'] });
+    const groupUsersId = groupUsers.map((user) => user.id);
+
+    const relatedGroups = Group.findAll({ include: { model: User, where: { id: groupUsersId }, attributes: ['id'] }, attributes });
+    return relatedGroups;
+  };
 
   return Group;
 };
