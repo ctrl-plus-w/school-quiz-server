@@ -57,6 +57,32 @@ export const createState = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const updateState = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const stateId = req.params.stateId;
+    if (!stateId) return next(new InvalidInputError());
+
+    const {
+      value: validatedState,
+      error: validationError,
+    }: {
+      value: StateCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
+
+    if (validationError) return next(new InvalidInputError());
+
+    const state = await State.findByPk(stateId);
+    if (!state) return next(new NotFoundError('State'));
+
+    await state.update(validatedState);
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deleteState = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const stateId = req.params.stateId;
