@@ -83,6 +83,32 @@ export const createGroup = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const updateGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const groupId = req.params.groupId;
+    if (!groupId) return next(new InvalidInputError());
+
+    const {
+      value: validatedGroup,
+      error: validationError,
+    }: {
+      value: GroupCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
+
+    if (validationError) return next(new InvalidInputError());
+
+    const group = await Group.findByPk(groupId);
+    if (!group) return next(new NotFoundError('Group'));
+
+    await group.update(validatedGroup);
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const addLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const groupId = req.params.groupId;
