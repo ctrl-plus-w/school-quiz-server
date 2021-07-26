@@ -290,6 +290,31 @@ export const setRole = async (req: Request, res: Response, next: NextFunction): 
   }
 };
 
+export const setState = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+    const stateId = req.body.stateId;
+    if (!userId || !stateId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId, { include: State });
+    if (!user) return next(new NotFoundError('User'));
+
+    const actualState = await user.getState({ attributes: ['id'] });
+    if (!actualState) return next(new NotFoundError('State'));
+
+    if (actualState.id === stateId) return next(new DuplicationError('State'));
+
+    const state = await State.findByPk(stateId);
+    if (!state) return next(new NotFoundError('State'));
+
+    await user.setState(state);
+
+    res.json({ set: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = await User.findByPk(req.params.userId);
