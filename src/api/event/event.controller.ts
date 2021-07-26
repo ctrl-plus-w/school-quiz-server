@@ -8,6 +8,7 @@ import { User } from '../../models/user';
 import { Group } from '../../models/group';
 import { Quiz } from '../../models/quiz';
 import { Role } from '../../models/role';
+import { Question } from '../../models/question';
 
 import {
   DuplicationError,
@@ -17,7 +18,7 @@ import {
   NotFoundError,
 } from '../../classes/StatusError';
 
-import { eventFormatter, eventMapper } from '../../helpers/mapper.helper';
+import { eventFormatter, eventMapper, quizFormatter } from '../../helpers/mapper.helper';
 
 import roles from '../../constants/roles';
 
@@ -46,8 +47,8 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction):
     const event = await Event.findByPk(eventId, { include: [Quiz, Group] });
     if (!event) return next(new NotFoundError('Event'));
 
-    const owner = await event?.getOwner();
-    const collaborators = await event?.getCollaborators();
+    const owner = await event.getOwner();
+    const collaborators = await event.getCollaborators();
 
     res.json(eventFormatter(event, owner, collaborators));
   } catch (err) {
@@ -87,8 +88,47 @@ export const getEventCollaborator = async (req: Request, res: Response, next: Ne
     const event: Event | undefined = res.locals.event;
     if (!event) return next(new NotFoundError('Event'));
 
-    const collaborators = await event.getCollaborators();
-    res.json(collaborators.find((user) => user.id === parseInt(userId)));
+    const collaborators = await event.getCollaborators({ where: { id: userId } });
+    if (collaborators.length === 0) return next(new NotFoundError('Collaborator'));
+
+    res.json(collaborators[0]);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getEventGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.collaboratorId;
+    if (!userId) return next(new InvalidInputError());
+
+    const event: Event | undefined = res.locals.event;
+    if (!event) return next(new NotFoundError('Event'));
+
+    const group = await event.getGroup();
+    if (!group) return next(new NotFoundError('Group'));
+
+    res.json(group);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getEventQuiz = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.collaboratorId;
+    if (!userId) return next(new InvalidInputError());
+
+    const event: Event | undefined = res.locals.event;
+    if (!event) return next(new NotFoundError('Event'));
+
+    const quiz = await event.getQuiz({ include: Question });
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const owner = await quiz?.getOwner();
+    const collaborators = await quiz?.getCollaborators();
+
+    res.json(quizFormatter(quiz, owner, collaborators));
   } catch (err) {
     next(err);
   }

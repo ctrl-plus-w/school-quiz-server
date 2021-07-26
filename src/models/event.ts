@@ -8,6 +8,7 @@ import {
   DataTypes,
   HasOneGetAssociationMixin,
   BelongsToManyGetAssociationsMixin,
+  BelongsToGetAssociationMixin,
 } from 'sequelize';
 
 import { Group } from './group';
@@ -52,9 +53,11 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public readonly updatedAt!: Date;
 
   /* Quiz property */
+  public getQuiz!: BelongsToGetAssociationMixin<Quiz>;
   public setQuiz!: BelongsToSetAssociationMixin<Quiz, number>;
 
   /* Group property */
+  public getGroup!: BelongsToGetAssociationMixin<Group>;
   public setGroup!: BelongsToSetAssociationMixin<Group, number>;
 
   /* Owner property */
