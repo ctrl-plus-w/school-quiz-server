@@ -12,7 +12,15 @@ import { Event } from '../../models/event';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
-import { userFormatter, userMapper } from '../../helpers/mapper.helper';
+import {
+  eventFormatter,
+  eventMapper,
+  quizFormatter,
+  quizMapper,
+  userFormatter,
+  userMapper,
+} from '../../helpers/mapper.helper';
+
 import roles from '../../constants/roles';
 
 const schema = Joi.object({
@@ -57,10 +65,11 @@ export const getUserGroups = async (req: Request, res: Response, next: NextFunct
     const userId = req.params.userId;
     if (!userId) return next(new InvalidInputError());
 
-    const user = await User.findByPk(userId, { include: Group });
+    const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    res.json(user.groups);
+    const groups = await user.getGroups();
+    res.json(groups);
   } catch (err) {
     next(err);
   }
@@ -72,13 +81,13 @@ export const getUserGroup = async (req: Request, res: Response, next: NextFuncti
     const groupId = req.params.groupId;
     if (!userId || !groupId) return next(new InvalidInputError());
 
-    const user = await User.findByPk(userId, { include: Group });
+    const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const group = user.groups?.find((group) => group.id === +groupId);
-    if (!group) return next(new NotFoundError('Group'));
+    const groups = await user.getGroups({ where: { id: groupId } });
+    if (groups.length === 0) return next(new NotFoundError('Group'));
 
-    res.json(group);
+    res.json(groups[0]);
   } catch (err) {
     next(err);
   }
@@ -89,13 +98,92 @@ export const getUserRole = async (req: Request, res: Response, next: NextFunctio
     const userId = req.params.userId;
     if (!userId) return next(new InvalidInputError());
 
-    const user = await User.findByPk(userId, { include: Role });
+    const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const role = user.role;
-    if (!role) return next(new NotFoundError('Role'));
-
+    const role = await user.getRole();
     res.json(role);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserState = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const state = await user.getState();
+    res.json(state);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserQuizzes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const quizzes = await user.getQuizzes();
+    res.json(quizMapper(quizzes));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserQuiz = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const quizId = req.params.quizId;
+    const userId = req.params.userId;
+    if (!userId || !quizId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const quizzes = await user.getQuizzes({ where: { id: quizId } });
+    if (quizzes.length === 0) return next(new NotFoundError('Quiz'));
+
+    res.json(quizFormatter(quizzes[0]));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserEvents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const events = await user.getEvents();
+    res.json(eventMapper(events));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const eventId = req.params.eventId;
+    const userId = req.params.userId;
+    if (!userId || !eventId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const events = await user.getEvents({ where: { id: eventId } });
+    if (events.length === 0) return next(new NotFoundError('Event'));
+
+    res.json(eventFormatter(events[0]));
   } catch (err) {
     next(err);
   }

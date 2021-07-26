@@ -10,6 +10,8 @@ import {
   HasManyCreateAssociationMixin,
   BelongsToManyCreateAssociationMixin,
   BelongsToManyGetAssociationsMixin,
+  BelongsToGetAssociationMixin,
+  HasManyGetAssociationsMixin,
 } from 'sequelize';
 
 import { Role } from './role';
@@ -59,15 +61,18 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public readonly updatedAt!: Date;
 
   /* Role properties */
+  public getRole!: BelongsToGetAssociationMixin<Role>;
   public setRole!: BelongsToSetAssociationMixin<Role, number>;
   public removeRole!: BelongsToSetAssociationMixin<Role, number>;
 
   /* Group properties */
+  public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
   public addGroup!: BelongsToManyAddAssociationMixin<Group, number>;
   public addGroups!: BelongsToManyAddAssociationsMixin<Group, number>;
   public removeGroup!: BelongsToManyRemoveAssociationMixin<Group, number>;
 
   /* State property */
+  public getState!: BelongsToGetAssociationMixin<State>;
   public setState!: BelongsToSetAssociationMixin<State, number>;
 
   /* Event properties */
@@ -78,6 +83,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
 
   /* Quiz properties */
+  public getQuizzes!: HasManyGetAssociationsMixin<Quiz>;
   public createQuiz!: HasManyCreateAssociationMixin<Quiz>;
 }
 
