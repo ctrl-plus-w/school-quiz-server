@@ -10,10 +10,7 @@ interface ComparisonAnswerAttributes {
 
 export type ComparisonAnswerCreationAttributes = Optional<ComparisonAnswerAttributes, 'id'>;
 
-export class ComparisonAnswer
-  extends Model<ComparisonAnswerAttributes, ComparisonAnswerCreationAttributes>
-  implements ComparisonAnswerAttributes
-{
+export class ComparisonAnswer extends Model<ComparisonAnswerAttributes, ComparisonAnswerCreationAttributes> implements ComparisonAnswerAttributes {
   public id!: number;
   public greaterThan!: number;
   public lowerThan!: number;

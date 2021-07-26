@@ -8,11 +8,7 @@ import { AcccessForbiddenError, InvalidInputError, NotFoundError, UnknownError }
 
 import { MiddlewareValidationPayload } from '../types/middlewares.types';
 
-export const checkQuizOwner = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkQuizOwner = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];
@@ -37,11 +33,7 @@ export const checkQuizOwner = async (
   }
 };
 
-export const checkQuizModifyPermission = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkQuizModifyPermission = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];
@@ -69,11 +61,7 @@ export const checkQuizModifyPermission = async (
   }
 };
 
-export const checkEventOwner = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkEventOwner = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];
@@ -99,11 +87,7 @@ export const checkEventOwner = async (
   }
 };
 
-export const checkEventModifyPermission = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkEventModifyPermission = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];

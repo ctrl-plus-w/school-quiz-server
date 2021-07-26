@@ -75,8 +75,7 @@ export const getChoice = async (req: Request, res: Response, next: NextFunction)
 
     if (!choiceQuestion) return next(new NotFoundError('Choice question'));
 
-    if (!choiceQuestion?.choices?.some((choice) => choice.id === parseInt(choiceId)))
-      return next(new NotFoundError('Choice'));
+    if (!choiceQuestion?.choices?.some((choice) => choice.id === parseInt(choiceId))) return next(new NotFoundError('Choice'));
 
     const choice = await Choice.findByPk(choiceId);
     if (!choice) return next(new NotFoundError('Choice'));
@@ -111,8 +110,7 @@ export const createChoice = async (req: Request, res: Response, next: NextFuncti
 
     if (!choiceQuestion) return next(new NotFoundError('Choice question'));
 
-    if (choiceQuestion.choices?.some((choice) => choice.slug === validatedChoice.slug))
-      return next(new DuplicationError('Choice'));
+    if (choiceQuestion.choices?.some((choice) => choice.slug === validatedChoice.slug)) return next(new DuplicationError('Choice'));
 
     const createdChoice = await choiceQuestion.createChoice(validatedChoice);
 

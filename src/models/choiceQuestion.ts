@@ -28,10 +28,7 @@ interface ChoiceQuestionDataValues extends ChoiceQuestionAttributes {
 
 export type ChoiceQuestionCreationAttributes = Optional<ChoiceQuestionAttributes, 'id'>;
 
-export class ChoiceQuestion
-  extends Model<ChoiceQuestionAttributes, ChoiceQuestionCreationAttributes>
-  implements ChoiceQuestionAttributes
-{
+export class ChoiceQuestion extends Model<ChoiceQuestionAttributes, ChoiceQuestionCreationAttributes> implements ChoiceQuestionAttributes {
   public id!: number;
   public shuffle!: boolean;
 

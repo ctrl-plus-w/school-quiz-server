@@ -11,11 +11,7 @@ import { InvalidInputError, NotFoundError, UnknownError } from '../classes/Statu
 
 import { MiddlewareValidationPayload } from '../types/middlewares.types';
 
-export const checkEventExists = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkEventExists = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const eventId = req.params.eventId;
     if (!eventId) return [false, new InvalidInputError()];
@@ -31,11 +27,7 @@ export const checkEventExists = async (
   }
 };
 
-export const checkQuizExists = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkQuizExists = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const quizId = req.params.quizId;
     if (!quizId) return [false, new InvalidInputError()];
@@ -51,11 +43,7 @@ export const checkQuizExists = async (
   }
 };
 
-export const checkQuestionExists = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkQuestionExists = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const questionId = req.params.questionId;
     if (!questionId) return [false, new InvalidInputError()];

@@ -62,8 +62,7 @@ export const getAnswer = async (req: Request, res: Response, next: NextFunction)
     if (!question) return next(new NotFoundError('Question'));
 
     // Fetch the answer from the getAnswers() property.
-    if (!question?.answers?.some((answer) => answer.id === parseInt(answerId)))
-      return next(new NotFoundError('Answer'));
+    if (!question?.answers?.some((answer) => answer.id === parseInt(answerId))) return next(new NotFoundError('Answer'));
 
     const answer = await Answer.findByPk(answerId, { include: [ExactAnswer, ComparisonAnswer] });
     if (!answer) return next(new NotFoundError('Answer'));

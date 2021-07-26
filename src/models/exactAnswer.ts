@@ -9,10 +9,7 @@ interface ExactAnswerAttributes {
 
 export type ExactAnswerCreationAttributes = Optional<ExactAnswerAttributes, 'id'>;
 
-export class ExactAnswer
-  extends Model<ExactAnswerAttributes, ExactAnswerCreationAttributes>
-  implements ExactAnswerAttributes
-{
+export class ExactAnswer extends Model<ExactAnswerAttributes, ExactAnswerCreationAttributes> implements ExactAnswerAttributes {
   public id!: number;
   public answerContent!: string;
 

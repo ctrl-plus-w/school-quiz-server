@@ -1,11 +1,4 @@
-import {
-  HasOneCreateAssociationMixin,
-  BelongsToSetAssociationMixin,
-  Sequelize,
-  Optional,
-  Model,
-  DataTypes,
-} from 'sequelize';
+import { HasOneCreateAssociationMixin, BelongsToSetAssociationMixin, Sequelize, Optional, Model, DataTypes } from 'sequelize';
 
 import { Question } from './question';
 import { VerificationType } from './verificationType';
@@ -26,10 +19,7 @@ interface TextualQuestionDataValues extends TextualQuestionAttributes {
 
 export type TextualQuestionCreationAttributes = Optional<TextualQuestionAttributes, 'id'>;
 
-export class TextualQuestion
-  extends Model<TextualQuestionAttributes, TextualQuestionCreationAttributes>
-  implements TextualQuestionAttributes
-{
+export class TextualQuestion extends Model<TextualQuestionAttributes, TextualQuestionCreationAttributes> implements TextualQuestionAttributes {
   public id!: number;
 
   public caseSensitive!: boolean;

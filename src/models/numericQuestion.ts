@@ -1,11 +1,4 @@
-import {
-  BelongsToSetAssociationMixin,
-  DataTypes,
-  HasOneCreateAssociationMixin,
-  Optional,
-  Sequelize,
-  Model,
-} from 'sequelize';
+import { BelongsToSetAssociationMixin, DataTypes, HasOneCreateAssociationMixin, Optional, Sequelize, Model } from 'sequelize';
 
 import { Question } from './question';
 import { QuestionSpecification } from './questionSpecification';
@@ -22,10 +15,7 @@ interface NumericQuestionDataValues extends NumericQuestionAttributes {
 
 export type NumericQuestionCreationAttributes = Optional<NumericQuestionAttributes, 'id'>;
 
-export class NumericQuestion
-  extends Model<NumericQuestionAttributes, NumericQuestionCreationAttributes>
-  implements NumericQuestionAttributes
-{
+export class NumericQuestion extends Model<NumericQuestionAttributes, NumericQuestionCreationAttributes> implements NumericQuestionAttributes {
   public id!: number;
 
   public questionSpecification!: QuestionSpecification;

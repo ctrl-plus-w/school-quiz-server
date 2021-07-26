@@ -68,11 +68,7 @@ export const questionMapper = (questions?: Array<Question>): Array<FormattedQues
   return questions?.map(questionFormatter).filter(isNotNull);
 };
 
-export const quizFormatter = (
-  quiz?: Quiz | null,
-  owner?: User,
-  collaborators?: Array<User>
-): FormattedQuiz | undefined => {
+export const quizFormatter = (quiz?: Quiz | null, owner?: User, collaborators?: Array<User>): FormattedQuiz | undefined => {
   return quiz
     ? {
         id: quiz.id,

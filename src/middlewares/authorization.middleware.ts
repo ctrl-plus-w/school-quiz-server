@@ -6,10 +6,7 @@ import { MiddlewareFunction, MiddlewareValidationPayload } from '../types/middle
 
 import roles from '../constants/roles';
 
-export const authorize = (
-  bypassedMiddlewares: Array<MiddlewareFunction>,
-  middlewares: Array<MiddlewareFunction> = []
-) => {
+export const authorize = (bypassedMiddlewares: Array<MiddlewareFunction>, middlewares: Array<MiddlewareFunction> = []) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       for (const middleware of middlewares) {
@@ -33,8 +30,7 @@ export const authorize = (
 const checkPermission = (permission: number) => {
   return async (_req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
     try {
-      const hasPermission =
-        !res.locals.jwt || !res.locals.jwt.rolePermission || res.locals.jwt.rolePermission < permission;
+      const hasPermission = !res.locals.jwt || !res.locals.jwt.rolePermission || res.locals.jwt.rolePermission < permission;
 
       return hasPermission ? [true, null] : [false, new AcccessForbiddenError()];
     } catch (err) {

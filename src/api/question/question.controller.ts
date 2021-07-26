@@ -18,11 +18,7 @@ import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { questionFormatter, questionMapper } from '../../helpers/mapper.helper';
 
-import {
-  tryCreateChoiceQuestion,
-  tryCreateNumericQuestion,
-  tryCreateTextualQuestion,
-} from '../../helpers/question.helper';
+import { tryCreateChoiceQuestion, tryCreateNumericQuestion, tryCreateTextualQuestion } from '../../helpers/question.helper';
 
 interface QuestionTypes {
   [questionType: string]: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -115,8 +111,7 @@ export const createQuestion = async (req: Request, res: Response, next: NextFunc
     };
 
     const questionType = req.params.questionType;
-    if (!questionType || !Object.keys(questionTypes).includes(questionType?.toLowerCase()))
-      return next(new InvalidInputError());
+    if (!questionType || !Object.keys(questionTypes).includes(questionType?.toLowerCase())) return next(new InvalidInputError());
 
     await questionTypes[questionType](req, res, next);
   } catch (err) {

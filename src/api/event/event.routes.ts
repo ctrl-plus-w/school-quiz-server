@@ -25,11 +25,7 @@ router.get('/', authorize([checkIsStudent]), getEvents);
 router.get('/:eventId', authorize([checkIsStudent]), getEvent);
 router.get('/:eventId/owner', authorize([checkIsStudent], [checkEventExists]), getEventOwner);
 router.get('/:eventId/collaborators', authorize([checkIsStudent], [checkEventExists]), getEventCollaborator);
-router.get(
-  '/:eventId/collaborators/:collaboratorId',
-  authorize([checkIsStudent], [checkEventExists]),
-  getEventCollaborator
-);
+router.get('/:eventId/collaborators/:collaboratorId', authorize([checkIsStudent], [checkEventExists]), getEventCollaborator);
 router.get('/:eventId/quiz', authorize([checkIsStudent], [checkEventExists]), getEventQuiz);
 router.get('/:eventId/group', authorize([checkIsStudent], [checkEventExists]), getEventGroup);
 
@@ -38,10 +34,6 @@ router.post('/:eventId/collaborators', authorize([checkIsProfessor, checkEventOw
 
 router.delete('/:eventId', authorize([checkIsProfessor, checkEventOwner]), deleteEvent);
 
-router.delete(
-  '/:eventId/collaborators/:collaboratorId',
-  authorize([checkIsProfessor, checkEventOwner]),
-  removeCollaborator
-);
+router.delete('/:eventId/collaborators/:collaboratorId', authorize([checkIsProfessor, checkEventOwner]), removeCollaborator);
 
 export default router;

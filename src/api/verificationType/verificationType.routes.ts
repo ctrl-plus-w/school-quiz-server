@@ -1,11 +1,6 @@
 import { Router } from 'express';
 
-import {
-  createVerificationType,
-  deleteVerificationType,
-  getVerificationType,
-  getVerificationTypes,
-} from './verificationType.controller';
+import { createVerificationType, deleteVerificationType, getVerificationType, getVerificationTypes } from './verificationType.controller';
 
 import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
 

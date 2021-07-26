@@ -12,14 +12,7 @@ import { Event } from '../../models/event';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
-import {
-  eventFormatter,
-  eventMapper,
-  quizFormatter,
-  quizMapper,
-  userFormatter,
-  userMapper,
-} from '../../helpers/mapper.helper';
+import { eventFormatter, eventMapper, quizFormatter, quizMapper, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
 import roles from '../../constants/roles';
 

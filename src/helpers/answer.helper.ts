@@ -18,13 +18,7 @@ const comparisonAnswerSchema = Joi.object({
   lowerThan: Joi.number().positive().min(Joi.ref('greaterThan')).required(),
 });
 
-const createAnswer = async (
-  question: Question,
-  createdTypedAnswer: TypedAnswer,
-  _req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+const createAnswer = async (question: Question, createdTypedAnswer: TypedAnswer, _req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const createdAnswer = await createdTypedAnswer.createAnswer();
 

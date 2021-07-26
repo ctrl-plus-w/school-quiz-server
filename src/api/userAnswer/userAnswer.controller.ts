@@ -64,8 +64,7 @@ export const getUserAnswer = async (req: Request, res: Response, next: NextFunct
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    if (!question.userAnswers?.some((userAnswer) => userAnswer.id === parseInt(userAnswerId)))
-      return next(new NotFoundError('User answer'));
+    if (!question.userAnswers?.some((userAnswer) => userAnswer.id === parseInt(userAnswerId))) return next(new NotFoundError('User answer'));
 
     const userAnswer = await UserAnswer.findByPk(userAnswerId);
     if (!userAnswer) return next(new NotFoundError('User answer'));

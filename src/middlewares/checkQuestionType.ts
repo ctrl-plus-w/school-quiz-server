@@ -13,8 +13,7 @@ export const checkQuestionTypes = (types: Array<QuestionTypes>) => {
       const question: Question | undefined = res.locals.question;
       if (!question) return [false, new NotFoundError('Question')];
 
-      if (!types.some((type) => type === question.questionType))
-        return [false, new StatusError('Ressource not found on this type of question', 404)];
+      if (!types.some((type) => type === question.questionType)) return [false, new StatusError('Ressource not found on this type of question', 404)];
 
       return [true, null];
     } catch (err) {
@@ -23,11 +22,7 @@ export const checkQuestionTypes = (types: Array<QuestionTypes>) => {
   };
 };
 
-export const checkQuestionHasType = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<MiddlewareValidationPayload> => {
+export const checkQuestionHasType = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const question: Question | undefined = res.locals.question;
     if (!question) return [false, new NotFoundError('Question')];

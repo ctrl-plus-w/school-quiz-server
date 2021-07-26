@@ -24,11 +24,7 @@ router.delete('/:questionId', authorize([checkIsProfessor, checkQuizModifyPermis
 
 /* Quiz -> Question -> Answer */
 
-router.use(
-  '/:questionId/answers',
-  authorize([], [checkQuestionExists, checkQuestionHasType, checkIsTextualOrNumeric]),
-  answerRoutes
-);
+router.use('/:questionId/answers', authorize([], [checkQuestionExists, checkQuestionHasType, checkIsTextualOrNumeric]), answerRoutes);
 
 /* Quiz -> Question -> User Answer */
 
@@ -36,10 +32,6 @@ router.use('/:questionId/userAnswers', authorize([], [checkQuestionExists]), use
 
 /* Quiz -> Question -> Choice */
 
-router.use(
-  '/:questionId/choices',
-  authorize([], [checkQuestionExists, checkQuestionHasType, checkIsChoice]),
-  choiceRoutes
-);
+router.use('/:questionId/choices', authorize([], [checkQuestionExists, checkQuestionHasType, checkIsChoice]), choiceRoutes);
 
 export default router;

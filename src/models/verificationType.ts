@@ -8,10 +8,7 @@ interface VerificationTypeAttributes {
 
 export type VerificationTypeCreationAttributes = Optional<VerificationTypeAttributes, 'id'>;
 
-export class VerificationType
-  extends Model<VerificationTypeAttributes, VerificationTypeCreationAttributes>
-  implements VerificationTypeAttributes
-{
+export class VerificationType extends Model<VerificationTypeAttributes, VerificationTypeCreationAttributes> implements VerificationTypeAttributes {
   public id!: number;
   public slug!: string;
   public name!: string;

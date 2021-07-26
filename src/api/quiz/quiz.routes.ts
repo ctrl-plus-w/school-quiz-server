@@ -26,21 +26,13 @@ router.get('/', authorize([checkIsStudent]), getQuizzes);
 router.get('/:quizId', authorize([checkIsStudent]), getQuiz);
 router.get('/:quizId/owner', authorize([checkIsStudent], [checkQuizExists]), getQuizOwner);
 router.get('/:quizId/collaborators', authorize([checkIsStudent], [checkQuizExists]), getQuizCollaborators);
-router.get(
-  '/:quizId/collaborators/:collaboratorId',
-  authorize([checkIsStudent], [checkQuizExists]),
-  getQuizCollaborator
-);
+router.get('/:quizId/collaborators/:collaboratorId', authorize([checkIsStudent], [checkQuizExists]), getQuizCollaborator);
 
 router.post('/', authorize([checkIsProfessor]), createQuiz);
 router.post('/:quizId/collaborators', authorize([checkIsProfessor, checkQuizOwner]), addCollaborator);
 
 router.delete('/:quizId', authorize([checkIsProfessor, checkQuizOwner]), deleteQuiz);
-router.delete(
-  '/:quizId/collaborators/:collaboratorId',
-  authorize([checkIsProfessor, checkQuizOwner]),
-  removeCollaborator
-);
+router.delete('/:quizId/collaborators/:collaboratorId', authorize([checkIsProfessor, checkQuizOwner]), removeCollaborator);
 
 /* Quiz -> Question */
 

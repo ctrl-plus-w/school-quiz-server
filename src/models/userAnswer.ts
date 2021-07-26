@@ -17,10 +17,7 @@ export interface FormattedUserAnswer extends UserAnswerAttributes {
 
 export type UserAnswerCreationAttributes = Optional<UserAnswerAttributes, 'id'>;
 
-export class UserAnswer
-  extends Model<UserAnswerAttributes, UserAnswerCreationAttributes>
-  implements UserAnswerAttributes
-{
+export class UserAnswer extends Model<UserAnswerAttributes, UserAnswerCreationAttributes> implements UserAnswerAttributes {
   public id!: number;
 
   public answerContent!: string;
