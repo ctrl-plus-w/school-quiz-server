@@ -9,6 +9,7 @@ import {
   HasManyAddAssociationsMixin,
   HasManyRemoveAssociationMixin,
   HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
 } from 'sequelize';
 
 import { Question } from './question';
@@ -43,6 +44,7 @@ export class ChoiceQuestion extends Model<ChoiceQuestionAttributes, ChoiceQuesti
   public dataValues!: ChoiceQuestionDataValues;
 
   /* Choice properties */
+  public getChoices!: HasManyGetAssociationsMixin<Choice>;
   public addChoice!: HasManyAddAssociationMixin<Choice, number>;
   public addChoices!: HasManyAddAssociationsMixin<Choice, number>;
   public createChoice!: HasManyCreateAssociationMixin<Choice>;
