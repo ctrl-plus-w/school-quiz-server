@@ -26,8 +26,8 @@ export const answerFormatter = (answer: Answer | null | undefined): FormattedAns
     : null;
 };
 
-export const answerMapper = (answers: Array<Answer>): Array<FormattedAnswer> => {
-  return answers.map(answerFormatter).filter(isNotNull);
+export const answerMapper = (answers?: Array<Answer>): Array<FormattedAnswer> | undefined => {
+  return answers?.map(answerFormatter).filter(isNotNull);
 };
 
 export const userAnswerFormatter = (userAnswer?: UserAnswer | null): FormattedUserAnswer | undefined => {
@@ -42,8 +42,8 @@ export const userAnswerFormatter = (userAnswer?: UserAnswer | null): FormattedUs
     : undefined;
 };
 
-export const userAnswerMapper = (userAnswers?: Array<UserAnswer>): Array<FormattedUserAnswer> => {
-  return userAnswers ? userAnswers.map(userAnswerFormatter).filter(isNotNull) : [];
+export const userAnswerMapper = (userAnswers?: Array<UserAnswer>): Array<FormattedUserAnswer> | undefined => {
+  return userAnswers?.map(userAnswerFormatter).filter(isNotNull);
 };
 
 export const questionFormatter = (question?: Question | null): FormattedQuestion | undefined => {
@@ -64,8 +64,8 @@ export const questionFormatter = (question?: Question | null): FormattedQuestion
     : undefined;
 };
 
-export const questionMapper = (questions?: Array<Question>): Array<FormattedQuestion> => {
-  return questions ? questions.map(questionFormatter).filter(isNotNull) : [];
+export const questionMapper = (questions?: Array<Question>): Array<FormattedQuestion> | undefined => {
+  return questions?.map(questionFormatter).filter(isNotNull);
 };
 
 export const quizFormatter = (
@@ -90,8 +90,8 @@ export const quizFormatter = (
     : undefined;
 };
 
-export const quizMapper = (quizzes?: Array<Quiz>): Array<FormattedQuiz> => {
-  return quizzes ? quizzes.map((quiz) => quizFormatter(quiz)).filter(isNotNull) : [];
+export const quizMapper = (quizzes?: Array<Quiz>): Array<FormattedQuiz> | undefined => {
+  return quizzes?.map((quiz) => quizFormatter(quiz)).filter(isNotNull);
 };
 
 export const eventFormatter = (
@@ -117,8 +117,8 @@ export const eventFormatter = (
     : null;
 };
 
-export const eventMapper = (events: Array<Event>): Array<FormattedEvent> => {
-  return events.map((event) => eventFormatter(event)).filter(isNotNull);
+export const eventMapper = (events?: Array<Event>): Array<FormattedEvent> | undefined => {
+  return events?.map((event) => eventFormatter(event)).filter(isNotNull);
 };
 
 export const userFormatter = (user?: User | null, infoLevel: 0 | 1 | 2 | 3 = 3): FormattedUser | undefined => {
@@ -167,6 +167,6 @@ export const userFormatter = (user?: User | null, infoLevel: 0 | 1 | 2 | 3 = 3):
   }
 };
 
-export const userMapper = (users?: Array<User>, infoLevel?: 0 | 1 | 2 | 3): Array<FormattedUser> => {
-  return users?.map((user) => userFormatter(user, infoLevel)).filter(isNotNull) || [];
+export const userMapper = (users?: Array<User>, infoLevel?: 0 | 1 | 2 | 3): Array<FormattedUser> | undefined => {
+  return users?.map((user) => userFormatter(user, infoLevel)).filter(isNotNull);
 };
