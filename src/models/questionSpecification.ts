@@ -4,6 +4,7 @@ interface QuestionSpecificationAttributes {
   id: number;
   slug: string;
   name: string;
+  questionType: 'textualQuestion' | 'numericQuestion' | 'choiceQuestion';
 }
 
 export type QuestionSpecificationCreationAttributes = Optional<QuestionSpecificationAttributes, 'id'>;
@@ -15,6 +16,7 @@ export class QuestionSpecification
   public id!: number;
   public slug!: string;
   public name!: string;
+  public questionType!: 'textualQuestion' | 'numericQuestion' | 'choiceQuestion';
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -34,6 +36,10 @@ export default (sequelize: Sequelize): typeof QuestionSpecification => {
         unique: true,
       },
       name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      questionType: {
         type: DataTypes.STRING,
         allowNull: false,
       },

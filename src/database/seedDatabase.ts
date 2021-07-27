@@ -97,34 +97,42 @@ export default async (): Promise<void> => {
     {
       slug: 'nombre-entier',
       name: 'Nombre entier',
+      questionType: 'numericQuestion',
     },
     {
       slug: 'nombre-décimal',
       name: 'Nombre décimal',
+      questionType: 'numericQuestion',
     },
     {
       slug: 'pourcentage',
       name: 'Pourcentage',
+      questionType: 'numericQuestion',
     },
     {
       slug: 'prix',
       name: 'Prix',
+      questionType: 'numericQuestion',
     },
     {
       slug: 'date',
       name: 'Date',
+      questionType: 'numericQuestion',
     },
     {
       slug: 'date-et-heure',
       name: 'Date et heure',
+      questionType: 'numericQuestion',
     },
     {
       slug: 'choix-unique',
       name: 'Choix unique',
+      questionType: 'choiceQuestion',
     },
     {
       slug: 'choix-multiple',
       name: 'Choix multiple',
+      questionType: 'choiceQuestion',
     },
   ]);
 

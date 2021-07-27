@@ -8,9 +8,12 @@ import { DuplicationError, InvalidInputError, NotFoundError } from '../../classe
 
 import { slugify } from '../../utils/string.utils';
 
+import questionTypes from '../../constants/questionTypes';
+
 const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
   slug: Joi.string().min(4).max(20).required(),
+  questionType: Joi.string().valid(questionTypes),
 });
 
 export const getQuestionSpecifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
