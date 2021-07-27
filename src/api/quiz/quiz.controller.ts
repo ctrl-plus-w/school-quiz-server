@@ -116,8 +116,8 @@ export const createQuiz = async (req: Request, res: Response, next: NextFunction
 
     if (validationError) return next(new InvalidInputError());
 
-    const quiz = await Quiz.findOne({ where: { slug: validatedQuiz.slug } });
-    if (quiz) return next(new DuplicationError('Quiz'));
+    const quizzes = await Quiz.count({ where: { slug: validatedQuiz.slug } });
+    if (quizzes > 0) return next(new DuplicationError('Quiz'));
 
     const user = await User.findByPk(res.locals.jwt.userId);
     if (!user) return next(new NotFoundError('User'));
@@ -149,6 +149,10 @@ export const updateQuiz = async (req: Request, res: Response, next: NextFunction
 
     if (validatedQuiz.title) {
       const slug = slugify(validatedQuiz.title);
+
+      const quizzes = await Quiz.count({ where: { slug } });
+      if (quizzes > 0) return next(new DuplicationError('Quiz'));
+
       await quiz.update({ ...validatedQuiz, slug });
     } else {
       await quiz.update(validatedQuiz);

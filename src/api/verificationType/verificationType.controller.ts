@@ -48,8 +48,8 @@ export const createVerificationType = async (req: Request, res: Response, next: 
 
     if (validationError) return next(new InvalidInputError());
 
-    const verificationType = await VerificationType.findOne({ where: { slug: validatedVerificationType.slug } });
-    if (verificationType) return next(new DuplicationError('VerificationType'));
+    const verificationTypes = await VerificationType.count({ where: { slug: validatedVerificationType.slug } });
+    if (verificationTypes > 0) return next(new DuplicationError('VerificationType'));
 
     const createdVerificationType = await VerificationType.create(validatedVerificationType);
     res.json(createdVerificationType);
@@ -75,6 +75,9 @@ export const updateVerificationType = async (req: Request, res: Response, next: 
 
     const verificationType = await VerificationType.findByPk(verificationTypeId);
     if (!verificationType) return next(new NotFoundError('Verification type'));
+
+    const verificationTypes = await VerificationType.count({ where: { slug: validatedVerificationType.slug } });
+    if (verificationTypes > 0) return next(new DuplicationError('Verification type'));
 
     await verificationType.update(validatedVerificationType);
 

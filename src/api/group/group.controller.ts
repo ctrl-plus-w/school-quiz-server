@@ -82,8 +82,8 @@ export const createGroup = async (req: Request, res: Response, next: NextFunctio
 
     if (validationError) return next(new InvalidInputError());
 
-    const group = await Group.findOne({ where: { slug: validatedGroup.slug } });
-    if (group) return next(new DuplicationError('Group'));
+    const groups = await Group.count({ where: { slug: validatedGroup.slug } });
+    if (groups > 0) return next(new DuplicationError('Group'));
 
     const createdGroup = await Group.create(validatedGroup);
     res.json(createdGroup);
@@ -109,6 +109,9 @@ export const updateGroup = async (req: Request, res: Response, next: NextFunctio
 
     const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
+
+    const groups = await Group.count({ where: { slug: validatedGroup.slug } });
+    if (groups > 0) return next(new DuplicationError('Group'));
 
     await group.update(validatedGroup);
 

@@ -202,8 +202,8 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
     if (validationError) return next(new InvalidInputError());
 
-    const user = await User.findOne({ where: { username: validatedUser.username } });
-    if (user) return next(new DuplicationError('User'));
+    const users = await User.count({ where: { username: validatedUser.username } });
+    if (users) return next(new DuplicationError('User'));
 
     const password = bcrypt.hashSync(validatedUser.password, 12);
 
@@ -231,6 +231,11 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     } = updateSchema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
+
+    if (validatedUser.username) {
+      const users = await User.count({ where: { username: validatedUser.username } });
+      if (users > 0) return next(new DuplicationError('User'));
+    }
 
     if (validatedUser.password) {
       const password = bcrypt.hashSync(validatedUser.password, 12);

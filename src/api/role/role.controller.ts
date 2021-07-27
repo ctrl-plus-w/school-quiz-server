@@ -7,12 +7,18 @@ import { Role, RoleCreationAttributes } from '../../models/role';
 import { slugify } from '../../utils/string.utils';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
+import { AllOptional } from '../../types/optional.types';
 
-const schema = Joi.object({
+const creationSchema = Joi.object({
   name: Joi.string().min(4).max(25).required(),
   slug: Joi.string().min(4).max(25).required(),
   permission: Joi.number().positive().required(),
 });
+
+const updateSchema = Joi.object({
+  name: Joi.string().min(4).max(25),
+  permission: Joi.number().positive(),
+}).min(1);
 
 export const getRoles = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -45,15 +51,50 @@ export const createRole = async (req: Request, res: Response, next: NextFunction
     }: {
       value: RoleCreationAttributes;
       error?: Error;
-    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
+    } = creationSchema.validate({ ...req.body, slug: slugify(req.body.name) });
 
     if (validationError) return next(new InvalidInputError());
 
-    const role = await Role.findOne({ where: { slug: validatedRole.slug } });
-    if (role) return next(new DuplicationError('Role'));
+    const roles = await Role.count({ where: { slug: validatedRole.slug } });
+    if (roles > 0) return next(new DuplicationError('Role'));
 
     const createdRole = await Role.create(validatedRole);
     res.json(createdRole);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const roleId = req.params.roleId;
+    if (!roleId) return next(new InvalidInputError());
+
+    const {
+      value: validatedRole,
+      error: validationError,
+    }: {
+      value: AllOptional<RoleCreationAttributes>;
+      error?: Error;
+    } = updateSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    const role = await Role.findByPk(roleId);
+    if (!role) return next(new NotFoundError('Role'));
+
+    if (validatedRole.name) {
+      const slug = slugify(validatedRole.name);
+
+      const roles = await Role.count({ where: { slug: validatedRole.slug } });
+      if (roles > 0) return next(new DuplicationError('Role'));
+
+      await role.update({ ...validatedRole, slug });
+    } else {
+      await role.update(validatedRole);
+    }
+
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

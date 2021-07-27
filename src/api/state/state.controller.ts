@@ -47,8 +47,8 @@ export const createState = async (req: Request, res: Response, next: NextFunctio
 
     if (validationError) return next(new InvalidInputError());
 
-    const state = await State.findOne({ where: { slug: validatedState.slug }, attributes: ['id'] });
-    if (state) return next(new DuplicationError('State'));
+    const states = await State.count({ where: { slug: validatedState.slug } });
+    if (states > 0) return next(new DuplicationError('State'));
 
     const createdState = await State.create(validatedState);
     res.json(createdState);
@@ -74,6 +74,9 @@ export const updateState = async (req: Request, res: Response, next: NextFunctio
 
     const state = await State.findByPk(stateId);
     if (!state) return next(new NotFoundError('State'));
+
+    const states = await State.count({ where: { slug: validatedState.slug } });
+    if (states > 0) return next(new DuplicationError('State'));
 
     await state.update(validatedState);
 

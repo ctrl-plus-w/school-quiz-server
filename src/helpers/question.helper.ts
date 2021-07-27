@@ -178,8 +178,8 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
     const questionsWithSameSlug = await quiz.countQuestions({ where: { slug: validatedNumericQuestion.slug } });
     if (questionsWithSameSlug > 0) return next(new DuplicationError('Question'));
 
-    const question = await Question.findOne({ where: { slug: validatedNumericQuestion.slug } });
-    if (question) return next(new DuplicationError('Question'));
+    const questions = await Question.count({ where: { slug: validatedNumericQuestion.slug } });
+    if (questions > 0) return next(new DuplicationError('Question'));
 
     const createdNumericQuestion = await NumericQuestion.create();
 
@@ -237,9 +237,8 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
     const questionsWithSameSlug = await quiz.countQuestions({ where: { slug: validatedChoiceQuestion.slug } });
     if (questionsWithSameSlug > 0) return next(new DuplicationError('Question'));
 
-    const question = await Question.findOne({ where: { slug: validatedChoiceQuestion.slug } });
-
-    if (question) return next(new DuplicationError('Question'));
+    const questions = await Question.count({ where: { slug: validatedChoiceQuestion.slug } });
+    if (questions > 0) return next(new DuplicationError('Question'));
 
     const createdChoiceQuestion = await ChoiceQuestion.create({
       shuffle: validatedChoiceQuestion.shuffle,

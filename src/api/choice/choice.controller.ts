@@ -109,17 +109,13 @@ export const createChoice = async (req: Request, res: Response, next: NextFuncti
 
     if (!question.typedQuestion) return next(new NotFoundError('Choice question'));
 
-    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, {
-      include: { model: Choice, attributes: ['id', 'slug'] },
-      attributes: ['id'],
-    });
-
+    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, { attributes: ['id'] });
     if (!choiceQuestion) return next(new NotFoundError('Choice question'));
 
-    if (choiceQuestion.choices?.some((choice) => choice.slug === validatedChoice.slug)) return next(new DuplicationError('Choice'));
+    const choices = await choiceQuestion.countChoices({ where: { slug: validatedChoice.slug } });
+    if (choices > 0) return next(new DuplicationError('Choice'));
 
     const createdChoice = await choiceQuestion.createChoice(validatedChoice);
-
     res.json(createdChoice);
   } catch (err) {
     next(err);
@@ -154,6 +150,10 @@ export const updateChoice = async (req: Request, res: Response, next: NextFuncti
 
     if (validatedChoice.name) {
       const slug = slugify(validatedChoice.name);
+
+      const choices = await choiceQuestion.countChoices({ where: { slug } });
+      if (choices > 0) return next(new DuplicationError('Choice'));
+
       await choice.update({ ...validatedChoice, slug });
     } else {
       await choice.update(validatedChoice);

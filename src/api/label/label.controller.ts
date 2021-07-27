@@ -47,8 +47,8 @@ export const createLabel = async (req: Request, res: Response, next: NextFunctio
 
     if (validationError) return next(new InvalidInputError());
 
-    const label = await Label.findOne({ where: { slug: validatedLabel.slug } });
-    if (label) return next(new DuplicationError('Label'));
+    const labels = await Label.count({ where: { slug: validatedLabel.slug } });
+    if (labels > 0) return next(new DuplicationError('Label'));
 
     const createdLabel = await Label.create(validatedLabel);
     res.json(createdLabel);
@@ -74,6 +74,9 @@ export const updateLabel = async (req: Request, res: Response, next: NextFunctio
 
     const label = await Label.findByPk(labelId);
     if (!label) return next(new NotFoundError('Label'));
+
+    const labels = await Label.count({ where: { slug: validatedLabel.slug } });
+    if (labels > 0) return next(new DuplicationError('Label'));
 
     await label.update(validatedLabel);
 
