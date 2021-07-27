@@ -72,7 +72,7 @@ export const checkEventOwner = async (req: Request, res: Response, next: NextFun
     const user = await User.findByPk(userId);
     if (!user) return [false, new NotFoundError('User')];
 
-    const event = <Event | null>res.locals.event || (await Event.findByPk(eventId));
+    const event = await Event.findByPk(eventId);
     if (!event) return [false, new NotFoundError('Event')];
 
     if (!event.ownerId || event.ownerId !== user.id) return [false, new AcccessForbiddenError()];
