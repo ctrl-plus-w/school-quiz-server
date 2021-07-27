@@ -1,4 +1,12 @@
-import { BelongsToSetAssociationMixin, DataTypes, HasOneCreateAssociationMixin, Optional, Sequelize, Model } from 'sequelize';
+import {
+  BelongsToSetAssociationMixin,
+  DataTypes,
+  HasOneCreateAssociationMixin,
+  Optional,
+  Sequelize,
+  Model,
+  BelongsToGetAssociationMixin,
+} from 'sequelize';
 
 import { Question } from './question';
 import { QuestionSpecification } from './questionSpecification';
@@ -28,6 +36,7 @@ export class NumericQuestion extends Model<NumericQuestionAttributes, NumericQue
   public dataValues!: NumericQuestionDataValues;
 
   /* Question specification property */
+  public getQuestionSpecification!: BelongsToGetAssociationMixin<QuestionSpecification>;
   public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
 
   /* Question property */

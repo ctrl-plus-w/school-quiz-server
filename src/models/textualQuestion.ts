@@ -45,6 +45,7 @@ export class TextualQuestion extends Model<TextualQuestionAttributes, TextualQue
   public dataValues!: TextualQuestionDataValues;
 
   /* Question specification property */
+  public getQuestionSpecification!: BelongsToGetAssociationMixin<QuestionSpecification>;
   public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
 
   /*  Question verification type property */

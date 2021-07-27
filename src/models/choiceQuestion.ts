@@ -10,6 +10,7 @@ import {
   HasManyRemoveAssociationMixin,
   HasManyCreateAssociationMixin,
   HasManyGetAssociationsMixin,
+  BelongsToGetAssociationMixin,
 } from 'sequelize';
 
 import { Question } from './question';
@@ -51,6 +52,7 @@ export class ChoiceQuestion extends Model<ChoiceQuestionAttributes, ChoiceQuesti
   public removeChoice!: HasManyRemoveAssociationMixin<Choice, number>;
 
   /* Question specification property */
+  public getQuestionSpecification!: BelongsToGetAssociationMixin<QuestionSpecification>;
   public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
 
   /* Question property */

@@ -8,6 +8,8 @@ import {
   getQuestions,
   setVerificationType,
   getQuestionVerificationType,
+  getQuestionSpecification,
+  setSpecification,
 } from './question.controller';
 
 import answerRoutes from '../answer/questionAnswer.routes';
@@ -26,11 +28,13 @@ const router = Router();
 router.get('/', authorize([checkIsProfessor]), getQuestions);
 router.get('/:questionId', authorize([checkIsProfessor]), getQuestion);
 router.get('/:questionId/verificationType', authorize([checkIsProfessor], [checkIsTextual]), getQuestionVerificationType);
+router.get('/:questionId/questionSpecification', authorize([checkIsProfessor]), getQuestionSpecification);
 
 router.post('/:questionType', authorize([checkIsProfessor, checkQuizModifyPermission]), createQuestion);
 
 router.put('/:questionId', authorize([checkIsProfessor, checkQuizModifyPermission]), updateQuestion);
 router.put('/:questionId/verificationType', authorize([checkIsProfessor, checkQuizModifyPermission], [checkIsTextual]), setVerificationType);
+router.put('/:questionId/questionSpecification', authorize([checkIsProfessor, checkQuizModifyPermission]), setSpecification);
 
 router.delete('/:questionId', authorize([checkIsProfessor, checkQuizModifyPermission]), deleteQuestion);
 

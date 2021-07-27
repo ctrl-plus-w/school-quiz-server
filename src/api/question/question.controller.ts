@@ -14,7 +14,7 @@ import { Answer } from '../../models/answer';
 import { Quiz } from '../../models/quiz';
 import { User } from '../../models/user';
 
-import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
+import StatusError, { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { questionFormatter, questionMapper } from '../../helpers/mapper.helper';
 
@@ -132,6 +132,26 @@ export const getQuestionVerificationType = async (req: Request, res: Response, n
   }
 };
 
+export const getQuestionSpecification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const questionId = req.params.questionId;
+    if (!questionId) return next(new InvalidInputError());
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const [question] = await quiz.getQuestions({ where: { id: questionId }, include: [TextualQuestion, NumericQuestion, ChoiceQuestion] });
+    if (!question || !question.typedQuestion) return next(new NotFoundError('Question'));
+
+    const specification = await question.typedQuestion.getQuestionSpecification();
+    if (!specification) return next(new NotFoundError('Question specification'));
+
+    res.json(specification);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void | boolean> => {
   try {
     const questionTypes: QuestionTypes = {
@@ -189,6 +209,32 @@ export const setVerificationType = async (req: Request, res: Response, next: Nex
     if (!textualQuestion) return next(new NotFoundError('Question'));
 
     await textualQuestion.setVerificationType(verificationType);
+
+    res.json({ set: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const setSpecification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const questionId = req.params.questionId;
+    const specificationId = req.body.questionSpecificationId;
+    if (!questionId || !specificationId) return next(new InvalidInputError());
+
+    const specification = await QuestionSpecification.findByPk(specificationId);
+    if (!specification) return next(new NotFoundError('Question specification'));
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const [question] = await quiz.getQuestions({ where: { id: questionId }, include: [TextualQuestion, NumericQuestion, ChoiceQuestion] });
+    if (!question || !question.typedQuestion) return next(new NotFoundError('Question'));
+
+    if (question.questionType !== specification.questionType)
+      return next(new StatusError("The question specification type doesn't match the question type", 400));
+
+    await question.typedQuestion.setQuestionSpecification(specification);
 
     res.json({ set: true });
   } catch (err) {
