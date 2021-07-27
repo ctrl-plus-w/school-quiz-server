@@ -20,14 +20,22 @@ import { slugify } from '../../utils/string.utils';
 import { quizFormatter, quizMapper } from '../../helpers/mapper.helper';
 
 import roles from '../../constants/roles';
+import { AllOptional } from '../../types/optional.types';
 
-const schema = Joi.object({
+const creationSchema = Joi.object({
   title: Joi.string().min(5).max(25).required(),
   slug: Joi.string().min(5).max(25).required(),
   description: Joi.string().min(3).max(120).required(),
   strict: Joi.boolean().required(),
   shuffle: Joi.boolean().required(),
 });
+
+const updateSchema = Joi.object({
+  title: Joi.string().min(5).max(25),
+  description: Joi.string().min(3).max(120),
+  strict: Joi.boolean(),
+  shuffle: Joi.boolean(),
+}).min(1);
 
 export const getQuizzes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -102,7 +110,7 @@ export const createQuiz = async (req: Request, res: Response, next: NextFunction
     }: {
       value: QuizCreationAttributes;
       error?: Error;
-    } = schema.validate({ ...req.body, slug: slugify(req.body.title) });
+    } = creationSchema.validate({ ...req.body, slug: slugify(req.body.title) });
 
     if (validationError) return next(new InvalidInputError());
 
@@ -114,6 +122,37 @@ export const createQuiz = async (req: Request, res: Response, next: NextFunction
 
     const createdQuiz = await user.createQuiz(validatedQuiz);
     res.json(quizFormatter(createdQuiz));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateQuiz = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const quizId = req.params.quizId;
+    if (!quizId) return next(new InvalidInputError());
+
+    const {
+      value: validatedQuiz,
+      error: validationError,
+    }: {
+      value: AllOptional<QuizCreationAttributes>;
+      error?: Error;
+    } = updateSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    const quiz = await Quiz.findByPk(quizId);
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    if (validatedQuiz.title) {
+      const slug = slugify(validatedQuiz.title);
+      await quiz.update({ ...validatedQuiz, slug });
+    } else {
+      await quiz.update(validatedQuiz);
+    }
+
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

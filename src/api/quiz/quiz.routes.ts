@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import {
   addCollaborator,
-  createQuiz,
+  updateQuiz,
   deleteQuiz,
   getQuiz,
   getQuizCollaborator,
@@ -10,6 +10,7 @@ import {
   getQuizOwner,
   getQuizzes,
   removeCollaborator,
+  createQuiz,
 } from './quiz.controller';
 
 import questionRoutes from '../question/quizQuestion.routes';
@@ -30,6 +31,8 @@ router.get('/:quizId/collaborators/:collaboratorId', authorize([checkIsStudent],
 
 router.post('/', authorize([checkIsProfessor]), createQuiz);
 router.post('/:quizId/collaborators', authorize([checkIsProfessor, checkQuizOwner]), addCollaborator);
+
+router.put('/:quizId', authorize([checkIsProfessor, checkQuizOwner]), updateQuiz);
 
 router.delete('/:quizId', authorize([checkIsProfessor, checkQuizOwner]), deleteQuiz);
 router.delete('/:quizId/collaborators/:collaboratorId', authorize([checkIsProfessor, checkQuizOwner]), removeCollaborator);
