@@ -10,7 +10,7 @@ import { MiddlewareValidationPayload } from '../types/middlewares.types';
 export const checkQuestionTypes = (types: Array<QuestionTypes>) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
     try {
-      const question: Question | undefined = res.locals.question;
+      const question: Question | undefined = res.locals.question || (await Question.findByPk(req.params.questionId));
       if (!question) return [false, new NotFoundError('Question')];
 
       if (!types.some((type) => type === question.questionType)) return [false, new StatusError('Ressource not found on this type of question', 404)];
@@ -24,7 +24,7 @@ export const checkQuestionTypes = (types: Array<QuestionTypes>) => {
 
 export const checkQuestionHasType = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
-    const question: Question | undefined = res.locals.question;
+    const question: Question | undefined = res.locals.question || (await Question.findByPk(req.params.questionId));
     if (!question) return [false, new NotFoundError('Question')];
 
     if (!question.questionType) return [false, new StatusError("Question doesn't have a type", 404)];
