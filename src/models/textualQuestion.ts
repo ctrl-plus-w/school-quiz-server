@@ -1,4 +1,12 @@
-import { HasOneCreateAssociationMixin, BelongsToSetAssociationMixin, Sequelize, Optional, Model, DataTypes } from 'sequelize';
+import {
+  HasOneCreateAssociationMixin,
+  BelongsToSetAssociationMixin,
+  Sequelize,
+  Optional,
+  Model,
+  DataTypes,
+  BelongsToGetAssociationMixin,
+} from 'sequelize';
 
 import { Question } from './question';
 import { VerificationType } from './verificationType';
@@ -40,6 +48,7 @@ export class TextualQuestion extends Model<TextualQuestionAttributes, TextualQue
   public setQuestionSpecification!: BelongsToSetAssociationMixin<QuestionSpecification, number>;
 
   /*  Question verification type property */
+  public getVerificationType!: BelongsToGetAssociationMixin<VerificationType>;
   public setVerificationType!: BelongsToSetAssociationMixin<VerificationType, number>;
 
   /* Question property */

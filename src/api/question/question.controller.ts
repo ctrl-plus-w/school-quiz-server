@@ -100,10 +100,33 @@ export const getQuestion = async (req: Request, res: Response, next: NextFunctio
     const quiz = <Quiz>res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const question = await quiz.getQuestions({ where: { id: questionId }, include: questionIncludes });
-    if (question.length === 0) return next(new NotFoundError('Question'));
+    const [question] = await quiz.getQuestions({ where: { id: questionId }, include: questionIncludes });
+    if (!question) return next(new NotFoundError('Question'));
 
-    res.json(questionFormatter(question[0]));
+    res.json(questionFormatter(question));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getQuestionVerificationType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const questionId = req.params.questionId;
+    if (!questionId) return next(new InvalidInputError());
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const [question] = await quiz.getQuestions({ where: { id: questionId } });
+    if (!question) return next(new NotFoundError('Question'));
+
+    const textualQuestion = await question.getTextualQuestion();
+    if (!textualQuestion) return next(new NotFoundError('Question'));
+
+    const verificationType = await textualQuestion.getVerificationType();
+    if (!verificationType) return next(new NotFoundError('Verification type'));
+
+    res.json(verificationType);
   } catch (err) {
     next(err);
   }
@@ -142,6 +165,32 @@ export const updateQuestion = async (req: Request, res: Response, next: NextFunc
     if (question.questionType === 'choiceQuestion') return tryUpdateChoiceQuestion(req, res, next, question);
 
     next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const setVerificationType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const questionId = req.params.questionId;
+    const verificationTypeId = req.body.verificationTypeId;
+    if (!questionId || !verificationTypeId) return next(new InvalidInputError());
+
+    const verificationType = await VerificationType.findByPk(verificationTypeId);
+    if (!verificationType) return next(new NotFoundError('Verification type'));
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const [question] = await quiz.getQuestions({ where: { id: questionId } });
+    if (!question) return next(new NotFoundError('Question'));
+
+    const textualQuestion = await question.getTextualQuestion();
+    if (!textualQuestion) return next(new NotFoundError('Question'));
+
+    await textualQuestion.setVerificationType(verificationType);
+
+    res.json({ set: true });
   } catch (err) {
     next(err);
   }
