@@ -16,10 +16,10 @@ export const checkQuizOwner = async (req: Request, res: Response, next: NextFunc
     const quizId = req.params.quizId || res.locals.quiz.id;
     if (!quizId) return [false, new InvalidInputError()];
 
-    const user = await User.findByPk(userId);
+    const user = <User | undefined>res.locals.user || (await User.findByPk(userId));
     if (!user) return [false, new NotFoundError('User')];
 
-    const quiz = <Quiz | null>res.locals.quiz || (await Quiz.findByPk(quizId));
+    const quiz = <Quiz | undefined>res.locals.quiz || (await Quiz.findByPk(quizId));
     if (!quiz) return [false, new NotFoundError('Quiz')];
 
     if (!quiz.ownerId || quiz.ownerId !== user.id) return [false, new AcccessForbiddenError()];
@@ -41,10 +41,10 @@ export const checkQuizModifyPermission = async (req: Request, res: Response, nex
     const quizId = req.params.quizId || res.locals.quiz.id;
     if (!quizId) return [false, new InvalidInputError()];
 
-    const user = await User.findByPk(userId);
+    const user = <User | undefined>res.locals.user || (await User.findByPk(userId));
     if (!user) return [false, new NotFoundError('User')];
 
-    const quiz = <Quiz | null>res.locals.quiz || (await Quiz.findByPk(quizId));
+    const quiz = <Quiz | undefined>res.locals.quiz || (await Quiz.findByPk(quizId));
 
     if (!quiz) return [false, new NotFoundError('Quiz')];
     if (!quiz.ownerId) [false, next(new AcccessForbiddenError())];
@@ -69,10 +69,10 @@ export const checkEventOwner = async (req: Request, res: Response, next: NextFun
     const eventId = req.params.eventId || res.locals.event.id;
     if (!eventId) return [false, new InvalidInputError()];
 
-    const user = await User.findByPk(userId);
+    const user = <User | undefined>res.locals.user || (await User.findByPk(userId));
     if (!user) return [false, new NotFoundError('User')];
 
-    const event = await Event.findByPk(eventId);
+    const event = <Quiz | undefined>res.locals.quiz || (await Event.findByPk(eventId));
     if (!event) return [false, new NotFoundError('Event')];
 
     if (!event.ownerId || event.ownerId !== user.id) return [false, new AcccessForbiddenError()];
@@ -95,7 +95,7 @@ export const checkEventModifyPermission = async (req: Request, res: Response, ne
     const eventId = req.params.eventId || res.locals.event.id;
     if (!eventId) return [false, new InvalidInputError()];
 
-    const user = await User.findByPk(userId);
+    const user = <User | undefined>res.locals.user || (await User.findByPk(userId));
     if (!user) return [false, new NotFoundError('User')];
 
     const event = <Event | null>res.locals.event || (await Event.findByPk(eventId));
