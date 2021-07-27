@@ -57,6 +57,32 @@ export const createQuestionSpecification = async (req: Request, res: Response, n
   }
 };
 
+export const updateQuestionSpecification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const questionSpecificationId = req.params.questionSpecificationId;
+    if (!questionSpecificationId) return next(new InvalidInputError());
+
+    const {
+      value: validatedQuestionSpecification,
+      error: validationError,
+    }: {
+      value: QuestionSpecificationCreationAttributes;
+      error?: Error;
+    } = schema.validate({ ...req.body, slug: slugify(req.body.name) });
+
+    if (validationError) return next(new InvalidInputError());
+
+    const questionSpecification = await QuestionSpecification.findByPk(questionSpecificationId);
+    if (!questionSpecification) return next(new NotFoundError('Question specification'));
+
+    await questionSpecification.update(validatedQuestionSpecification);
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deleteQuestionSpecification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const questionSpecification = await QuestionSpecification.findByPk(req.params.questionSpecificationId);
