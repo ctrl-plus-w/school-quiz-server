@@ -25,7 +25,10 @@ export const getGroups = async (req: Request, res: Response, next: NextFunction)
 
 export const getGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const group = await Group.findByPk(req.params.groupId);
+    const groupId = req.params.groupId;
+    if (!groupId) return next(new InvalidInputError());
+
+    const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
 
     res.json(group);
@@ -36,7 +39,10 @@ export const getGroup = async (req: Request, res: Response, next: NextFunction):
 
 export const getGroupLabels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const group = await Group.findByPk(req.params.groupId);
+    const groupId = req.params.groupId;
+    if (!groupId) return next(new InvalidInputError());
+
+    const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
 
     const labels = await group.getLabels();
@@ -49,9 +55,10 @@ export const getGroupLabels = async (req: Request, res: Response, next: NextFunc
 export const getGroupLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const labelId = req.params.labelId;
-    if (!labelId) return next(new InvalidInputError());
+    const groupId = req.params.groupId;
+    if (!labelId || !groupId) return next(new InvalidInputError());
 
-    const group = await Group.findByPk(req.params.groupId);
+    const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
 
     const [label] = await group.getLabels({ where: { id: labelId } });
@@ -133,7 +140,10 @@ export const addLabel = async (req: Request, res: Response, next: NextFunction):
 
 export const deleteGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const group = await Group.findByPk(req.params.groupId);
+    const groupId = req.params.groupId;
+    if (!groupId) return next(new InvalidInputError());
+
+    const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
 
     await group.destroy();

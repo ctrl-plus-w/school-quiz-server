@@ -25,7 +25,10 @@ export const getRoles = async (req: Request, res: Response, next: NextFunction):
 
 export const getRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const role = await Role.findByPk(req.params.roleId);
+    const roleId = req.params.roleId;
+    if (!roleId) return next(new InvalidInputError());
+
+    const role = await Role.findByPk(roleId);
     if (!role) return next(new NotFoundError('Role'));
 
     res.json(role);

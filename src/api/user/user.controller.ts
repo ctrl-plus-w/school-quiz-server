@@ -46,11 +46,12 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
 
 export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const userId = req.params.userId;
+    if (!userId) return next(new InvalidInputError());
+
     const [isAdmin] = await checkIsAdmin(req, res, next);
 
-    const user = await User.findByPk(req.params.userId, {
-      include: [Event, Group, Role, State, Quiz],
-    });
+    const user = await User.findByPk(userId, { include: [Event, Group, Role, State, Quiz] });
 
     if (!user) return next(new NotFoundError('User'));
 
@@ -315,7 +316,10 @@ export const setState = async (req: Request, res: Response, next: NextFunction):
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const user = await User.findByPk(req.params.userId);
+    const userId = req.params.userId;
+    if (!userId) return next(new InvalidInputError());
+
+    const user = await User.findByPk(userId);
     if (!user) return next(new NotFoundError('User'));
 
     await user.destroy();

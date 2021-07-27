@@ -23,7 +23,10 @@ export const getLabels = async (req: Request, res: Response, next: NextFunction)
 
 export const getLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const label = await Label.findByPk(req.params.labelId);
+    const labelId = req.params.labelId;
+    if (!labelId) return next(new InvalidInputError());
+
+    const label = await Label.findByPk(labelId);
     if (!label) return next(new NotFoundError('Label'));
 
     res.json(label);
@@ -82,7 +85,10 @@ export const updateLabel = async (req: Request, res: Response, next: NextFunctio
 
 export const deleteLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const label = await Label.findByPk(req.params.labelId);
+    const labelId = req.params.labelId;
+    if (!labelId) return next(new InvalidInputError());
+
+    const label = await Label.findByPk(labelId);
     if (!label) return next(new NotFoundError('Label'));
 
     await label.destroy();

@@ -24,7 +24,10 @@ export const getVerificationTypes = async (req: Request, res: Response, next: Ne
 
 export const getVerificationType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const verificationType = await VerificationType.findByPk(req.params.verificationTypeId);
+    const verificationTypeId = req.params.verificationTypeId;
+    if (!verificationTypeId) return next(new InvalidInputError());
+
+    const verificationType = await VerificationType.findByPk(verificationTypeId);
     if (!verificationType) return next(new NotFoundError('Verification type'));
 
     res.json(verificationType);
@@ -83,7 +86,10 @@ export const updateVerificationType = async (req: Request, res: Response, next: 
 
 export const deleteVerificationType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const verificationType = await VerificationType.findByPk(req.params.verificationTypeId);
+    const verificationTypeId = req.params.verificationTypeId;
+    if (!verificationTypeId) return next(new InvalidInputError());
+
+    const verificationType = await VerificationType.findByPk(verificationTypeId);
     if (!verificationType) return next(new NotFoundError('VerificationType'));
 
     await verificationType.destroy();

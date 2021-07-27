@@ -27,7 +27,10 @@ export const getQuestionSpecifications = async (req: Request, res: Response, nex
 
 export const getQuestionSpecification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const questionSpecification = await QuestionSpecification.findByPk(req.params.questionSpecificationId);
+    const questionSpecificationId = req.params.questionSpecificationId;
+    if (!questionSpecificationId) return next(new InvalidInputError());
+
+    const questionSpecification = await QuestionSpecification.findByPk(questionSpecificationId);
     if (!questionSpecification) return next(new NotFoundError('Specification'));
 
     res.json(questionSpecification);
@@ -88,7 +91,10 @@ export const updateQuestionSpecification = async (req: Request, res: Response, n
 
 export const deleteQuestionSpecification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const questionSpecification = await QuestionSpecification.findByPk(req.params.questionSpecificationId);
+    const questionSpecificationId = req.params.questionSpecificationId;
+    if (!questionSpecificationId) return next(new InvalidInputError());
+
+    const questionSpecification = await QuestionSpecification.findByPk(questionSpecificationId);
     if (!questionSpecification) return next(new NotFoundError('QuestionSpecification'));
 
     await questionSpecification.destroy();
