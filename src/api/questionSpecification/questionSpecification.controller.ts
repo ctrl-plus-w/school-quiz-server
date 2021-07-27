@@ -13,7 +13,7 @@ import questionTypes from '../../constants/questionTypes';
 const schema = Joi.object({
   name: Joi.string().min(4).max(20).required(),
   slug: Joi.string().min(4).max(20).required(),
-  questionType: Joi.string().valid(questionTypes),
+  questionType: Joi.string().valid(...questionTypes),
 });
 
 export const getQuestionSpecifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
