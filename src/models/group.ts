@@ -32,6 +32,7 @@ export class Group extends Model<GroupAttributes, GroupCreationAttributes> imple
   public readonly updatedAt!: Date;
 
   /* Labels properties */
+  public getLabels!: BelongsToManyGetAssociationsMixin<Label>;
   public addLabel!: BelongsToManyAddAssociationMixin<Label, number>;
   public addLabels!: BelongsToManyAddAssociationsMixin<Label, number>;
   public removeLabel!: BelongsToManyRemoveAssociationMixin<Label, number>;

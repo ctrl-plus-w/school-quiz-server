@@ -12,6 +12,7 @@ import {
   BelongsToManyGetAssociationsMixin,
   BelongsToGetAssociationMixin,
   HasManyGetAssociationsMixin,
+  BelongsToManyCountAssociationsMixin,
 } from 'sequelize';
 
 import { Role } from './role';
@@ -66,6 +67,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public removeRole!: BelongsToSetAssociationMixin<Role, number>;
 
   /* Group properties */
+  public countGroups!: BelongsToManyCountAssociationsMixin;
   public getGroups!: BelongsToManyGetAssociationsMixin<Group>;
   public addGroup!: BelongsToManyAddAssociationMixin<Group, number>;
   public addGroups!: BelongsToManyAddAssociationsMixin<Group, number>;

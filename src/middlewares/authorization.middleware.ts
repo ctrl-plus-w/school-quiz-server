@@ -9,18 +9,19 @@ import roles from '../constants/roles';
 export const authorize = (bypassedMiddlewares: Array<MiddlewareFunction>, middlewares: Array<MiddlewareFunction> = []) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const [isAdmin] = await checkIsAdmin(req, res, next);
+
       for (const middleware of middlewares) {
-        const [validated, error] = await middleware(req, res, next);
+        const [validated, error] = await middleware(req, res, next, isAdmin);
         if (!validated) return next(error);
       }
-
-      const isAdmin = await checkIsAdmin(req, res, next);
-      if (isAdmin) return next();
 
       for (const middleware of bypassedMiddlewares) {
-        const [validated, error] = await middleware(req, res, next);
+        const [validated, error] = await middleware(req, res, next, isAdmin);
         if (!validated) return next(error);
       }
+
+      next();
     } catch (err) {
       next(err);
     }
@@ -30,8 +31,7 @@ export const authorize = (bypassedMiddlewares: Array<MiddlewareFunction>, middle
 const checkPermission = (permission: number) => {
   return async (_req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
     try {
-      const hasPermission = !res.locals.jwt || !res.locals.jwt.rolePermission || res.locals.jwt.rolePermission < permission;
-
+      const hasPermission = res.locals.jwt && res.locals.jwt.rolePermission && res.locals.jwt.rolePermission <= permission;
       return hasPermission ? [true, null] : [false, new AcccessForbiddenError()];
     } catch (err) {
       return err instanceof Error ? [false, err] : [false, new UnknownError()];

@@ -13,6 +13,8 @@ import {
   BelongsToManyGetAssociationsMixin,
   BelongsToManyRemoveAssociationMixin,
   HasManyGetAssociationsMixin,
+  BelongsToManyCountAssociationsMixin,
+  HasManyCountAssociationsMixin,
 } from 'sequelize';
 
 import { FormattedQuestion, Question } from './question';
@@ -57,9 +59,6 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  /* Question properties */
-  public getQuestions!: HasManyGetAssociationsMixin<Question>;
-
   /* User properties */
   private setUser!: BelongsToSetAssociationMixin<User, number>;
   public setOwner = this.setUser;
@@ -76,7 +75,12 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   private getUsers!: BelongsToManyGetAssociationsMixin<User>;
   public getCollaborators = this.getUsers;
 
+  private countUsers!: BelongsToManyCountAssociationsMixin;
+  public countCollaborators = this.countUsers;
+
   /* Question properties */
+  public getQuestions!: HasManyGetAssociationsMixin<Question>;
+  public countQuestions!: HasManyCountAssociationsMixin;
   public addQuestion!: HasManyAddAssociationMixin<Question, number>;
   public addQuestions!: HasManyAddAssociationsMixin<Question, number>;
   public createQuestion!: HasManyCreateAssociationMixin<Question>;

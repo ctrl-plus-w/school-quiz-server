@@ -96,7 +96,7 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
     const user = await User.findByPk(res.locals.jwt.userId, { include: Group });
     if (!user) return next(new NotFoundError('User'));
 
-    const possibleEvents = await Event.findAll({
+    const possibleEventsAmount = await Event.count({
       where: { start: { [Op.lt]: new Date() }, end: { [Op.gt]: new Date() } },
       include: [
         { model: Quiz, where: { id: quiz.id } },
@@ -104,7 +104,7 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
       ],
     });
 
-    if (possibleEvents.length === 0) return next(new NotFoundError('Event'));
+    if (possibleEventsAmount) return next(new NotFoundError('Event'));
 
     const userAnswer = await UserAnswer.findOne({
       include: { model: User, where: { id: user?.id } },

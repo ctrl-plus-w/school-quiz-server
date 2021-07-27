@@ -18,7 +18,7 @@ import {
   NotFoundError,
 } from '../../classes/StatusError';
 
-import { eventFormatter, eventMapper, quizFormatter } from '../../helpers/mapper.helper';
+import { eventFormatter, eventMapper, quizFormatter, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
 import roles from '../../constants/roles';
 import { AllOptional } from '../../types/optional.types';
@@ -70,7 +70,7 @@ export const getEventOwner = async (req: Request, res: Response, next: NextFunct
     if (!event) return next(new NotFoundError('Event'));
 
     const owner = await event.getOwner();
-    res.json(owner);
+    res.json(userFormatter(owner));
   } catch (err) {
     next(err);
   }
@@ -82,7 +82,7 @@ export const getEventCollaborators = async (req: Request, res: Response, next: N
     if (!event) return next(new NotFoundError('Event'));
 
     const collaborators = await event.getCollaborators();
-    res.json(collaborators);
+    res.json(userMapper(collaborators));
   } catch (err) {
     next(err);
   }
@@ -96,10 +96,10 @@ export const getEventCollaborator = async (req: Request, res: Response, next: Ne
     const event: Event | undefined = res.locals.event;
     if (!event) return next(new NotFoundError('Event'));
 
-    const collaborators = await event.getCollaborators({ where: { id: userId } });
-    if (collaborators.length === 0) return next(new NotFoundError('Collaborator'));
+    const [collaborator] = await event.getCollaborators({ where: { id: userId } });
+    if (!collaborator) return next(new NotFoundError('Collaborator'));
 
-    res.json(collaborators[0]);
+    res.json(userFormatter(collaborator));
   } catch (err) {
     next(err);
   }
@@ -166,12 +166,12 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const relatedGroups = await group.getRelatedGroups();
     const relatedGroupsId = relatedGroups.map((group) => group.id);
 
-    const events = await Event.findAll({
+    const eventsAmount = await Event.count({
       where: getEventDateConditions(validatedEvent.start, validatedEvent.end),
       include: { model: Group, where: { id: relatedGroupsId } },
     });
 
-    if (events.length > 0) return next(new DuplicationError('Event'));
+    if (eventsAmount > 0) return next(new DuplicationError('Event'));
 
     const createdEvent = await user.createEvent({
       start: validatedEvent.start,
@@ -215,12 +215,12 @@ export const updateEvent = async (req: Request, res: Response, next: NextFunctio
     const start = validatedEvent.start || event.start;
     const end = validatedEvent.end || event.end;
 
-    const events = await Event.findAll({
+    const eventsAmount = await Event.count({
       where: { ...getEventDateConditions(start, end), id: { [Op.not]: event.id } },
       include: { model: Group, where: { id: relatedGroupsId } },
     });
 
-    if (events.length > 0) return next(new DuplicationError('Event'));
+    if (eventsAmount > 0) return next(new DuplicationError('Event'));
 
     await event.update(validatedEvent);
 
@@ -240,8 +240,8 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
 
     if (event.ownerId === userId) return next(new ModelRoleDuplicationError());
 
-    const collaboratorsWithSameId = await event.getCollaborators({ where: { id: userId } });
-    if (collaboratorsWithSameId.length > 0) return next(new DuplicationError('Collaborator'));
+    const collaboratorsWithSameId = await event.countCollaborators({ where: { id: userId } });
+    if (collaboratorsWithSameId) return next(new DuplicationError('Collaborator'));
 
     const user = await User.findByPk(userId, { attributes: ['id'], include: Role });
 

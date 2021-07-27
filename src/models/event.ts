@@ -9,6 +9,7 @@ import {
   HasOneGetAssociationMixin,
   BelongsToManyGetAssociationsMixin,
   BelongsToGetAssociationMixin,
+  BelongsToManyCountAssociationsMixin,
 } from 'sequelize';
 
 import { Group } from './group';
@@ -70,6 +71,9 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   /* Collaborators properties */
   private getUsers!: BelongsToManyGetAssociationsMixin<User>;
   public getCollaborators = this.getUsers;
+
+  private countUsers!: BelongsToManyCountAssociationsMixin;
+  public countCollaborators = this.countUsers;
 
   private addUser!: BelongsToManyAddAssociationMixin<User, number>;
   public addCollaborator = this.addUser;

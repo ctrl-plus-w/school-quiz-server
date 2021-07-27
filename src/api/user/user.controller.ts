@@ -14,8 +14,8 @@ import { DuplicationError, InvalidInputError, NotFoundError } from '../../classe
 
 import { eventFormatter, eventMapper, quizFormatter, quizMapper, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
-import roles from '../../constants/roles';
 import { AllOptional } from '../../types/optional.types';
+import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const creationSchema = Joi.object({
   username: Joi.string().min(5).max(25).required(),
@@ -35,8 +35,7 @@ const updateSchema = Joi.object({
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const loggedInUserPermission = res.locals.jwt.rolePermission;
-    const isAdmin = loggedInUserPermission === roles.ADMIN.PERMISSION;
+    const [isAdmin] = await checkIsAdmin(req, res, next);
 
     const users = await User.findAll();
     res.json(userMapper(users, isAdmin ? 2 : 3));
@@ -47,8 +46,7 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
 
 export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const loggedInUserPermission = res.locals.jwt.rolePermission;
-    const isAdmin = loggedInUserPermission === roles.ADMIN.PERMISSION;
+    const [isAdmin] = await checkIsAdmin(req, res, next);
 
     const user = await User.findByPk(req.params.userId, {
       include: [Event, Group, Role, State, Quiz],
@@ -86,10 +84,10 @@ export const getUserGroup = async (req: Request, res: Response, next: NextFuncti
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const groups = await user.getGroups({ where: { id: groupId } });
-    if (groups.length === 0) return next(new NotFoundError('Group'));
+    const [group] = await user.getGroups({ where: { id: groupId } });
+    if (!group) return next(new NotFoundError('Group'));
 
-    res.json(groups[0]);
+    res.json(group);
   } catch (err) {
     next(err);
   }
@@ -104,8 +102,6 @@ export const getUserRole = async (req: Request, res: Response, next: NextFunctio
     if (!user) return next(new NotFoundError('User'));
 
     const role = await user.getRole();
-    console.log(role);
-
     res.json(role);
   } catch (err) {
     next(err);
@@ -151,10 +147,10 @@ export const getUserQuiz = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const quizzes = await user.getQuizzes({ where: { id: quizId } });
-    if (quizzes.length === 0) return next(new NotFoundError('Quiz'));
+    const [quizz] = await user.getQuizzes({ where: { id: quizId } });
+    if (quizz) return next(new NotFoundError('Quiz'));
 
-    res.json(quizFormatter(quizzes[0]));
+    res.json(quizFormatter(quizz));
   } catch (err) {
     next(err);
   }
@@ -184,10 +180,10 @@ export const getUserEvent = async (req: Request, res: Response, next: NextFuncti
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const events = await user.getEvents({ where: { id: eventId } });
-    if (events.length === 0) return next(new NotFoundError('Event'));
+    const [event] = await user.getEvents({ where: { id: eventId } });
+    if (!event) return next(new NotFoundError('Event'));
 
-    res.json(eventFormatter(events[0]));
+    res.json(eventFormatter(event));
   } catch (err) {
     next(err);
   }

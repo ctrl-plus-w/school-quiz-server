@@ -8,7 +8,7 @@ import { AcccessForbiddenError, InvalidInputError, NotFoundError, UnknownError }
 
 import { MiddlewareValidationPayload } from '../types/middlewares.types';
 
-export const checkQuizOwner = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
+export const checkQuizOwner = async (req: Request, res: Response, next: NextFunction, isAdmin: boolean): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];
@@ -22,7 +22,7 @@ export const checkQuizOwner = async (req: Request, res: Response, next: NextFunc
     const quiz = <Quiz | undefined>res.locals.quiz || (await Quiz.findByPk(quizId));
     if (!quiz) return [false, new NotFoundError('Quiz')];
 
-    if (!quiz.ownerId || quiz.ownerId !== user.id) return [false, new AcccessForbiddenError()];
+    if ((!quiz.ownerId || quiz.ownerId !== user.id) && !isAdmin) return [false, new AcccessForbiddenError()];
 
     res.locals.quiz = quiz;
     res.locals.user = user;
@@ -33,7 +33,12 @@ export const checkQuizOwner = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const checkQuizModifyPermission = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
+export const checkQuizModifyPermission = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  isAdmin: boolean
+): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];
@@ -49,8 +54,10 @@ export const checkQuizModifyPermission = async (req: Request, res: Response, nex
     if (!quiz) return [false, new NotFoundError('Quiz')];
     if (!quiz.ownerId) [false, next(new AcccessForbiddenError())];
 
-    const collaboratorsWithSameId = await quiz.getCollaborators({ where: { id: userId } });
-    if (collaboratorsWithSameId.length === 0 && quiz.ownerId !== userId) return [false, new AcccessForbiddenError()];
+    if (!isAdmin) {
+      const collaboratorsWithSameId = await quiz.countCollaborators({ where: { id: userId } });
+      if (collaboratorsWithSameId === 0 && quiz.ownerId !== userId) return [false, new AcccessForbiddenError()];
+    }
 
     res.locals.quiz = quiz;
     res.locals.user = user;
@@ -61,7 +68,7 @@ export const checkQuizModifyPermission = async (req: Request, res: Response, nex
   }
 };
 
-export const checkEventOwner = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
+export const checkEventOwner = async (req: Request, res: Response, next: NextFunction, isAdmin: boolean): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];
@@ -75,7 +82,7 @@ export const checkEventOwner = async (req: Request, res: Response, next: NextFun
     const event = <Quiz | undefined>res.locals.quiz || (await Event.findByPk(eventId));
     if (!event) return [false, new NotFoundError('Event')];
 
-    if (!event.ownerId || event.ownerId !== user.id) return [false, new AcccessForbiddenError()];
+    if ((!event.ownerId || event.ownerId !== user.id) && !isAdmin) return [false, new AcccessForbiddenError()];
 
     res.locals.quiz = event;
     res.locals.user = user;
@@ -87,7 +94,12 @@ export const checkEventOwner = async (req: Request, res: Response, next: NextFun
   }
 };
 
-export const checkEventModifyPermission = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
+export const checkEventModifyPermission = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  isAdmin: boolean
+): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
     if (!userId) return [false, new AcccessForbiddenError()];
@@ -103,8 +115,10 @@ export const checkEventModifyPermission = async (req: Request, res: Response, ne
     if (!event) return [false, new NotFoundError('Event')];
     if (!event.ownerId) return [false, new AcccessForbiddenError()];
 
-    const collaboratorsWithSameId = await event.getCollaborators({ where: { id: userId } });
-    if (collaboratorsWithSameId.length === 0 && event.ownerId !== userId) return [false, new AcccessForbiddenError()];
+    if (!isAdmin) {
+      const collaboratorsWithSameId = await event.countCollaborators({ where: { id: userId } });
+      if (collaboratorsWithSameId === 0 && event.ownerId !== userId) return [false, new AcccessForbiddenError()];
+    }
 
     res.locals.quiz = event;
     res.locals.user = user;

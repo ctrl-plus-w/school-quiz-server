@@ -17,7 +17,7 @@ import {
 
 import { slugify } from '../../utils/string.utils';
 
-import { quizFormatter, quizMapper } from '../../helpers/mapper.helper';
+import { quizFormatter, quizMapper, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
 import roles from '../../constants/roles';
 import { AllOptional } from '../../types/optional.types';
@@ -69,7 +69,7 @@ export const getQuizOwner = async (req: Request, res: Response, next: NextFuncti
     if (!quiz) return next(new NotFoundError('Quiz'));
 
     const owner = await quiz.getOwner();
-    res.json(owner);
+    res.json(userFormatter(owner));
   } catch (err) {
     next(err);
   }
@@ -81,7 +81,7 @@ export const getQuizCollaborators = async (req: Request, res: Response, next: Ne
     if (!quiz) return next(new NotFoundError('Quiz'));
 
     const collaborators = await quiz.getCollaborators();
-    res.json(collaborators);
+    res.json(userMapper(collaborators));
   } catch (err) {
     next(err);
   }
@@ -95,8 +95,10 @@ export const getQuizCollaborator = async (req: Request, res: Response, next: Nex
     const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const collaborators = await quiz.getCollaborators();
-    res.json(collaborators.find((user) => user.id === parseInt(userId)));
+    const [collaborator] = await quiz.getCollaborators({ where: { id: userId } });
+    if (!collaborator) return next(new NotFoundError('Collaborator'));
+
+    res.json(userFormatter(collaborator));
   } catch (err) {
     next(err);
   }
@@ -168,8 +170,8 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
 
     if (quiz.ownerId === userId) return next(new ModelRoleDuplicationError());
 
-    const collaboratorsWithSameId = await quiz.getCollaborators({ where: { id: userId } });
-    if (collaboratorsWithSameId.length > 0) return next(new InvalidInputError());
+    const collaboratorsWithSameId = await quiz.countCollaborators({ where: { id: userId } });
+    if (collaboratorsWithSameId > 0) return next(new InvalidInputError());
 
     const user = await User.findByPk(userId, { include: { model: Role }, attributes: ['id'] });
 

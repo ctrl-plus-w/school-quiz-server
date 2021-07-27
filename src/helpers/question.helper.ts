@@ -105,8 +105,8 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedTextualQuestion.slug } });
-    if (questionsWithSameSlug.length > 0) return next(new DuplicationError('Question'));
+    const questionsWithSameSlug = await quiz.countQuestions({ where: { slug: validatedTextualQuestion.slug } });
+    if (questionsWithSameSlug > 0) return next(new DuplicationError('Question'));
 
     const createdTextualQuestion = await TextualQuestion.create({
       accentSensitive: validatedTextualQuestion.accentSensitive,
@@ -175,8 +175,8 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
     const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedNumericQuestion.slug } });
-    if (questionsWithSameSlug.length > 0) return next(new DuplicationError('Question'));
+    const questionsWithSameSlug = await quiz.countQuestions({ where: { slug: validatedNumericQuestion.slug } });
+    if (questionsWithSameSlug > 0) return next(new DuplicationError('Question'));
 
     const question = await Question.findOne({ where: { slug: validatedNumericQuestion.slug } });
     if (question) return next(new DuplicationError('Question'));
@@ -234,8 +234,8 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
     const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedChoiceQuestion.slug } });
-    if (questionsWithSameSlug.length > 0) return next(new DuplicationError('Question'));
+    const questionsWithSameSlug = await quiz.countQuestions({ where: { slug: validatedChoiceQuestion.slug } });
+    if (questionsWithSameSlug > 0) return next(new DuplicationError('Question'));
 
     const question = await Question.findOne({ where: { slug: validatedChoiceQuestion.slug } });
 
