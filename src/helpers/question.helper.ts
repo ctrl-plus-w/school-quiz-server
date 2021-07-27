@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 
 import Joi from 'joi';
 
-import { VerificationType } from '../models/verificationType';
 import { Question, TypedQuestion } from '../models/question';
 import { Quiz } from '../models/quiz';
 
@@ -18,6 +17,7 @@ import { slugify } from '../utils/string.utils';
 
 import { AllOptional } from '../types/optional.types';
 
+/* Global schemas */
 const questionCreationSchema: Joi.SchemaMap = {
   title: Joi.string().min(5).max(35).required(),
   slug: Joi.string().min(5).max(35).required(),
@@ -29,10 +29,9 @@ const questionUpdateSchema: Joi.SchemaMap = {
   description: Joi.string().min(3).max(120),
 };
 
+/* Textual question schemas */
 const textualQuestionCreationSchema = Joi.object({
   ...questionCreationSchema,
-
-  verificationType: Joi.string().required(),
 
   accentSensitive: Joi.boolean().required(),
   caseSensitive: Joi.boolean().required(),
@@ -45,6 +44,7 @@ const textualQuestionUpdateSchema = Joi.object({
   caseSensitive: Joi.boolean(),
 }).min(1);
 
+/* Numeric question schemas */
 const numericQuestionSchema = Joi.object({
   ...questionCreationSchema,
 });
@@ -53,6 +53,7 @@ const numericQuestionUpdateSchema = Joi.object({
   ...questionUpdateSchema,
 });
 
+/* Choice question schemas */
 const choiceQuestionCreationSchema = Joi.object({
   ...questionCreationSchema,
 
@@ -107,11 +108,6 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedTextualQuestion.slug } });
     if (questionsWithSameSlug.length > 0) return next(new DuplicationError('Question'));
 
-    const verificationType = await VerificationType.findOne({
-      where: { slug: validatedTextualQuestion.verificationType },
-    });
-    if (!verificationType) return next(new NotFoundError('Verification type'));
-
     const createdTextualQuestion = await TextualQuestion.create({
       accentSensitive: validatedTextualQuestion.accentSensitive,
       caseSensitive: validatedTextualQuestion.caseSensitive,
@@ -123,7 +119,6 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     const fetchedCreatedQuestion = await Question.findByPk(createdQuestion.id);
     if (!fetchedCreatedQuestion) return next(new Error());
 
-    await fetchedCreatedQuestion?.textualQuestion?.setVerificationType(verificationType);
     await quiz.addQuestion(fetchedCreatedQuestion);
 
     res.json(questionFormatter(createdQuestion));
