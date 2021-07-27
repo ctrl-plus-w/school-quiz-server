@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { createQuestion, deleteQuestion, getQuestion, getQuestions } from './question.controller';
+import { createQuestion, udpateQuestion, deleteQuestion, getQuestion, getQuestions } from './question.controller';
 
 import answerRoutes from '../answer/questionAnswer.routes';
 import userAnswerRoutes from '../userAnswer/questionUserAnswer.routes';
@@ -19,6 +19,8 @@ router.get('/', authorize([checkIsProfessor]), getQuestions);
 router.get('/:questionId', authorize([checkIsProfessor]), getQuestion);
 
 router.post('/:questionType', authorize([checkIsProfessor, checkQuizModifyPermission]), createQuestion);
+
+router.put('/:questionId', authorize([checkIsProfessor, checkQuizModifyPermission]), udpateQuestion);
 
 router.delete('/:questionId', authorize([checkIsProfessor, checkQuizModifyPermission]), deleteQuestion);
 

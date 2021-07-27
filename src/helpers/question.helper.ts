@@ -16,14 +16,21 @@ import { questionFormatter } from './mapper.helper';
 
 import { slugify } from '../utils/string.utils';
 
-const questionSchema: Joi.SchemaMap = {
+import { AllOptional } from '../types/optional.types';
+
+const questionCreationSchema: Joi.SchemaMap = {
   title: Joi.string().min(5).max(35).required(),
   slug: Joi.string().min(5).max(35).required(),
   description: Joi.string().min(3).max(120).required(),
 };
 
-const textualQuestionSchema = Joi.object({
-  ...questionSchema,
+const questionUpdateSchema: Joi.SchemaMap = {
+  title: Joi.string().min(5).max(35),
+  description: Joi.string().min(3).max(120),
+};
+
+const textualQuestionCreationSchema = Joi.object({
+  ...questionCreationSchema,
 
   verificationType: Joi.string().required(),
 
@@ -31,14 +38,31 @@ const textualQuestionSchema = Joi.object({
   caseSensitive: Joi.boolean().required(),
 });
 
+const textualQuestionUpdateSchema = Joi.object({
+  ...questionUpdateSchema,
+
+  accentSensitive: Joi.boolean(),
+  caseSensitive: Joi.boolean(),
+}).min(1);
+
 const numericQuestionSchema = Joi.object({
-  ...questionSchema,
+  ...questionCreationSchema,
 });
 
-const choiceQuestionSchema = Joi.object({
-  ...questionSchema,
+const numericQuestionUpdateSchema = Joi.object({
+  ...questionUpdateSchema,
+});
+
+const choiceQuestionCreationSchema = Joi.object({
+  ...questionCreationSchema,
 
   shuffle: Joi.boolean().required(),
+});
+
+const choiceQuestionUpdateSchema = Joi.object({
+  ...questionUpdateSchema,
+
+  shuffle: Joi.boolean(),
 });
 
 type TextualQuestionIntersection = Question & TextualQuestionCreationAttributes & { verificationType: string };
@@ -47,7 +71,7 @@ type ChoiceQuestionIntersection = Question & ChoiceQuestionCreationAttributes;
 
 const createQuestion = async (
   createdTypedQuestion: TypedQuestion,
-  validatedSchema: TextualQuestionIntersection | NumericQuestionIntersection | ChoiceQuestionIntersection,
+  validatedSchema: NumericQuestionIntersection | NumericQuestionIntersection | ChoiceQuestionIntersection,
   _req: Request,
   res: Response,
   next: NextFunction
@@ -73,11 +97,11 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     }: {
       value: TextualQuestionIntersection;
       error?: Error;
-    } = textualQuestionSchema.validate({ ...req.body, slug: slugify(req.body.title) });
+    } = textualQuestionCreationSchema.validate({ ...req.body, slug: slugify(req.body.title) });
 
     if (validationError) return next(new InvalidInputError());
 
-    const quiz: Quiz = res.locals.quiz;
+    const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
     const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedTextualQuestion.slug } });
@@ -108,6 +132,39 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
   }
 };
 
+export const tryUpdateTextualQuestion = async (req: Request, res: Response, next: NextFunction, question: Question): Promise<void> => {
+  try {
+    const {
+      value: validatedTextualQuestion,
+      error: validationError,
+    }: {
+      value: AllOptional<TextualQuestionIntersection>;
+      error?: Error;
+    } = textualQuestionUpdateSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    if (validatedTextualQuestion.title) {
+      const slug = slugify(validatedTextualQuestion.title);
+      await question.update({ title: validatedTextualQuestion.title, description: validatedTextualQuestion.description, slug });
+    } else if (validatedTextualQuestion.description) {
+      await question.update({ description: validatedTextualQuestion.description });
+    }
+
+    const textualQuestion = await question.getTextualQuestion();
+    if (!textualQuestion) return next(new NotFoundError('Question'));
+
+    await textualQuestion.update({
+      accentSensitive: validatedTextualQuestion.accentSensitive,
+      caseSensitive: validatedTextualQuestion.caseSensitive,
+    });
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const tryCreateNumericQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
@@ -120,7 +177,7 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
 
     if (validationError) return next(new InvalidInputError());
 
-    const quiz: Quiz = res.locals.quiz;
+    const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
     const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedNumericQuestion.slug } });
@@ -142,6 +199,31 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
   }
 };
 
+export const tryUpdateNumericQuestion = async (req: Request, res: Response, next: NextFunction, question: Question): Promise<void> => {
+  try {
+    const {
+      value: validatedNumericQuestion,
+      error: validationError,
+    }: {
+      value: AllOptional<NumericQuestionIntersection>;
+      error?: Error;
+    } = numericQuestionUpdateSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    if (validatedNumericQuestion.title) {
+      const slug = slugify(validatedNumericQuestion.title);
+      await question.update({ title: validatedNumericQuestion.title, description: validatedNumericQuestion.description, slug });
+    } else if (validatedNumericQuestion.description) {
+      await question.update({ description: validatedNumericQuestion.description });
+    }
+
+    res.json({ updated: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const tryCreateChoiceQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
@@ -150,11 +232,11 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
     }: {
       value: ChoiceQuestionIntersection;
       error?: Error;
-    } = choiceQuestionSchema.validate({ ...req.body, slug: slugify(req.body.title) });
+    } = choiceQuestionCreationSchema.validate({ ...req.body, slug: slugify(req.body.title) });
 
     if (validationError) return next(new InvalidInputError());
 
-    const quiz: Quiz = res.locals.quiz;
+    const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
     const questionsWithSameSlug = await quiz.getQuestions({ where: { slug: validatedChoiceQuestion.slug } });
@@ -174,6 +256,36 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
     await quiz.addQuestion(createdQuestion);
 
     res.json(questionFormatter(createdQuestion));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next: NextFunction, question: Question): Promise<void> => {
+  try {
+    const {
+      value: validatedChoiceQuestion,
+      error: validationError,
+    }: {
+      value: AllOptional<ChoiceQuestionIntersection>;
+      error?: Error;
+    } = choiceQuestionUpdateSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    if (validatedChoiceQuestion.title) {
+      const slug = slugify(validatedChoiceQuestion.title);
+      await question.update({ title: validatedChoiceQuestion.title, description: validatedChoiceQuestion.description, slug });
+    } else if (validatedChoiceQuestion.description) {
+      await question.update({ description: validatedChoiceQuestion.description });
+    }
+
+    const choiceQuestion = await question.getChoiceQuestion();
+    if (!choiceQuestion) return next(new NotFoundError('Question'));
+
+    await choiceQuestion.update({ shuffle: validatedChoiceQuestion.shuffle });
+
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

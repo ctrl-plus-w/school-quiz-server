@@ -18,7 +18,14 @@ import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { questionFormatter, questionMapper } from '../../helpers/mapper.helper';
 
-import { tryCreateChoiceQuestion, tryCreateNumericQuestion, tryCreateTextualQuestion } from '../../helpers/question.helper';
+import {
+  tryCreateChoiceQuestion,
+  tryCreateNumericQuestion,
+  tryCreateTextualQuestion,
+  tryUpdateChoiceQuestion,
+  tryUpdateNumericQuestion,
+  tryUpdateTextualQuestion,
+} from '../../helpers/question.helper';
 
 interface QuestionTypes {
   [questionType: string]: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -114,6 +121,27 @@ export const createQuestion = async (req: Request, res: Response, next: NextFunc
     if (!questionType || !Object.keys(questionTypes).includes(questionType?.toLowerCase())) return next(new InvalidInputError());
 
     await questionTypes[questionType](req, res, next);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const udpateQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void | boolean> => {
+  try {
+    const questionId = req.params.questionId;
+    if (!questionId) return next(new InvalidInputError());
+
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const [question] = await quiz.getQuestions({ where: { id: questionId } });
+    if (!question) return next(new NotFoundError('Question'));
+
+    if (question.questionType === 'textualQuestion') return tryUpdateTextualQuestion(req, res, next, question);
+    if (question.questionType === 'numericQuestion') return tryUpdateNumericQuestion(req, res, next, question);
+    if (question.questionType === 'choiceQuestion') return tryUpdateChoiceQuestion(req, res, next, question);
+
+    next();
   } catch (err) {
     next(err);
   }

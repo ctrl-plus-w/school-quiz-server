@@ -10,6 +10,7 @@ import {
   BelongsToManyRemoveAssociationMixin,
   BelongsToManyCreateAssociationMixin,
   BelongsToManyGetAssociationsMixin,
+  BelongsToGetAssociationMixin,
 } from 'sequelize';
 
 import { TextualQuestion } from './textualQuestion';
@@ -26,7 +27,7 @@ interface QuestionAttributes {
   title: string;
   description: string;
   filename?: string;
-  questionType: string;
+  questionType: 'numericQuestion' | 'textualQuestion' | 'choiceQuestion';
 }
 
 export interface FormattedQuestion extends QuestionAttributes {
@@ -56,7 +57,7 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public title!: string;
   public description!: string;
   public filename!: string;
-  public questionType!: string;
+  public questionType!: 'numericQuestion' | 'textualQuestion' | 'choiceQuestion';
 
   public numericQuestion?: NumericQuestion;
   public textualQuestion?: TextualQuestion;
@@ -84,6 +85,11 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public addUserAnswer!: HasManyAddAssociationMixin<UserAnswer, number>;
   public removeUserAnswer!: HasManyRemoveAssociationMixin<UserAnswer, number>;
   public createUserAnswer!: HasManyCreateAssociationMixin<UserAnswer>;
+
+  /* Typed question properties */
+  public getTextualQuestion!: BelongsToGetAssociationMixin<TextualQuestion>;
+  public getNumericQuestion!: BelongsToGetAssociationMixin<NumericQuestion>;
+  public getChoiceQuestion!: BelongsToGetAssociationMixin<ChoiceQuestion>;
 }
 
 export default (sequelize: Sequelize): typeof Question => {
