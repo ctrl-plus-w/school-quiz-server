@@ -100,10 +100,12 @@ export const getUserRole = async (req: Request, res: Response, next: NextFunctio
     const userId = req.params.userId;
     if (!userId) return next(new InvalidInputError());
 
-    const user = await User.findByPk(userId, { attributes: ['id'] });
+    const user = await User.findByPk(userId, { attributes: ['id', 'roleId'] });
     if (!user) return next(new NotFoundError('User'));
 
     const role = await user.getRole();
+    console.log(role);
+
     res.json(role);
   } catch (err) {
     next(err);
@@ -115,7 +117,7 @@ export const getUserState = async (req: Request, res: Response, next: NextFuncti
     const userId = req.params.userId;
     if (!userId) return next(new InvalidInputError());
 
-    const user = await User.findByPk(userId, { attributes: ['id'] });
+    const user = await User.findByPk(userId, { attributes: ['id', 'stateId'] });
     if (!user) return next(new NotFoundError('User'));
 
     const state = await user.getState();
