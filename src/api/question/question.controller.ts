@@ -126,7 +126,7 @@ export const createQuestion = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const udpateQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void | boolean> => {
+export const updateQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void | boolean> => {
   try {
     const questionId = req.params.questionId;
     if (!questionId) return next(new InvalidInputError());
