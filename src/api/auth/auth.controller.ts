@@ -34,7 +34,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     const token = sign(payload, credentials.JWT_TOKEN, options);
 
-    res.json({ token });
+    res.json({ token, ...payload });
   } catch (err) {
     next(err);
   }

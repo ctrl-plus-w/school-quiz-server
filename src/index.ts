@@ -1,6 +1,7 @@
 // Imports
 import express from 'express';
 import morgan from 'morgan';
+import cors from 'cors';
 
 import { json } from 'body-parser';
 
@@ -34,7 +35,7 @@ import seedDatabase from './database/seedDatabase';
 import database from './models/index';
 
 // Constants
-const PORT = process.env.PORT || 6000;
+const PORT = process.env.PORT || 3005;
 
 // Body
 const app: express.Application = express();
@@ -42,6 +43,7 @@ const app: express.Application = express();
 // Middlewares
 app.use(morgan('dev'));
 app.use(json());
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 // Routes
 app.use('/auth', auth);
