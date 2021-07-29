@@ -8,19 +8,19 @@ import credentials from '../constants/credentials';
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authorizationHeader = req.headers.authorization;
-    if (!authorizationHeader) return next(new StatusError('Invalid token', 403));
+    if (!authorizationHeader) throw new Error();
 
     const [_, token] = authorizationHeader.split(' ');
-    if (!token) return next(new StatusError('Invalid token', 403));
+    if (!token) throw new Error();
 
     const isValid = verify(token, credentials.JWT_TOKEN);
-    if (!isValid) return next(new StatusError('Invalid token', 403));
+    if (!isValid) throw new Error();
 
     const tokenData = decode(token);
     res.locals.jwt = tokenData;
 
     next();
   } catch (err) {
-    next(err);
+    next(new StatusError('Invalid token', 403));
   }
 };

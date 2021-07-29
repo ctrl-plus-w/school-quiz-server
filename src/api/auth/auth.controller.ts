@@ -39,3 +39,11 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     next(err);
   }
 };
+
+export const validateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    res.json({ valid: true });
+  } catch (err) {
+    next(err);
+  }
+};
