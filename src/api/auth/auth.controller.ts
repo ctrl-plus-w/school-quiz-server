@@ -42,7 +42,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
 export const validateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    res.json({ valid: true });
+    res.json({ valid: true, role: res.locals.jwt.role, rolePermission: res.locals.jwt.rolePermission });
   } catch (err) {
     next(err);
   }
