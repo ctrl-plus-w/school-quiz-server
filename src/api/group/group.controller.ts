@@ -28,7 +28,7 @@ export const getGroup = async (req: Request, res: Response, next: NextFunction):
     const groupId = req.params.groupId;
     if (!groupId) return next(new InvalidInputError());
 
-    const group = await Group.findByPk(groupId);
+    const group = await Group.findByPk(groupId, { include: Label });
     if (!group) return next(new NotFoundError('Group'));
 
     res.json(group);
@@ -124,16 +124,27 @@ export const updateGroup = async (req: Request, res: Response, next: NextFunctio
 export const addLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const groupId = req.params.groupId;
+    if (!groupId) return next(new InvalidInputError());
+
     const labelId = req.body.labelId;
-    if (!labelId || !groupId) return next(new InvalidInputError());
+    const labelIds = req.body.labelIds;
+
+    if (!labelId && !labelIds) return next(new InvalidInputError());
 
     const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
 
-    const label = await Label.findByPk(labelId);
-    if (!label) return next(new NotFoundError('Label'));
+    if (labelId) {
+      const label = await Label.findByPk(labelId);
+      if (!label) return next(new NotFoundError('Label'));
 
-    await group.addLabel(label);
+      await group.addLabel(label);
+    } else if (labelIds) {
+      const labels = await Label.findAll({ where: { id: labelIds } });
+      if (labels.length !== labelIds.length) return next(new NotFoundError('Group'));
+
+      await group.addLabels(labels);
+    }
 
     res.json({ added: true });
   } catch (err) {
