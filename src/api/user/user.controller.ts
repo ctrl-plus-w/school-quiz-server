@@ -356,7 +356,7 @@ export const removeGroup = async (req: Request, res: Response, next: NextFunctio
     if (!userId) return next(new InvalidInputError());
 
     const groupId = req.body.groupId;
-    const groupIds = req.body.groupId;
+    const groupIds = req.body.groupIds;
 
     if (!groupId && !groupIds) return next(new InvalidInputError());
 
