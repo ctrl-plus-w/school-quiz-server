@@ -10,6 +10,7 @@ const developmentCredentials: Options = {
   database: 'school_quiz',
   host: '127.0.0.1',
   dialect: 'mariadb',
+  logging: false,
 };
 
 const productionCredentials: Options = {
