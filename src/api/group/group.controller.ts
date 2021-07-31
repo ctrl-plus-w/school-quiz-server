@@ -179,12 +179,8 @@ export const deleteGroup = async (req: Request, res: Response, next: NextFunctio
 export const removeLabel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const groupId = req.params.groupId;
-    if (!groupId) return next(new InvalidInputError());
-
-    const labelId = req.body.labelId;
-    const labelIds = req.body.labelIds;
-
-    if (!labelId && !labelIds) return next(new InvalidInputError());
+    const labelId = req.params.labelId;
+    if (!groupId || !labelId) return next(new InvalidInputError());
 
     const group = await Group.findByPk(groupId);
     if (!group) return next(new NotFoundError('Group'));
@@ -192,23 +188,12 @@ export const removeLabel = async (req: Request, res: Response, next: NextFunctio
     const groupLabels = await group.getLabels();
     if (!groupLabels || groupLabels.length === 0) return next(new NotFoundError('Label'));
 
-    if (labelId) {
-      if (!groupLabels.some((label) => label.id === labelId)) return next(new NotFoundError('Label'));
+    if (!groupLabels.some((label) => label.id === parseInt(labelId))) return next(new NotFoundError('Label'));
 
-      const label = await Label.findByPk(labelId);
-      if (!label) return next(new NotFoundError('Label'));
+    const label = await Label.findByPk(labelId);
+    if (!label) return next(new NotFoundError('Label'));
 
-      await group.removeLabel(label);
-    } else if (labelIds) {
-      if (!Array.isArray(labelIds) || labelIds.length === 0) return next(new InvalidInputError());
-
-      if (!labelIds.every((id) => groupLabels.some(({ id: _id }) => id === _id))) return next(new NotFoundError('Label'));
-
-      const labels = await Label.findAll({ where: { id: labelIds } });
-      if (labels.length !== labelIds.length) return next(new NotFoundError('Label'));
-
-      await group.removeLabels(labels);
-    }
+    await group.removeLabel(label);
 
     res.json({ removed: true });
   } catch (err) {

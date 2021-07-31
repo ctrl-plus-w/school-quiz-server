@@ -42,6 +42,6 @@ router.put('/:userId/role', authorize([checkIsAdmin]), setRole);
 router.put('/:userId/state', authorize([checkIsAdmin]), setState);
 
 router.delete('/:userId', authorize([checkIsAdmin]), deleteUser);
-router.delete('/:userId/groups', authorize([checkIsAdmin]), removeGroup);
+router.delete('/:userId/groups/:groupId', authorize([checkIsAdmin]), removeGroup);
 
 export default router;

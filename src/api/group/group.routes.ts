@@ -17,6 +17,6 @@ router.post('/:groupId/labels', authorize([checkIsAdmin]), addLabel);
 router.put('/:groupId', authorize([checkIsAdmin]), updateGroup);
 
 router.delete('/:groupId', authorize([checkIsAdmin]), deleteGroup);
-router.delete('/:groupId/labels', authorize([checkIsAdmin]), removeLabel);
+router.delete('/:groupId/labels/:labelId', authorize([checkIsAdmin]), removeLabel);
 
 export default router;

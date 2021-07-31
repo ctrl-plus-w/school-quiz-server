@@ -353,33 +353,18 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 export const removeGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.params.userId;
-    if (!userId) return next(new InvalidInputError());
-
-    const groupId = req.body.groupId;
-    const groupIds = req.body.groupIds;
-
-    if (!groupId && !groupIds) return next(new InvalidInputError());
+    const groupId = req.params.groupId;
+    if (!userId || !groupId) return next(new InvalidInputError());
 
     const user = await User.findByPk(userId, { include: Group });
     if (!user) return next(new NotFoundError('User'));
 
-    if (groupId) {
-      if (!user.groups?.some((group) => group.id === groupId)) return next(new NotFoundError('Group'));
+    if (!user.groups?.some((group) => group.id === parseInt(groupId))) return next(new NotFoundError('Group'));
 
-      const group = await Group.findByPk(groupId);
-      if (!group) return next(new NotFoundError('Group'));
+    const group = await Group.findByPk(groupId);
+    if (!group) return next(new NotFoundError('Group'));
 
-      await user.removeGroup(group);
-    } else if (groupIds) {
-      if (!Array.isArray(groupIds) || groupIds.length === 0) return next(new InvalidInputError());
-
-      if (!user.groups?.some((group) => groupIds.includes(group.id))) return next(new NotFoundError('Group'));
-
-      const groups = await Group.findAll({ where: { id: groupIds } });
-      if (groups.length !== groupIds.length) return next(new NotFoundError('Group'));
-
-      await user.removeGroups(groups);
-    }
+    await user.removeGroup(group);
 
     res.json({ deleted: true });
   } catch (err) {
