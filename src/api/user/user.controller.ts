@@ -21,7 +21,7 @@ const creationSchema = Joi.object({
   username: Joi.string().min(5).max(25).required(),
   firstName: Joi.string().min(5).max(25).required(),
   lastName: Joi.string().min(5).max(25).required(),
-  password: Joi.string().min(7).max(35).required(),
+  password: Joi.string().min(5).max(35).required(),
   gender: Joi.boolean().allow(null),
 });
 
