@@ -8,6 +8,7 @@ import {
   BelongsToManyRemoveAssociationMixin,
   BelongsToManyGetAssociationsMixin,
   FindAttributeOptions,
+  BelongsToManyRemoveAssociationsMixin,
 } from 'sequelize';
 
 import { Label } from './label';
@@ -36,6 +37,7 @@ export class Group extends Model<GroupAttributes, GroupCreationAttributes> imple
   public addLabel!: BelongsToManyAddAssociationMixin<Label, number>;
   public addLabels!: BelongsToManyAddAssociationsMixin<Label, number>;
   public removeLabel!: BelongsToManyRemoveAssociationMixin<Label, number>;
+  public removeLabels!: BelongsToManyRemoveAssociationsMixin<Label, number>;
 
   /* Users property */
   public getUsers!: BelongsToManyGetAssociationsMixin<User>;
