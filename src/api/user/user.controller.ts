@@ -18,18 +18,18 @@ import { AllOptional } from '../../types/optional.types';
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 
 const creationSchema = Joi.object({
-  username: Joi.string().min(5).max(25).required(),
-  firstName: Joi.string().min(5).max(25).required(),
-  lastName: Joi.string().min(5).max(25).required(),
+  username: Joi.string().min(4).max(25).required(),
+  firstName: Joi.string().min(3).max(25).required(),
+  lastName: Joi.string().min(3).max(25).required(),
   password: Joi.string().min(5).max(35).required(),
   gender: Joi.boolean().allow(null),
 });
 
 const updateSchema = Joi.object({
-  username: Joi.string().min(5).max(25),
-  firstName: Joi.string().min(5).max(25),
-  lastName: Joi.string().min(5).max(25),
-  password: Joi.string().min(7).max(35),
+  username: Joi.string().min(4).max(25),
+  firstName: Joi.string().min(3).max(25),
+  lastName: Joi.string().min(3).max(25),
+  password: Joi.string().min(5).max(35),
   gender: Joi.boolean().allow(null),
 }).min(1);
 
