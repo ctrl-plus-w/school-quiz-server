@@ -23,16 +23,16 @@ import roles from '../../constants/roles';
 import { AllOptional } from '../../types/optional.types';
 
 const creationSchema = Joi.object({
-  title: Joi.string().min(5).max(25).required(),
-  slug: Joi.string().min(5).max(25).required(),
-  description: Joi.string().min(3).max(120).required(),
+  title: Joi.string().min(1).max(25).required(),
+  slug: Joi.string().min(1).max(25).required(),
+  description: Joi.string().min(1).max(120).required(),
   strict: Joi.boolean().required(),
   shuffle: Joi.boolean().required(),
 });
 
 const updateSchema = Joi.object({
-  title: Joi.string().min(5).max(25),
-  description: Joi.string().min(3).max(120),
+  title: Joi.string().min(1).max(25),
+  description: Joi.string().min(1).max(120),
   strict: Joi.boolean(),
   shuffle: Joi.boolean(),
 }).min(1);
