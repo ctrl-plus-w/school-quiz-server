@@ -59,24 +59,15 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  /* User properties */
-  private setUser!: BelongsToSetAssociationMixin<User, number>;
-  public setOwner = this.setUser;
+  /* Owner properties */
+  public getOwner!: BelongsToGetAssociationMixin<User>;
+  public setOwner!: BelongsToSetAssociationMixin<User, number>;
 
-  private addUser!: BelongsToManyAddAssociationMixin<User, number>;
-  public addCollaborator = this.addUser;
-
-  private removeUser!: BelongsToManyRemoveAssociationMixin<User, number>;
-  public removeCollaborator = this.removeUser;
-
-  private getUser!: BelongsToGetAssociationMixin<User>;
-  public getOwner = this.getUser;
-
-  private getUsers!: BelongsToManyGetAssociationsMixin<User>;
-  public getCollaborators = this.getUsers;
-
-  private countUsers!: BelongsToManyCountAssociationsMixin;
-  public countCollaborators = this.countUsers;
+  /* Collaborators properties */
+  public getCollaborators!: BelongsToManyGetAssociationsMixin<User>;
+  public countCollaborators!: BelongsToManyCountAssociationsMixin;
+  public addCollaborator!: BelongsToManyAddAssociationMixin<User, number>;
+  public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
 
   /* Question properties */
   public getQuestions!: HasManyGetAssociationsMixin<Question>;

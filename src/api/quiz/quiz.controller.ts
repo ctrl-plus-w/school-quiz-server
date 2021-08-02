@@ -39,8 +39,20 @@ const updateSchema = Joi.object({
 
 export const getQuizzes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const quizzes = await Quiz.findAll();
-    res.json(quizMapper(quizzes));
+    const userId = req.query.userId as string | null;
+
+    if (userId) {
+      const user = await User.findByPk(userId);
+      if (!user) return next(new NotFoundError('User'));
+
+      const userOwnedQuizzes = await user.getOwnedQuizzes();
+      const userCollaboratedQuizzes = await user.getCollaboratedQuizzes();
+
+      res.json(quizMapper([...userOwnedQuizzes, ...userCollaboratedQuizzes]));
+    } else {
+      const quizzes = await Quiz.findAll();
+      res.json(quizMapper(quizzes));
+    }
   } catch (err) {
     next(err);
   }
@@ -122,7 +134,10 @@ export const createQuiz = async (req: Request, res: Response, next: NextFunction
     const user = await User.findByPk(res.locals.jwt.userId);
     if (!user) return next(new NotFoundError('User'));
 
-    const createdQuiz = await user.createQuiz(validatedQuiz);
+    const createdQuiz = await Quiz.create(validatedQuiz);
+
+    await createdQuiz.setOwner(user);
+
     res.json(quizFormatter(createdQuiz));
   } catch (err) {
     next(err);

@@ -132,8 +132,10 @@ export const getUserQuizzes = async (req: Request, res: Response, next: NextFunc
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const quizzes = await user.getQuizzes();
-    res.json(quizMapper(quizzes));
+    const userOwnedQuizzes = await user.getOwnedQuizzes();
+    const userCollaboratedQuizzes = await user.getCollaboratedQuizzes();
+
+    res.json(quizMapper([...userOwnedQuizzes, ...userCollaboratedQuizzes]));
   } catch (err) {
     next(err);
   }
@@ -148,10 +150,21 @@ export const getUserQuiz = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const [quizz] = await user.getQuizzes({ where: { id: quizId } });
-    if (quizz) return next(new NotFoundError('Quiz'));
+    const [userOwnedQuiz] = await user.getOwnedQuizzes({ where: { id: quizId } });
 
-    res.json(quizFormatter(quizz));
+    if (userOwnedQuiz) {
+      res.json(quizFormatter(userOwnedQuiz));
+      return;
+    }
+
+    const [userCollaboratedQuiz] = await user.getCollaboratedQuizzes({ where: { id: quizId } });
+
+    if (userCollaboratedQuiz) {
+      res.json(quizFormatter(userCollaboratedQuiz));
+      return;
+    }
+
+    return next(new NotFoundError('Quiz'));
   } catch (err) {
     next(err);
   }
@@ -165,7 +178,7 @@ export const getUserEvents = async (req: Request, res: Response, next: NextFunct
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const events = await user.getEvents();
+    const events = await user.getOwnedEvents();
     res.json(eventMapper(events));
   } catch (err) {
     next(err);
@@ -181,7 +194,7 @@ export const getUserEvent = async (req: Request, res: Response, next: NextFuncti
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const [event] = await user.getEvents({ where: { id: eventId } });
+    const [event] = await user.getOwnedEvents({ where: { id: eventId } });
     if (!event) return next(new NotFoundError('Event'));
 
     res.json(eventFormatter(event));

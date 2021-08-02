@@ -6,7 +6,6 @@ import {
   Sequelize,
   Model,
   DataTypes,
-  HasOneGetAssociationMixin,
   BelongsToManyGetAssociationsMixin,
   BelongsToGetAssociationMixin,
   BelongsToManyCountAssociationsMixin,
@@ -62,24 +61,14 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public setGroup!: BelongsToSetAssociationMixin<Group, number>;
 
   /* Owner property */
-  private getUser!: HasOneGetAssociationMixin<User>;
-  public getOwner = this.getUser;
-
-  private setUser!: BelongsToSetAssociationMixin<User, number>;
-  public setOwner = this.setUser;
+  public getOwner!: BelongsToGetAssociationMixin<User>;
+  public setOwner!: BelongsToSetAssociationMixin<User, number>;
 
   /* Collaborators properties */
-  private getUsers!: BelongsToManyGetAssociationsMixin<User>;
-  public getCollaborators = this.getUsers;
-
-  private countUsers!: BelongsToManyCountAssociationsMixin;
-  public countCollaborators = this.countUsers;
-
-  private addUser!: BelongsToManyAddAssociationMixin<User, number>;
-  public addCollaborator = this.addUser;
-
-  private removeUser!: BelongsToManyRemoveAssociationMixin<User, number>;
-  public removeCollaborator = this.removeUser;
+  public getCollaborators!: BelongsToManyGetAssociationsMixin<User>;
+  public countCollaborators!: BelongsToManyCountAssociationsMixin;
+  public addCollaborator!: BelongsToManyAddAssociationMixin<User, number>;
+  public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
 }
 
 export default (sequelize: Sequelize): typeof Event => {

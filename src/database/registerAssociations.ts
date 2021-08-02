@@ -46,22 +46,22 @@ export default async (): Promise<void> => {
 
   const QUIZ_COLLABORATORS_TABLENAME = 'QuizCollaborators';
 
-  Quiz.belongsTo(User);
-  User.hasMany(Quiz);
+  Quiz.belongsTo(User, { as: 'owner' });
+  User.hasMany(Quiz, { as: { singular: 'ownedQuiz', plural: 'ownedQuizzes' }, foreignKey: 'ownerId' });
 
-  Quiz.belongsToMany(User, { through: QUIZ_COLLABORATORS_TABLENAME });
-  User.belongsToMany(Quiz, { through: QUIZ_COLLABORATORS_TABLENAME });
+  Quiz.belongsToMany(User, { through: QUIZ_COLLABORATORS_TABLENAME, as: 'collaborators' });
+  User.belongsToMany(Quiz, { through: QUIZ_COLLABORATORS_TABLENAME, as: { singular: 'collaboratedQuiz', plural: 'collaboratedQuizzes' } });
 
   const EVENT_COLLABORATORS_TABLENAME = 'EventCollaborators';
 
-  Event.belongsTo(User);
-  User.hasMany(Event);
+  Event.belongsTo(User, { as: 'owner' });
+  User.hasMany(Event, { as: 'ownedEvents', foreignKey: 'ownerId', constraints: true });
 
   Event.belongsTo(Group);
   Group.hasMany(Event);
 
-  Event.belongsToMany(User, { through: EVENT_COLLABORATORS_TABLENAME });
-  User.belongsToMany(Event, { through: EVENT_COLLABORATORS_TABLENAME });
+  Event.belongsToMany(User, { through: EVENT_COLLABORATORS_TABLENAME, as: 'collaborators' });
+  User.belongsToMany(Event, { through: EVENT_COLLABORATORS_TABLENAME, as: 'collaboratedEvents' });
 
   // Quiz & Question relation.
   Question.belongsTo(Quiz);

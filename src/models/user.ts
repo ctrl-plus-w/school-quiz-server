@@ -7,8 +7,6 @@ import {
   Model,
   DataTypes,
   BelongsToManyAddAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  BelongsToManyCreateAssociationMixin,
   BelongsToManyGetAssociationsMixin,
   BelongsToGetAssociationMixin,
   HasManyGetAssociationsMixin,
@@ -80,15 +78,15 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public setState!: BelongsToSetAssociationMixin<State, number>;
 
   /* Event properties */
-  public getEvents!: BelongsToManyGetAssociationsMixin<Event>;
+  public getOwnedEvents!: HasManyGetAssociationsMixin<Event>;
+  public getCollaboratedEvents!: BelongsToManyGetAssociationsMixin<Event>;
   public addEvent!: BelongsToManyAddAssociationMixin<Event, number>;
   public addEvents!: BelongsToManyAddAssociationsMixin<Event, number>;
-  public createEvent!: BelongsToManyCreateAssociationMixin<Event>;
   public removeEvent!: BelongsToManyRemoveAssociationMixin<Event, number>;
 
   /* Quiz properties */
-  public getQuizzes!: HasManyGetAssociationsMixin<Quiz>;
-  public createQuiz!: HasManyCreateAssociationMixin<Quiz>;
+  public getOwnedQuizzes!: HasManyGetAssociationsMixin<Quiz>;
+  public getCollaboratedQuizzes!: HasManyGetAssociationsMixin<Quiz>;
 }
 
 export default (sequelize: Sequelize): typeof User => {

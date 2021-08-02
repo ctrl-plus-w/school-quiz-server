@@ -40,10 +40,20 @@ const updateSchema = Joi.object({
 
 export const getEvents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const reqParams = req.query.userId ? { include: { model: User, where: { id: req.query.userId } } } : {};
+    const userId = req.query.userId as string | null;
 
-    const events = await Event.findAll(reqParams);
-    res.json(eventMapper(events));
+    if (userId) {
+      const user = await User.findByPk(userId);
+      if (!user) return next(new NotFoundError('User'));
+
+      const userOwnedEvents = await user.getOwnedEvents();
+      const userCollaboratedEvents = await user.getCollaboratedEvents();
+
+      res.json(eventMapper([...userOwnedEvents, ...userCollaboratedEvents]));
+    } else {
+      const events = await Event.findAll();
+      res.json(eventMapper(events));
+    }
   } catch (err) {
     next(err);
   }
@@ -175,12 +185,13 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
 
     if (eventsAmount > 0) return next(new DuplicationError('Event'));
 
-    const createdEvent = await user.createEvent({
+    const createdEvent = await Event.create({
       start: validatedEvent.start,
       end: validatedEvent.end,
       countdown: validatedEvent.countdown,
     });
 
+    await createdEvent.setOwner(user);
     await createdEvent.setQuiz(quiz);
     await createdEvent.setGroup(group);
 
