@@ -40,7 +40,9 @@ const updateSchema = Joi.object({
 
 export const getEvents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const events = await Event.findAll();
+    const reqParams = req.query.userId ? { include: { model: User, where: { id: req.query.userId } } } : {};
+
+    const events = await Event.findAll(reqParams);
     res.json(eventMapper(events));
   } catch (err) {
     next(err);
