@@ -117,7 +117,12 @@ export const eventMapper = (events?: Array<Event>): Array<FormattedEvent> | unde
   return events?.map((event) => eventFormatter(event)).filter(isNotNull);
 };
 
-export const userFormatter = (user?: User | null, infoLevel: 0 | 1 | 2 | 3 = 3): FormattedUser | undefined => {
+export const userFormatter = (
+  user?: User | null,
+  quizzes: Array<Quiz> = [],
+  events: Array<Event> = [],
+  infoLevel: 0 | 1 | 2 | 3 = 3
+): FormattedUser | undefined => {
   if (!user) return undefined;
 
   const defaultInfos = {
@@ -135,9 +140,9 @@ export const userFormatter = (user?: User | null, infoLevel: 0 | 1 | 2 | 3 = 3):
       return {
         ...defaultInfos,
         password: user.password,
-        events: user.events,
+        events: eventMapper(events),
         groups: user.groups,
-        quizzes: quizMapper(user.quizzes),
+        quizzes: quizMapper(quizzes),
         role: user.role,
         state: user.state,
       };
@@ -145,9 +150,9 @@ export const userFormatter = (user?: User | null, infoLevel: 0 | 1 | 2 | 3 = 3):
     case 1:
       return {
         ...defaultInfos,
-        events: user.events,
+        events: eventMapper(events),
         groups: user.groups,
-        quizzes: quizMapper(user.quizzes),
+        quizzes: quizMapper(quizzes),
         role: user.role,
         state: user.state,
       };
@@ -164,5 +169,5 @@ export const userFormatter = (user?: User | null, infoLevel: 0 | 1 | 2 | 3 = 3):
 };
 
 export const userMapper = (users?: Array<User>, infoLevel?: 0 | 1 | 2 | 3): Array<FormattedUser> | undefined => {
-  return users?.map((user) => userFormatter(user, infoLevel)).filter(isNotNull);
+  return users?.map((user) => userFormatter(user, undefined, undefined, infoLevel)).filter(isNotNull);
 };

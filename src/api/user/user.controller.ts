@@ -6,9 +6,7 @@ import bcrypt from 'bcrypt';
 import { User, UserCreationAttributes } from '../../models/user';
 import { Group } from '../../models/group';
 import { Role } from '../../models/role';
-import { Quiz } from '../../models/quiz';
 import { State } from '../../models/state';
-import { Event } from '../../models/event';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
@@ -51,11 +49,18 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
 
     const [isAdmin] = await checkIsAdmin(req, res, next);
 
-    const user = await User.findByPk(userId, { include: [Event, Group, Role, State, Quiz] });
-
+    const user = await User.findByPk(userId, { include: [Group, Role, State] });
     if (!user) return next(new NotFoundError('User'));
 
-    res.json(userFormatter(user, isAdmin ? 0 : 1));
+    const userOwnedEvents = await user.getOwnedEvents();
+    const userCollaboratedEvents = await user.getCollaboratedEvents();
+    const userEvents = [...userOwnedEvents, ...userCollaboratedEvents];
+
+    const userOwnedQuizzes = await user.getOwnedQuizzes();
+    const userCollaboratedQuizzes = await user.getCollaboratedQuizzes();
+    const userQuizzes = [...userOwnedQuizzes, ...userCollaboratedQuizzes];
+
+    res.json(userFormatter(user, userQuizzes, userEvents, isAdmin ? 0 : 1));
   } catch (err) {
     next(err);
   }
@@ -221,7 +226,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     const password = bcrypt.hashSync(validatedUser.password, 12);
 
     const createdUser = await User.create({ ...validatedUser, password });
-    res.json(userFormatter(createdUser, 2));
+    res.json(userFormatter(createdUser, undefined, undefined, 2));
   } catch (err) {
     next(err);
   }
