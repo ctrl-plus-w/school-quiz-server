@@ -100,7 +100,7 @@ export default async (): Promise<void> => {
       questionType: 'numericQuestion',
     },
     {
-      slug: 'nombre-décimal',
+      slug: 'nombre-decimal',
       name: 'Nombre décimal',
       questionType: 'numericQuestion',
     },
