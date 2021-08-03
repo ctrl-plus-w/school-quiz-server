@@ -14,6 +14,7 @@ import { eventFormatter, eventMapper, quizFormatter, quizMapper, userFormatter, 
 
 import { AllOptional } from '../../types/optional.types';
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
+import { Question } from '../../models/question';
 
 const creationSchema = Joi.object({
   username: Joi.string().min(4).max(25).required(),
@@ -155,17 +156,22 @@ export const getUserQuiz = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const [userOwnedQuiz] = await user.getOwnedQuizzes({ where: { id: quizId } });
+    const [userOwnedQuiz] = await user.getOwnedQuizzes({ where: { id: quizId }, include: [Question] });
 
     if (userOwnedQuiz) {
-      res.json(quizFormatter(userOwnedQuiz));
+      const quizCollaborators = await userOwnedQuiz.getCollaborators();
+
+      res.json(quizFormatter(userOwnedQuiz, user, quizCollaborators));
       return;
     }
 
-    const [userCollaboratedQuiz] = await user.getCollaboratedQuizzes({ where: { id: quizId } });
+    const [userCollaboratedQuiz] = await user.getCollaboratedQuizzes({ where: { id: quizId }, include: [Question] });
 
     if (userCollaboratedQuiz) {
-      res.json(quizFormatter(userCollaboratedQuiz));
+      const quizOwner = await userCollaboratedQuiz.getOwner();
+      const quizCollaborators = await userCollaboratedQuiz.getCollaborators();
+
+      res.json(quizFormatter(userCollaboratedQuiz, quizOwner, quizCollaborators));
       return;
     }
 

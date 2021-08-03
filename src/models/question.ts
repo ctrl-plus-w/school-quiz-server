@@ -128,26 +128,28 @@ export default (sequelize: Sequelize): typeof Question => {
 
       hooks: {
         afterFind: (instanceOrInstances: Array<Question> | Question) => {
-          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
-          const instances = instanceOrInstances === null ? [] : arrayedInstances;
+          if (!('count' in instanceOrInstances)) {
+            const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+            const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
-          for (const instance of instances) {
-            if (instance.questionType === 'numericQuestion' && instance.typedQuestionId != undefined) {
-              instance.typedQuestion = instance.numericQuestion;
-            } else if (instance.questionType === 'textualQuestion' && instance.typedQuestionId != undefined) {
-              instance.typedQuestion = instance.textualQuestion;
-            } else if (instance.questionType === 'choiceQuestion' && instance.typedQuestionId != undefined) {
-              instance.typedQuestion = instance.choiceQuestion;
+            for (const instance of instances) {
+              if (instance.questionType === 'numericQuestion' && instance.typedQuestionId != undefined) {
+                instance.typedQuestion = instance.numericQuestion;
+              } else if (instance.questionType === 'textualQuestion' && instance.typedQuestionId != undefined) {
+                instance.typedQuestion = instance.textualQuestion;
+              } else if (instance.questionType === 'choiceQuestion' && instance.typedQuestionId != undefined) {
+                instance.typedQuestion = instance.choiceQuestion;
+              }
+
+              delete instance.numericQuestion;
+              delete instance.dataValues.numericQuestion;
+
+              delete instance.textualQuestion;
+              delete instance.dataValues.textualQuestion;
+
+              delete instance.choiceQuestion;
+              delete instance.dataValues.choiceQuestion;
             }
-
-            delete instance.numericQuestion;
-            delete instance.dataValues.numericQuestion;
-
-            delete instance.textualQuestion;
-            delete instance.dataValues.textualQuestion;
-
-            delete instance.choiceQuestion;
-            delete instance.dataValues.choiceQuestion;
           }
         },
       },
