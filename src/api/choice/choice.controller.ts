@@ -3,11 +3,14 @@ import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
 import { Question } from '../../models/question';
-
-import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
+import { QuestionSpecification } from '../../models/questionSpecification';
 import { ChoiceQuestion } from '../../models/choiceQuestion';
 import { Choice, ChoiceCreationAttributes } from '../../models/choice';
+
+import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
+
 import { slugify } from '../../utils/string.utils';
+
 import { AllOptional } from '../../types/optional.types';
 
 const arrayCreationSchema = Joi.array()
@@ -163,10 +166,10 @@ export const createChoices = async (req: Request, res: Response, next: NextFunct
 
     if (!question.typedQuestion) return next(new NotFoundError('Choice question'));
 
-    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, { attributes: ['id'] });
+    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, { include: QuestionSpecification });
     if (!choiceQuestion) return next(new NotFoundError('Choice question'));
 
-    const questionSpecification = await choiceQuestion.getQuestionSpecification();
+    const questionSpecification = choiceQuestion.questionSpecification;
     if (!questionSpecification) return next(new NotFoundError('Question specification'));
 
     // If the question specifcation is 'choix-unique' so only one choice can be valid and the number of valid choices
