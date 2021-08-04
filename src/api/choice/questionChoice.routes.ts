@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { updateChoice, deleteChoice, getChoice, getChoices, createChoice } from './choice.controller';
+import { updateChoice, deleteChoice, getChoice, getChoices, postChoiceSpreader } from './choice.controller';
 
 import { authorize, checkIsProfessor } from '../../middlewares/authorization.middleware';
 import { checkQuizModifyPermission } from '../../middlewares/checkPossesion.middleware';
@@ -10,7 +10,7 @@ const router = Router();
 router.get('/', authorize([checkIsProfessor]), getChoices);
 router.get('/:choiceId', authorize([checkIsProfessor]), getChoice);
 
-router.post('/', authorize([checkIsProfessor, checkQuizModifyPermission]), createChoice);
+router.post('/', authorize([checkIsProfessor, checkQuizModifyPermission]), postChoiceSpreader);
 
 router.put('/:choiceId', authorize([checkIsProfessor, checkQuizModifyPermission]), updateChoice);
 

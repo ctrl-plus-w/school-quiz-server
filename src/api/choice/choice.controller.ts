@@ -10,10 +10,19 @@ import { Choice, ChoiceCreationAttributes } from '../../models/choice';
 import { slugify } from '../../utils/string.utils';
 import { AllOptional } from '../../types/optional.types';
 
+const arrayCreationSchema = Joi.array()
+  .items(
+    Joi.object({
+      valid: Joi.boolean().required(),
+      name: Joi.string().min(1).max(35).required(),
+    })
+  )
+  .min(1);
+
 const creationSchema = Joi.object({
   valid: Joi.boolean().required(),
   name: Joi.string().min(1).max(35).required(),
-  slug: Joi.string().min(1).max(35),
+  slug: Joi.string().min(1).max(35).required(),
 });
 
 const updateSchema = Joi.object({
@@ -92,6 +101,11 @@ export const getChoice = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const postChoiceSpreader = (req: Request, res: Response, next: NextFunction): void => {
+  if (Array.isArray(req.body)) createChoices(req, res, next);
+  else createChoice(req, res, next);
+};
+
 export const createChoice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const {
@@ -117,6 +131,46 @@ export const createChoice = async (req: Request, res: Response, next: NextFuncti
 
     const createdChoice = await choiceQuestion.createChoice(validatedChoice);
     res.json(createdChoice);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createChoices = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const {
+      value: _validatedChoices,
+      error: validationError,
+    }: {
+      value: Array<ChoiceCreationAttributes>;
+      error?: Error;
+    } = arrayCreationSchema.validate(req.body);
+
+    const validatedChoices = _validatedChoices.map(({ name, ...rest }) => ({ ...rest, name, slug: slugify(name) }));
+
+    if (validationError) return next(new InvalidInputError());
+
+    const question: Question | undefined = res.locals.question;
+    if (!question) return next(new NotFoundError('Question'));
+
+    if (!question.typedQuestion) return next(new NotFoundError('Choice question'));
+
+    const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, { attributes: ['id'] });
+    if (!choiceQuestion) return next(new NotFoundError('Choice question'));
+
+    const choicesSlug = validatedChoices.map(({ slug }) => slug) as Array<string>;
+
+    const choices = await choiceQuestion.countChoices({ where: { slug: choicesSlug } });
+    if (choices > 0) return next(new DuplicationError('Choice'));
+
+    const createdChoices: Array<Choice> = [];
+
+    for (const validatedChoice of validatedChoices) {
+      const createdChoice = await choiceQuestion.createChoice(validatedChoice);
+      createdChoices.push(createdChoice);
+    }
+
+    res.json(createdChoices);
   } catch (err) {
     next(err);
   }
