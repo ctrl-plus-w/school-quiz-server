@@ -58,33 +58,41 @@ const textualQuestionUpdateSchema = Joi.object({
 const numericQuestionSchema = Joi.object({
   ...questionCreationSchema,
 
-  questionSpecificationId: Joi.number().required(),
-});
+  questionSpecificationId: Joi.number(),
+  questionSpecificationSlug: Joi.string(),
+}).xor('questionSpecificationId', 'questionSpecificationSlug');
 
 const numericQuestionUpdateSchema = Joi.object({
   ...questionUpdateSchema,
 
   questionSpecificationId: Joi.number(),
-});
+  questionSpecificationSlug: Joi.string(),
+}).oxor('questionSpecificationId', 'questionSpecificationSlug');
 
 /* Choice question schemas */
 const choiceQuestionCreationSchema = Joi.object({
   ...questionCreationSchema,
 
   shuffle: Joi.boolean().required(),
-  questionSpecificationId: Joi.number().required(),
-});
+  questionSpecificationId: Joi.number(),
+  questionSpecificationSlug: Joi.string(),
+}).xor('questionSpecificationId', 'questionSpecificationSlug');
 
 const choiceQuestionUpdateSchema = Joi.object({
   ...questionUpdateSchema,
 
   shuffle: Joi.boolean(),
   questionSpecificationId: Joi.number(),
-});
+  questionSpecificationSlug: Joi.string(),
+}).oxor('questionSpecificationId', 'questionSpecificationSlug');
 
 type TextualQuestionIntersection = Question & TextualQuestionCreationAttributes & { verificationTypeId?: number; verificationTypeSlug?: string };
-type NumericQuestionIntersection = Question & NumericQuestionCreationAttributes & { questionSpecificationId?: number };
-type ChoiceQuestionIntersection = Question & ChoiceQuestionCreationAttributes & { questionSpecificationId?: number };
+
+type NumericQuestionIntersection = Question &
+  NumericQuestionCreationAttributes & { questionSpecificationId?: number; questionSpecificationSlug?: number };
+
+type ChoiceQuestionIntersection = Question &
+  ChoiceQuestionCreationAttributes & { questionSpecificationId?: number; questionSpecificationSlug?: number };
 
 const createQuestion = async (
   createdTypedQuestion: TypedQuestion,
@@ -226,7 +234,11 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
 
     const createdNumericQuestion = NumericQuestion.build();
 
-    const questionSpecification = await QuestionSpecification.findByPk(validatedNumericQuestion.questionSpecificationId);
+    const condition = validatedNumericQuestion.questionSpecificationId
+      ? { id: validatedNumericQuestion.questionSpecificationId }
+      : { slug: validatedNumericQuestion.questionSpecificationSlug };
+
+    const questionSpecification = await QuestionSpecification.findOne({ where: condition });
     if (!questionSpecification) return next(new NotFoundError('Question specification'));
 
     if (questionSpecification.questionType !== 'numericQuestion')
@@ -270,8 +282,12 @@ export const tryUpdateNumericQuestion = async (req: Request, res: Response, next
     if (!numericQuestion) return next(new NotFoundError('Numeric question'));
 
     // Update numeric question properties
-    if (validatedNumericQuestion.questionSpecificationId) {
-      const questionSpecification = await QuestionSpecification.findByPk(validatedNumericQuestion.questionSpecificationId);
+    if (validatedNumericQuestion.questionSpecificationId || validatedNumericQuestion.questionSpecificationSlug) {
+      const condition = validatedNumericQuestion.questionSpecificationId
+        ? { id: validatedNumericQuestion.questionSpecificationId }
+        : { slug: validatedNumericQuestion.questionSpecificationSlug };
+
+      const questionSpecification = await QuestionSpecification.findOne({ where: condition });
       if (!questionSpecification) return next(new NotFoundError('Question specification'));
 
       if (questionSpecification.questionType !== 'numericQuestion')
@@ -312,7 +328,11 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
 
     const createdChoiceQuestion = ChoiceQuestion.build({ shuffle: validatedChoiceQuestion.shuffle });
 
-    const questionSpecification = await QuestionSpecification.findByPk(validatedChoiceQuestion.questionSpecificationId);
+    const condition = validatedChoiceQuestion.questionSpecificationId
+      ? { id: validatedChoiceQuestion.questionSpecificationId }
+      : { slug: validatedChoiceQuestion.questionSpecificationSlug };
+
+    const questionSpecification = await QuestionSpecification.findOne({ where: condition });
     if (!questionSpecification) return next(new NotFoundError('Question specification'));
 
     if (questionSpecification.questionType !== 'choiceQuestion')
@@ -359,7 +379,11 @@ export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next:
 
     // Update choice question properties
     if (validatedChoiceQuestion.questionSpecificationId) {
-      const questionSpecification = await QuestionSpecification.findByPk(validatedChoiceQuestion.questionSpecificationId);
+      const condition = validatedChoiceQuestion.questionSpecificationId
+        ? { id: validatedChoiceQuestion.questionSpecificationId }
+        : { slug: validatedChoiceQuestion.questionSpecificationSlug };
+
+      const questionSpecification = await QuestionSpecification.findOne({ where: condition });
       if (!questionSpecification) return next(new NotFoundError('Question specification'));
 
       if (questionSpecification.questionType !== 'choiceQuestion')
