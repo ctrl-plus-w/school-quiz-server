@@ -12,13 +12,13 @@ import { AllOptional } from '../../types/optional.types';
 
 const creationSchema = Joi.object({
   valid: Joi.boolean().required(),
-  name: Joi.string().min(3).max(35).required(),
-  slug: Joi.string().min(3).max(35),
+  name: Joi.string().min(1).max(35).required(),
+  slug: Joi.string().min(1).max(35),
 });
 
 const updateSchema = Joi.object({
   valid: Joi.boolean(),
-  name: Joi.string().min(3).max(35),
+  name: Joi.string().min(1).max(35),
 }).min(1);
 
 export const getGlobalChoices = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
