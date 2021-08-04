@@ -16,6 +16,7 @@ import { questionFormatter } from './mapper.helper';
 import { slugify } from '../utils/string.utils';
 
 import { AllOptional } from '../types/optional.types';
+import { VerificationType } from '../models/verificationType';
 
 /* Global schemas */
 const questionCreationSchema: Joi.SchemaMap = {
@@ -35,14 +36,22 @@ const textualQuestionCreationSchema = Joi.object({
 
   accentSensitive: Joi.boolean().required(),
   caseSensitive: Joi.boolean().required(),
-});
+
+  verificationTypeId: Joi.number(),
+  verificationTypeSlug: Joi.string().valid('automatique', 'hybride', 'manuel'),
+}).xor('verificationTypeId', 'verificationTypeSlug');
 
 const textualQuestionUpdateSchema = Joi.object({
   ...questionUpdateSchema,
 
   accentSensitive: Joi.boolean(),
   caseSensitive: Joi.boolean(),
-}).min(1);
+
+  verificationTypeId: Joi.number(),
+  verificationTypeSlug: Joi.string().valid('automatique', 'hybride', 'manuel'),
+})
+  .min(1)
+  .oxor('verificationTypeId', 'verificationTypeSlug');
 
 /* Numeric question schemas */
 const numericQuestionSchema = Joi.object({
@@ -66,9 +75,9 @@ const choiceQuestionUpdateSchema = Joi.object({
   shuffle: Joi.boolean(),
 });
 
-type TextualQuestionIntersection = Question & TextualQuestionCreationAttributes & { verificationType: string };
-type NumericQuestionIntersection = Question & NumericQuestionCreationAttributes;
-type ChoiceQuestionIntersection = Question & ChoiceQuestionCreationAttributes;
+type TextualQuestionIntersection = Question & TextualQuestionCreationAttributes & { verificationTypeId?: number; verificationTypeSlug?: string };
+type NumericQuestionIntersection = Question & NumericQuestionCreationAttributes & { questionSpecificationId?: number };
+type ChoiceQuestionIntersection = Question & ChoiceQuestionCreationAttributes & { questionSpecificationId?: number };
 
 const createQuestion = async (
   createdTypedQuestion: TypedQuestion,
@@ -108,10 +117,24 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
     const questionsWithSameSlug = await quiz.countQuestions({ where: { slug: validatedTextualQuestion.slug } });
     if (questionsWithSameSlug > 0) return next(new DuplicationError('Question'));
 
-    const createdTextualQuestion = await TextualQuestion.create({
+    const createdTextualQuestion = TextualQuestion.build({
       accentSensitive: validatedTextualQuestion.accentSensitive,
       caseSensitive: validatedTextualQuestion.caseSensitive,
     });
+
+    if (validatedTextualQuestion.verificationTypeId || validatedTextualQuestion.verificationTypeSlug) {
+      const condition = validatedTextualQuestion.verificationTypeId
+        ? { id: validatedTextualQuestion.verificationTypeId }
+        : { slug: validatedTextualQuestion.verificationTypeSlug };
+
+      const verificationType = await VerificationType.findOne({ where: condition });
+      if (!verificationType) return next(new NotFoundError('Verification type'));
+
+      await createdTextualQuestion.save();
+      await createdTextualQuestion.setVerificationType(verificationType);
+    } else {
+      await createdTextualQuestion.save();
+    }
 
     const createdQuestion = await createQuestion(createdTextualQuestion, validatedTextualQuestion, req, res, next);
     if (!createdQuestion) return next(new Error());
@@ -139,20 +162,37 @@ export const tryUpdateTextualQuestion = async (req: Request, res: Response, next
 
     if (validationError) return next(new InvalidInputError());
 
+    // Update question properties
     if (validatedTextualQuestion.title) {
-      const slug = slugify(validatedTextualQuestion.title);
-      await question.update({ title: validatedTextualQuestion.title, description: validatedTextualQuestion.description, slug });
-    } else if (validatedTextualQuestion.description) {
-      await question.update({ description: validatedTextualQuestion.description });
+      question.title = validatedTextualQuestion.title;
+      question.slug = slugify(validatedTextualQuestion.title) || question.slug;
     }
+
+    if (validatedTextualQuestion.description) question.description = validatedTextualQuestion.description;
 
     const textualQuestion = await question.getTextualQuestion();
     if (!textualQuestion) return next(new NotFoundError('Question'));
 
-    await textualQuestion.update({
-      accentSensitive: validatedTextualQuestion.accentSensitive,
-      caseSensitive: validatedTextualQuestion.caseSensitive,
-    });
+    // Update textual question properties
+    if (validatedTextualQuestion.accentSensitive) textualQuestion.accentSensitive = validatedTextualQuestion.accentSensitive;
+    if (validatedTextualQuestion.caseSensitive) textualQuestion.caseSensitive = validatedTextualQuestion.caseSensitive;
+
+    if (validatedTextualQuestion.verificationTypeId || validatedTextualQuestion.verificationTypeSlug) {
+      const condition = validatedTextualQuestion.verificationTypeId
+        ? { id: validatedTextualQuestion.verificationTypeId }
+        : { slug: validatedTextualQuestion.verificationTypeSlug };
+
+      const verificationType = await VerificationType.findOne({ where: condition });
+      if (!verificationType) return next(new NotFoundError('Verification type'));
+
+      await textualQuestion.setVerificationType(verificationType);
+
+      await question.save();
+      await textualQuestion.save();
+    } else {
+      await question.save();
+      await textualQuestion.save();
+    }
 
     res.json({ updated: true });
   } catch (err) {
