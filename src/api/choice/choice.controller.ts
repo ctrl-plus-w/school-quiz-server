@@ -126,7 +126,15 @@ export const createChoice = async (req: Request, res: Response, next: NextFuncti
     const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, { attributes: ['id'] });
     if (!choiceQuestion) return next(new NotFoundError('Choice question'));
 
-    const choices = await choiceQuestion.countChoices({ where: { slug: validatedChoice.slug } });
+    const questionSpecification = await choiceQuestion.getQuestionSpecification();
+    if (!questionSpecification) return next(new NotFoundError('Question specification'));
+
+    const conditions =
+      questionSpecification.slug === 'choix-unique' && validatedChoice.valid
+        ? { slug: validatedChoice.slug, valid: true }
+        : { slug: validatedChoice.slug };
+
+    const choices = await choiceQuestion.countChoices({ where: conditions });
     if (choices > 0) return next(new DuplicationError('Choice'));
 
     const createdChoice = await choiceQuestion.createChoice(validatedChoice);
@@ -158,9 +166,22 @@ export const createChoices = async (req: Request, res: Response, next: NextFunct
     const choiceQuestion = await ChoiceQuestion.findByPk(question.typedQuestion.id, { attributes: ['id'] });
     if (!choiceQuestion) return next(new NotFoundError('Choice question'));
 
+    const questionSpecification = await choiceQuestion.getQuestionSpecification();
+    if (!questionSpecification) return next(new NotFoundError('Question specification'));
+
+    // If the question specifcation is 'choix-unique' so only one choice can be valid and the number of valid choices
+    // with a valid property to true is over 1, we can't create because only one valid choice is allowed.
+    if (questionSpecification.slug === 'choix-unique' && validatedChoices.filter(({ valid }) => valid === true).length > 1)
+      return next(new DuplicationError('Choice'));
+
     const choicesSlug = validatedChoices.map(({ slug }) => slug) as Array<string>;
 
-    const choices = await choiceQuestion.countChoices({ where: { slug: choicesSlug } });
+    const conditions =
+      questionSpecification.slug === 'choix-unique' && validatedChoices.some(({ valid }) => valid === true)
+        ? { slug: choicesSlug, valid: true }
+        : { slug: choicesSlug };
+
+    const choices = await choiceQuestion.countChoices({ where: conditions });
     if (choices > 0) return next(new DuplicationError('Choice'));
 
     const createdChoices: Array<Choice> = [];
