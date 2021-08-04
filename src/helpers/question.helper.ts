@@ -72,12 +72,14 @@ const choiceQuestionCreationSchema = Joi.object({
   ...questionCreationSchema,
 
   shuffle: Joi.boolean().required(),
+  questionSpecificationId: Joi.number().required(),
 });
 
 const choiceQuestionUpdateSchema = Joi.object({
   ...questionUpdateSchema,
 
   shuffle: Joi.boolean(),
+  questionSpecificationId: Joi.number(),
 });
 
 type TextualQuestionIntersection = Question & TextualQuestionCreationAttributes & { verificationTypeId?: number; verificationTypeSlug?: string };
@@ -254,8 +256,6 @@ export const tryUpdateNumericQuestion = async (req: Request, res: Response, next
       error?: Error;
     } = numericQuestionUpdateSchema.validate(req.body);
 
-    console.log(validationError);
-
     if (validationError) return next(new InvalidInputError());
 
     // Update question properties
@@ -310,9 +310,16 @@ export const tryCreateChoiceQuestion = async (req: Request, res: Response, next:
     const questions = await Question.count({ where: { slug: validatedChoiceQuestion.slug } });
     if (questions > 0) return next(new DuplicationError('Question'));
 
-    const createdChoiceQuestion = await ChoiceQuestion.create({
-      shuffle: validatedChoiceQuestion.shuffle,
-    });
+    const createdChoiceQuestion = ChoiceQuestion.build({ shuffle: validatedChoiceQuestion.shuffle });
+
+    const questionSpecification = await QuestionSpecification.findByPk(validatedChoiceQuestion.questionSpecificationId);
+    if (!questionSpecification) return next(new NotFoundError('Question specification'));
+
+    if (questionSpecification.questionType !== 'choiceQuestion')
+      return next(new StatusError("The question specification type doesn't match the question type", 400));
+
+    await createdChoiceQuestion.save();
+    await createdChoiceQuestion.setQuestionSpecification(questionSpecification);
 
     const createdQuestion = await createQuestion(createdChoiceQuestion, validatedChoiceQuestion, req, res, next);
     if (!createdQuestion) return next(new Error());
@@ -337,17 +344,34 @@ export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next:
 
     if (validationError) return next(new InvalidInputError());
 
+    // Update question properties
     if (validatedChoiceQuestion.title) {
-      const slug = slugify(validatedChoiceQuestion.title);
-      await question.update({ title: validatedChoiceQuestion.title, description: validatedChoiceQuestion.description, slug });
-    } else if (validatedChoiceQuestion.description) {
-      await question.update({ description: validatedChoiceQuestion.description });
+      question.title = validatedChoiceQuestion.title;
+      question.slug = slugify(validatedChoiceQuestion.title) || question.slug;
     }
 
-    const choiceQuestion = await question.getChoiceQuestion();
-    if (!choiceQuestion) return next(new NotFoundError('Question'));
+    if (validatedChoiceQuestion.description) question.description = validatedChoiceQuestion.description;
 
-    await choiceQuestion.update({ shuffle: validatedChoiceQuestion.shuffle });
+    const choiceQuestion = await question.getChoiceQuestion();
+    if (!choiceQuestion) return next(new NotFoundError('Choice Question'));
+
+    if (validatedChoiceQuestion.shuffle) choiceQuestion.shuffle = validatedChoiceQuestion.shuffle;
+
+    // Update choice question properties
+    if (validatedChoiceQuestion.questionSpecificationId) {
+      const questionSpecification = await QuestionSpecification.findByPk(validatedChoiceQuestion.questionSpecificationId);
+      if (!questionSpecification) return next(new NotFoundError('Question specification'));
+
+      if (questionSpecification.questionType !== 'choiceQuestion')
+        return next(new StatusError("The question specification type doesn't match the question type", 400));
+
+      await choiceQuestion.save();
+      await choiceQuestion.setQuestionSpecification(questionSpecification);
+      await question.save();
+    } else {
+      await choiceQuestion.save();
+      await question.save();
+    }
 
     res.json({ updated: true });
   } catch (err) {
