@@ -19,14 +19,14 @@ import { AllOptional } from '../types/optional.types';
 
 /* Global schemas */
 const questionCreationSchema: Joi.SchemaMap = {
-  title: Joi.string().min(5).max(35).required(),
-  slug: Joi.string().min(5).max(35).required(),
-  description: Joi.string().min(3).max(120).required(),
+  title: Joi.string().min(1).max(35).required(),
+  slug: Joi.string().min(1).max(35).required(),
+  description: Joi.string().min(1).max(120).required(),
 };
 
 const questionUpdateSchema: Joi.SchemaMap = {
-  title: Joi.string().min(5).max(35),
-  description: Joi.string().min(3).max(120),
+  title: Joi.string().min(1).max(35),
+  description: Joi.string().min(1).max(120),
 };
 
 /* Textual question schemas */
