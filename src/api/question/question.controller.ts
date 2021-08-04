@@ -155,9 +155,9 @@ export const getQuestionSpecification = async (req: Request, res: Response, next
 export const createQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void | boolean> => {
   try {
     const questionTypes: QuestionTypes = {
-      textual: tryCreateTextualQuestion,
-      numeric: tryCreateNumericQuestion,
-      choice: tryCreateChoiceQuestion,
+      textualQuestion: tryCreateTextualQuestion,
+      numericQuestion: tryCreateNumericQuestion,
+      choiceQuestion: tryCreateChoiceQuestion,
     };
 
     const questionType = req.params.questionType;
