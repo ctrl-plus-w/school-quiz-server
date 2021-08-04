@@ -9,7 +9,7 @@ import { ChoiceQuestion, ChoiceQuestionCreationAttributes } from '../models/choi
 import { NumericQuestion, NumericQuestionCreationAttributes } from '../models/numericQuestion';
 import { TextualQuestion, TextualQuestionCreationAttributes } from '../models/textualQuestion';
 
-import { DuplicationError, InvalidInputError, NotFoundError } from '../classes/StatusError';
+import StatusError, { DuplicationError, InvalidInputError, NotFoundError } from '../classes/StatusError';
 
 import { questionFormatter } from './mapper.helper';
 
@@ -17,6 +17,7 @@ import { slugify } from '../utils/string.utils';
 
 import { AllOptional } from '../types/optional.types';
 import { VerificationType } from '../models/verificationType';
+import { QuestionSpecification } from '../models/questionSpecification';
 
 /* Global schemas */
 const questionCreationSchema: Joi.SchemaMap = {
@@ -56,10 +57,14 @@ const textualQuestionUpdateSchema = Joi.object({
 /* Numeric question schemas */
 const numericQuestionSchema = Joi.object({
   ...questionCreationSchema,
+
+  questionSpecificationId: Joi.number().required(),
 });
 
 const numericQuestionUpdateSchema = Joi.object({
   ...questionUpdateSchema,
+
+  questionSpecificationId: Joi.number(),
 });
 
 /* Choice question schemas */
@@ -122,19 +127,15 @@ export const tryCreateTextualQuestion = async (req: Request, res: Response, next
       caseSensitive: validatedTextualQuestion.caseSensitive,
     });
 
-    if (validatedTextualQuestion.verificationTypeId || validatedTextualQuestion.verificationTypeSlug) {
-      const condition = validatedTextualQuestion.verificationTypeId
-        ? { id: validatedTextualQuestion.verificationTypeId }
-        : { slug: validatedTextualQuestion.verificationTypeSlug };
+    const condition = validatedTextualQuestion.verificationTypeId
+      ? { id: validatedTextualQuestion.verificationTypeId }
+      : { slug: validatedTextualQuestion.verificationTypeSlug };
 
-      const verificationType = await VerificationType.findOne({ where: condition });
-      if (!verificationType) return next(new NotFoundError('Verification type'));
+    const verificationType = await VerificationType.findOne({ where: condition });
+    if (!verificationType) return next(new NotFoundError('Verification type'));
 
-      await createdTextualQuestion.save();
-      await createdTextualQuestion.setVerificationType(verificationType);
-    } else {
-      await createdTextualQuestion.save();
-    }
+    await createdTextualQuestion.save();
+    await createdTextualQuestion.setVerificationType(verificationType);
 
     const createdQuestion = await createQuestion(createdTextualQuestion, validatedTextualQuestion, req, res, next);
     if (!createdQuestion) return next(new Error());
@@ -221,7 +222,16 @@ export const tryCreateNumericQuestion = async (req: Request, res: Response, next
     const questions = await Question.count({ where: { slug: validatedNumericQuestion.slug } });
     if (questions > 0) return next(new DuplicationError('Question'));
 
-    const createdNumericQuestion = await NumericQuestion.create();
+    const createdNumericQuestion = NumericQuestion.build();
+
+    const questionSpecification = await QuestionSpecification.findByPk(validatedNumericQuestion.questionSpecificationId);
+    if (!questionSpecification) return next(new NotFoundError('Question specification'));
+
+    if (questionSpecification.questionType !== 'numericQuestion')
+      return next(new StatusError("The question specification type doesn't match the question type", 400));
+
+    await createdNumericQuestion.save();
+    await createdNumericQuestion.setQuestionSpecification(questionSpecification);
 
     const createdQuestion = await createQuestion(createdNumericQuestion, validatedNumericQuestion, req, res, next);
     if (!createdQuestion) return next(new Error());
@@ -244,13 +254,33 @@ export const tryUpdateNumericQuestion = async (req: Request, res: Response, next
       error?: Error;
     } = numericQuestionUpdateSchema.validate(req.body);
 
+    console.log(validationError);
+
     if (validationError) return next(new InvalidInputError());
 
+    // Update question properties
     if (validatedNumericQuestion.title) {
-      const slug = slugify(validatedNumericQuestion.title);
-      await question.update({ title: validatedNumericQuestion.title, description: validatedNumericQuestion.description, slug });
-    } else if (validatedNumericQuestion.description) {
-      await question.update({ description: validatedNumericQuestion.description });
+      question.title = validatedNumericQuestion.title;
+      question.slug = slugify(validatedNumericQuestion.title) || question.slug;
+    }
+
+    if (validatedNumericQuestion.description) question.description = validatedNumericQuestion.description;
+
+    const numericQuestion = await question.getNumericQuestion();
+    if (!numericQuestion) return next(new NotFoundError('Numeric question'));
+
+    // Update numeric question properties
+    if (validatedNumericQuestion.questionSpecificationId) {
+      const questionSpecification = await QuestionSpecification.findByPk(validatedNumericQuestion.questionSpecificationId);
+      if (!questionSpecification) return next(new NotFoundError('Question specification'));
+
+      if (questionSpecification.questionType !== 'numericQuestion')
+        return next(new StatusError("The question specification type doesn't match the question type", 400));
+
+      await numericQuestion.setQuestionSpecification(questionSpecification);
+      await question.save();
+    } else {
+      await question.save();
     }
 
     res.json({ updated: true });
