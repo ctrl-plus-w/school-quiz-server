@@ -194,9 +194,15 @@ export const setVerificationType = async (req: Request, res: Response, next: Nex
   try {
     const questionId = req.params.questionId;
     const verificationTypeId = req.body.verificationTypeId;
-    if (!questionId || !verificationTypeId) return next(new InvalidInputError());
+    const verificationTypeSlug = req.body.verificationTypeSlug;
+    if (!questionId) return next(new InvalidInputError());
 
-    const verificationType = await VerificationType.findByPk(verificationTypeId);
+    if (!verificationTypeId && !verificationTypeSlug) return next(new InvalidInputError());
+
+    const verificationType = verificationTypeId
+      ? await VerificationType.findByPk(verificationTypeId)
+      : await VerificationType.findOne({ where: { slug: verificationTypeSlug } });
+
     if (!verificationType) return next(new NotFoundError('Verification type'));
 
     const quiz: Quiz | undefined = res.locals.quiz;
