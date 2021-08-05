@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 
 import Joi from 'joi';
-import { InvalidInputError, NotFoundError } from '../classes/StatusError';
+import { DuplicationError, InvalidInputError, NotFoundError } from '../classes/StatusError';
 import { Answer, TypedAnswer } from '../models/answer';
 
 import { ExactAnswer, ExactAnswerCreationAttributes } from '../models/exactAnswer';
 import { ComparisonAnswer, ComparisonAnswerCreationAttributes } from '../models/comparisonAnswer';
-import { answerFormatter } from './mapper.helper';
+import { answerFormatter, answerMapper } from './mapper.helper';
 import { Question } from '../models/question';
 import { AllOptional } from '../types/optional.types';
 
@@ -14,10 +14,14 @@ const exactAnswerSchema = Joi.object({
   answerContent: Joi.string().min(1).max(25).required(),
 });
 
+const arrayExactAnswerSchema = Joi.array().items(exactAnswerSchema).min(1);
+
 const comparisonAnswerCreationSchema = Joi.object({
   greaterThan: Joi.number().required(),
   lowerThan: Joi.number().min(Joi.ref('greaterThan')).required(),
 });
+
+const arrayComparisonAnswerSchema = Joi.array().items(comparisonAnswerCreationSchema).min(1);
 
 const comparisonAnswerUpdateSchema = Joi.object({
   greaterThan: Joi.number(),
@@ -31,6 +35,29 @@ const createAnswer = async (question: Question, createdTypedAnswer: TypedAnswer,
     await question.addAnswer(createdAnswer);
 
     res.json(answerFormatter(createdAnswer));
+  } catch (err) {
+    next(err);
+  }
+};
+
+const createAnswers = async (
+  question: Question,
+  createdTypedAnswers: Array<TypedAnswer>,
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const createdAnswers: Array<Answer> = [];
+
+    for (const createdTypedAnswer of createdTypedAnswers) {
+      const createdAnswer = await createdTypedAnswer.createAnswer();
+      createdAnswers.push(createdAnswer);
+
+      await question.addAnswer(createdAnswer);
+    }
+
+    res.json(answerMapper(createdAnswers));
   } catch (err) {
     next(err);
   }
@@ -54,6 +81,32 @@ export const tryCreateExactAnswer = async (req: Request, res: Response, next: Ne
     const [createdExactAnswer] = await ExactAnswer.findOrCreate({ where: validatedExactAnswer });
 
     await createAnswer(question, createdExactAnswer, req, res, next);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const tryCreateExactAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const {
+      value: validatedExactAnswers,
+      error: validationError,
+    }: {
+      value: Array<ExactAnswerCreationAttributes>;
+      error?: Error;
+    } = arrayExactAnswerSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    const question: Question | undefined = res.locals.question;
+    if (!question) return next(new NotFoundError('Question'));
+
+    const exactAnswersCount = await ExactAnswer.count({ where: { answerContent: validatedExactAnswers.map(({ answerContent }) => answerContent) } });
+    if (exactAnswersCount > 0) return next(new DuplicationError('One of the answer'));
+
+    const createdExactAnswers = await ExactAnswer.bulkCreate(validatedExactAnswers);
+
+    await createAnswers(question, createdExactAnswers, req, res, next);
   } catch (err) {
     next(err);
   }
@@ -103,6 +156,35 @@ export const tryCreateComparisonAnswer = async (req: Request, res: Response, nex
     const [createdComparisonAnswer] = await ComparisonAnswer.findOrCreate({ where: validatedComparisonAnswer });
 
     await createAnswer(question, createdComparisonAnswer, req, res, next);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const tryCreateComparisonAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const {
+      value: validatedComparisonAnswers,
+      error: validationError,
+    }: {
+      value: Array<ComparisonAnswerCreationAttributes>;
+      error?: Error;
+    } = arrayComparisonAnswerSchema.validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    const question: Question | undefined = res.locals.question;
+    if (!question) return next(new NotFoundError('Question'));
+
+    const greaterThan = validatedComparisonAnswers.map(({ greaterThan }) => greaterThan);
+    const lowerThan = validatedComparisonAnswers.map(({ greaterThan }) => greaterThan);
+
+    const comparisonAnswersAmount = await ComparisonAnswer.count({ where: { greaterThan, lowerThan } });
+    if (comparisonAnswersAmount > 0) return next(new DuplicationError('One of the comparison answer'));
+
+    const createdComparisonAnswers = await ComparisonAnswer.bulkCreate(validatedComparisonAnswers);
+
+    await createAnswers(question, createdComparisonAnswers, req, res, next);
   } catch (err) {
     next(err);
   }

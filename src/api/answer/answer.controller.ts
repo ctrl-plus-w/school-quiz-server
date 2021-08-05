@@ -5,7 +5,14 @@ import { Answer } from '../../models/answer';
 import { InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { answerFormatter, answerMapper } from '../../helpers/mapper.helper';
-import { tryUpdateExactAnswer, tryCreateExactAnswer, tryUpdateComparisonAnswer, tryCreateComparisonAnswer } from '../../helpers/answer.helper';
+import {
+  tryUpdateExactAnswer,
+  tryCreateExactAnswer,
+  tryUpdateComparisonAnswer,
+  tryCreateComparisonAnswer,
+  tryCreateComparisonAnswers,
+  tryCreateExactAnswers,
+} from '../../helpers/answer.helper';
 import { Question } from '../../models/question';
 import { ExactAnswer } from '../../models/exactAnswer';
 import { ComparisonAnswer } from '../../models/comparisonAnswer';
@@ -73,20 +80,15 @@ export const getAnswer = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export const createAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const answerTypes: AnswerTypes = {
-      exact: tryCreateExactAnswer,
-      comparison: tryCreateComparisonAnswer,
-    };
+export const postAnswerSpreader = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const answerTypes: AnswerTypes = Array.isArray(req.body)
+    ? { exact: tryCreateExactAnswers, comparison: tryCreateComparisonAnswers }
+    : { exact: tryCreateExactAnswer, comparison: tryCreateComparisonAnswer };
 
-    const answerType = req.params.answerType.toLowerCase();
-    if (!Object.keys(answerTypes).includes(answerType)) return next(new InvalidInputError());
+  const answerType = req.params.answerType.toLowerCase();
+  if (!Object.keys(answerTypes).includes(answerType)) return next(new InvalidInputError());
 
-    await answerTypes[answerType](req, res, next);
-  } catch (err) {
-    next(err);
-  }
+  await answerTypes[answerType](req, res, next);
 };
 
 export const updateAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
