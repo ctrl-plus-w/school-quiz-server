@@ -18,6 +18,7 @@ import { ChoiceQuestion } from './choiceQuestion';
 import { NumericQuestion } from './numericQuestion';
 import { FormattedUserAnswer, UserAnswer } from './userAnswer';
 import { Answer, FormattedAnswer } from './answer';
+import { Choice } from './choice';
 
 export type TypedQuestion = NumericQuestion | TextualQuestion | ChoiceQuestion;
 
@@ -34,6 +35,7 @@ export interface FormattedQuestion extends QuestionAttributes {
   typedQuestion: TypedQuestion | undefined;
   answers?: Array<FormattedAnswer>;
   userAnswers?: Array<FormattedUserAnswer>;
+  choices?: Array<Choice>;
 
   shuffle?: boolean;
 

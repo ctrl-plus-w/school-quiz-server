@@ -10,6 +10,7 @@ import { ChoiceQuestion } from '../../models/choiceQuestion';
 import { ExactAnswer } from '../../models/exactAnswer';
 import { UserAnswer } from '../../models/userAnswer';
 import { Question } from '../../models/question';
+import { Choice } from '../../models/choice';
 import { Answer } from '../../models/answer';
 import { Quiz } from '../../models/quiz';
 import { User } from '../../models/user';
@@ -42,7 +43,7 @@ const questionIncludes: Includeable | Array<Includeable> = [
   },
   {
     model: ChoiceQuestion,
-    include: [QuestionSpecification],
+    include: [QuestionSpecification, Choice],
   },
   {
     model: Answer,

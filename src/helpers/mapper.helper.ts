@@ -57,6 +57,7 @@ export const questionFormatter = (question?: Question | null): FormattedQuestion
         questionType: question.questionType,
         typedQuestion: question.typedQuestion,
         answers: question.answers ? answerMapper(question.answers) : question.answers,
+        choices: question.choiceQuestion?.choices,
         userAnswers: question.userAnswers ? userAnswerMapper(question.userAnswers) : question.userAnswers,
         createdAt: question.createdAt,
         updatedAt: question.updatedAt,
