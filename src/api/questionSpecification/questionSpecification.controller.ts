@@ -18,9 +18,11 @@ const schema = Joi.object({
 
 export const getQuestionSpecifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const questionSpecifications = await QuestionSpecification.findAll();
+    const questionType = req.query.questionType;
+    const questionSpecifications = await QuestionSpecification.findAll(questionType ? { where: { questionType } } : {});
     res.json(questionSpecifications);
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };
