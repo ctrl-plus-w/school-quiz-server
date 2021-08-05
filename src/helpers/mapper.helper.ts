@@ -19,7 +19,7 @@ export const answerFormatter = (answer: Answer | null | undefined): FormattedAns
     ? {
         id: answer.id,
         answerType: answer.answerType,
-        typedAnswer: answer.typedAnswer,
+        typedAnswer: answer.typedAnswer ? answer.typedAnswer : answer.exactAnswer || answer.comparisonAnswer,
         createdAt: answer.createdAt,
         updatedAt: answer.updatedAt,
       }
