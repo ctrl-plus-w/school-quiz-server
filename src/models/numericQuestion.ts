@@ -59,7 +59,7 @@ export default (sequelize: Sequelize): typeof NumericQuestion => {
 
       hooks: {
         afterFind: (instanceOrInstances: NumericQuestion | Array<NumericQuestion>) => {
-          if (!('count' in instanceOrInstances)) {
+          if (instanceOrInstances && !('count' in instanceOrInstances)) {
             const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
             const instances = instanceOrInstances === null ? [] : arrayedInstances;
 

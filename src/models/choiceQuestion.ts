@@ -82,7 +82,7 @@ export default (sequelize: Sequelize): typeof ChoiceQuestion => {
 
       hooks: {
         afterFind: (instanceOrInstances: ChoiceQuestion | Array<ChoiceQuestion>) => {
-          if (!('count' in instanceOrInstances)) {
+          if (instanceOrInstances && !('count' in instanceOrInstances)) {
             const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
             const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
