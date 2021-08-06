@@ -6,12 +6,9 @@ import {
   HasManyRemoveAssociationMixin,
   Optional,
   Sequelize,
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyRemoveAssociationMixin,
-  BelongsToManyCreateAssociationMixin,
-  BelongsToManyGetAssociationsMixin,
   BelongsToGetAssociationMixin,
-  BelongsToManyCountAssociationsMixin,
+  HasManyGetAssociationsMixin,
+  HasManyCountAssociationsMixin,
 } from 'sequelize';
 
 import { TextualQuestion } from './textualQuestion';
@@ -79,11 +76,11 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public readonly updatedAt!: Date;
 
   /* Answer properties */
-  public getAnswers!: BelongsToManyGetAssociationsMixin<Answer>;
-  public countAnswers!: BelongsToManyCountAssociationsMixin;
-  public addAnswer!: BelongsToManyAddAssociationMixin<Answer, number>;
-  public removeAnswer!: BelongsToManyRemoveAssociationMixin<Answer, number>;
-  public createAnswer!: BelongsToManyCreateAssociationMixin<Answer>;
+  public getAnswers!: HasManyGetAssociationsMixin<Answer>;
+  public countAnswers!: HasManyCountAssociationsMixin;
+  public addAnswer!: HasManyAddAssociationMixin<Answer, number>;
+  public removeAnswer!: HasManyRemoveAssociationMixin<Answer, number>;
+  public createAnswer!: HasManyCreateAssociationMixin<Answer>;
 
   /* User answer properties */
   public addUserAnswer!: HasManyAddAssociationMixin<UserAnswer, number>;
@@ -131,7 +128,7 @@ export default (sequelize: Sequelize): typeof Question => {
       tableName: 'Question',
 
       hooks: {
-        afterDestroy: async (instance: Question) => {
+        beforeDestroy: async (instance: Question) => {
           if (!instance.questionType || !instance.typedQuestionId) return;
 
           if (instance.questionType === 'textualQuestion') {
@@ -143,6 +140,14 @@ export default (sequelize: Sequelize): typeof Question => {
           } else if (instance.questionType === 'choiceQuestion') {
             const choiceQuestion = await instance.getChoiceQuestion();
             await choiceQuestion.destroy();
+          }
+
+          if (instance.questionType === 'textualQuestion' || instance.questionType === 'numericQuestion') {
+            const answers = await instance.getAnswers();
+
+            for (const answer of answers) {
+              await answer.destroy();
+            }
           }
         },
 

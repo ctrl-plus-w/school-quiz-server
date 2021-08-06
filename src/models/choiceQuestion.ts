@@ -81,6 +81,11 @@ export default (sequelize: Sequelize): typeof ChoiceQuestion => {
       tableName: 'ChoiceQuestion',
 
       hooks: {
+        beforeDestroy: async (instance) => {
+          const choices = await instance.getChoices();
+          await Choice.destroy({ where: { id: choices.map(({ id }) => id) } });
+        },
+
         afterFind: (instanceOrInstances: ChoiceQuestion | Array<ChoiceQuestion>) => {
           if (instanceOrInstances && !('count' in instanceOrInstances)) {
             const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];

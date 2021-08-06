@@ -64,6 +64,20 @@ export default (sequelize: Sequelize): typeof Answer => {
       tableName: 'Answer',
 
       hooks: {
+        beforeDestroy: async (instance: Answer) => {
+          console.log(instance);
+
+          if (!instance.answerType || !instance.typedAnswerId) return;
+
+          if (instance.answerType === 'comparisonAnswer') {
+            const comparisonAnswer = await instance.getComparisonAnswer();
+            await comparisonAnswer.destroy();
+          } else if (instance.answerType === 'exactAnswer') {
+            const exactAnswer = await instance.getExactAnswer();
+            await exactAnswer.destroy();
+          }
+        },
+
         afterFind: (instanceOrInstances: Array<Answer> | Answer) => {
           if (instanceOrInstances && !('count' in instanceOrInstances)) {
             const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
