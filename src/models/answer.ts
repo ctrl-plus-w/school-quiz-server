@@ -65,7 +65,7 @@ export default (sequelize: Sequelize): typeof Answer => {
 
       hooks: {
         afterFind: (instanceOrInstances: Array<Answer> | Answer) => {
-          if (!('count' in instanceOrInstances)) {
+          if (instanceOrInstances && !('count' in instanceOrInstances)) {
             const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
 
             for (const instance of instances) {
