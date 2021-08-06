@@ -82,12 +82,14 @@ export default (sequelize: Sequelize): typeof ChoiceQuestion => {
 
       hooks: {
         afterFind: (instanceOrInstances: ChoiceQuestion | Array<ChoiceQuestion>) => {
-          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
-          const instances = instanceOrInstances === null ? [] : arrayedInstances;
+          if (!('count' in instanceOrInstances)) {
+            const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+            const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
-          for (const instance of instances) {
-            delete instance.questionSpecificationId;
-            delete instance.dataValues.questionSpecificationId;
+            for (const instance of instances) {
+              delete instance.questionSpecificationId;
+              delete instance.dataValues.questionSpecificationId;
+            }
           }
         },
       },

@@ -82,15 +82,17 @@ export default (sequelize: Sequelize): typeof TextualQuestion => {
 
       hooks: {
         afterFind: (instanceOrInstances: TextualQuestion | Array<TextualQuestion>) => {
-          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
-          const instances = instanceOrInstances === null ? [] : arrayedInstances;
+          if (!('count' in instanceOrInstances)) {
+            const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+            const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
-          for (const instance of instances) {
-            delete instance.verificationTypeId;
-            delete instance.dataValues.verificationTypeId;
+            for (const instance of instances) {
+              delete instance.verificationTypeId;
+              delete instance.dataValues.verificationTypeId;
 
-            delete instance.questionSpecificationId;
-            delete instance.dataValues.questionSpecificationId;
+              delete instance.questionSpecificationId;
+              delete instance.dataValues.questionSpecificationId;
+            }
           }
         },
       },

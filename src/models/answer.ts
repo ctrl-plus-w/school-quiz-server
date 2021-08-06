@@ -65,20 +65,22 @@ export default (sequelize: Sequelize): typeof Answer => {
 
       hooks: {
         afterFind: (instanceOrInstances: Array<Answer> | Answer) => {
-          const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+          if (!('count' in instanceOrInstances)) {
+            const instances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
 
-          for (const instance of instances) {
-            if (instance.answerType === 'exactAnswer' && instance.typedAnswerId != undefined) {
-              instance.typedAnswer = instance.exactAnswer;
-            } else if (instance.answerType === 'comparisonAnswer' && instance.typedAnswerId != undefined) {
-              instance.typedAnswer = instance.comparisonAnswer;
+            for (const instance of instances) {
+              if (instance.answerType === 'exactAnswer' && instance.typedAnswerId != undefined) {
+                instance.typedAnswer = instance.exactAnswer;
+              } else if (instance.answerType === 'comparisonAnswer' && instance.typedAnswerId != undefined) {
+                instance.typedAnswer = instance.comparisonAnswer;
+              }
+
+              delete instance.exactAnswer;
+              delete instance.dataValues.exactAnswer;
+
+              delete instance.comparisonAnswer;
+              delete instance.dataValues.comparisonAnswer;
             }
-
-            delete instance.exactAnswer;
-            delete instance.dataValues.exactAnswer;
-
-            delete instance.comparisonAnswer;
-            delete instance.dataValues.comparisonAnswer;
           }
         },
       },

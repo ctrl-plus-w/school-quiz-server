@@ -59,12 +59,14 @@ export default (sequelize: Sequelize): typeof NumericQuestion => {
 
       hooks: {
         afterFind: (instanceOrInstances: NumericQuestion | Array<NumericQuestion>) => {
-          const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
-          const instances = instanceOrInstances === null ? [] : arrayedInstances;
+          if (!('count' in instanceOrInstances)) {
+            const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
+            const instances = instanceOrInstances === null ? [] : arrayedInstances;
 
-          for (const instance of instances) {
-            delete instance.questionSpecificationId;
-            delete instance.dataValues.questionSpecificationId;
+            for (const instance of instances) {
+              delete instance.questionSpecificationId;
+              delete instance.dataValues.questionSpecificationId;
+            }
           }
         },
       },
