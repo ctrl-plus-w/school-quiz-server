@@ -83,8 +83,6 @@ export const updateRole = async (req: Request, res: Response, next: NextFunction
     const role = await Role.findByPk(roleId);
     if (!role) return next(new NotFoundError('Role'));
 
-    console.log(validatedRole);
-
     if (validatedRole.name && validatedRole.name !== role.name) {
       const slug = slugify(validatedRole.name);
       const roles = await Role.count({ where: { slug: slug } });

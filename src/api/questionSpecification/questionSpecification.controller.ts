@@ -22,7 +22,6 @@ export const getQuestionSpecifications = async (req: Request, res: Response, nex
     const questionSpecifications = await QuestionSpecification.findAll(questionType ? { where: { questionType } } : {});
     res.json(questionSpecifications);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
