@@ -131,6 +131,21 @@ export default (sequelize: Sequelize): typeof Question => {
       tableName: 'Question',
 
       hooks: {
+        afterDestroy: async (instance: Question) => {
+          if (!instance.questionType || !instance.typedQuestionId) return;
+
+          if (instance.questionType === 'textualQuestion') {
+            const textualQuestion = await instance.getTextualQuestion();
+            await textualQuestion.destroy();
+          } else if (instance.questionType === 'numericQuestion') {
+            const numericQuestion = await instance.getNumericQuestion();
+            await numericQuestion.destroy();
+          } else if (instance.questionType === 'choiceQuestion') {
+            const choiceQuestion = await instance.getChoiceQuestion();
+            await choiceQuestion.destroy();
+          }
+        },
+
         afterFind: (instanceOrInstances: Array<Question> | Question) => {
           if (!('count' in instanceOrInstances)) {
             const arrayedInstances = Array.isArray(instanceOrInstances) ? instanceOrInstances : [instanceOrInstances];
