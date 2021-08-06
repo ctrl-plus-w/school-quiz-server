@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 import Joi from 'joi';
-import { DuplicationError, InvalidInputError, NotFoundError } from '../classes/StatusError';
+import StatusError, { DuplicationError, InvalidInputError, NotFoundError } from '../classes/StatusError';
 import { Answer, TypedAnswer } from '../models/answer';
 
 import { ExactAnswer, ExactAnswerCreationAttributes } from '../models/exactAnswer';
@@ -9,6 +9,7 @@ import { ComparisonAnswer, ComparisonAnswerCreationAttributes } from '../models/
 import { answerFormatter, answerMapper } from './mapper.helper';
 import { Question } from '../models/question';
 import { AllOptional } from '../types/optional.types';
+import { Includeable } from 'sequelize/types';
 
 const exactAnswerSchema = Joi.object({
   answerContent: Joi.string().min(1).max(25).required(),
@@ -21,7 +22,7 @@ const comparisonAnswerCreationSchema = Joi.object({
   lowerThan: Joi.number().min(Joi.ref('greaterThan')).required(),
 });
 
-const arrayComparisonAnswerSchema = Joi.array().items(comparisonAnswerCreationSchema).min(1);
+// const arrayComparisonAnswerSchema = Joi.array().items(comparisonAnswerCreationSchema).min(1);
 
 const comparisonAnswerUpdateSchema = Joi.object({
   greaterThan: Joi.number(),
@@ -78,7 +79,15 @@ export const tryCreateExactAnswer = async (req: Request, res: Response, next: Ne
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    const [createdExactAnswer] = await ExactAnswer.findOrCreate({ where: validatedExactAnswer });
+    const answers = await question.getAnswers();
+
+    if (answers[0] && answers[0].answerType === 'comparisonAnswer')
+      return next(new StatusError('You cannot create an exact answer on a question with comparison answers'));
+
+    const answersCount = await question.countAnswers({ where: { answerContent: validatedExactAnswer.answerContent } });
+    if (answersCount > 0) return next(new DuplicationError('Answer'));
+
+    const createdExactAnswer = await ExactAnswer.create(validatedExactAnswer);
 
     await createAnswer(question, createdExactAnswer, req, res, next);
   } catch (err) {
@@ -101,8 +110,17 @@ export const tryCreateExactAnswers = async (req: Request, res: Response, next: N
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    const exactAnswersCount = await ExactAnswer.count({ where: { answerContent: validatedExactAnswers.map(({ answerContent }) => answerContent) } });
-    if (exactAnswersCount > 0) return next(new DuplicationError('One of the answer'));
+    const answerContent = validatedExactAnswers.map(({ answerContent }) => answerContent);
+
+    const questionIncludes: Includeable | Includeable[] = [
+      { model: Answer, attributes: ['typedAnswerId'], include: [{ model: ExactAnswer, where: { answerContent }, attributes: [] }] },
+    ];
+
+    const exactAnswers = await Question.findByPk(question.id, { include: questionIncludes, attributes: [] }).then(
+      (question) => question?.answers?.map(({ exactAnswer }) => exactAnswer) || []
+    );
+
+    if (exactAnswers.length > 0) return next(new DuplicationError('One of the answer'));
 
     const createdExactAnswers = await ExactAnswer.bulkCreate(validatedExactAnswers);
 
@@ -153,7 +171,10 @@ export const tryCreateComparisonAnswer = async (req: Request, res: Response, nex
     const question: Question | undefined = res.locals.question;
     if (!question) return next(new NotFoundError('Question'));
 
-    const [createdComparisonAnswer] = await ComparisonAnswer.findOrCreate({ where: validatedComparisonAnswer });
+    const answersCount = await question.countAnswers();
+    if (answersCount > 0) return next(new StatusError('A question can only have one comparison answer'));
+
+    const createdComparisonAnswer = await ComparisonAnswer.create(validatedComparisonAnswer);
 
     await createAnswer(question, createdComparisonAnswer, req, res, next);
   } catch (err) {
@@ -161,34 +182,34 @@ export const tryCreateComparisonAnswer = async (req: Request, res: Response, nex
   }
 };
 
-export const tryCreateComparisonAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const {
-      value: validatedComparisonAnswers,
-      error: validationError,
-    }: {
-      value: Array<ComparisonAnswerCreationAttributes>;
-      error?: Error;
-    } = arrayComparisonAnswerSchema.validate(req.body);
+// export const tryCreateComparisonAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+//   try {
+//     const {
+//       value: validatedComparisonAnswers,
+//       error: validationError,
+//     }: {
+//       value: Array<ComparisonAnswerCreationAttributes>;
+//       error?: Error;
+//     } = arrayComparisonAnswerSchema.validate(req.body);
 
-    if (validationError) return next(new InvalidInputError());
+//     if (validationError) return next(new InvalidInputError());
 
-    const question: Question | undefined = res.locals.question;
-    if (!question) return next(new NotFoundError('Question'));
+//     const question: Question | undefined = res.locals.question;
+//     if (!question) return next(new NotFoundError('Question'));
 
-    const greaterThan = validatedComparisonAnswers.map(({ greaterThan }) => greaterThan);
-    const lowerThan = validatedComparisonAnswers.map(({ greaterThan }) => greaterThan);
+//     const greaterThan = validatedComparisonAnswers.map(({ greaterThan }) => greaterThan);
+//     const lowerThan = validatedComparisonAnswers.map(({ greaterThan }) => greaterThan);
 
-    const comparisonAnswersAmount = await ComparisonAnswer.count({ where: { greaterThan, lowerThan } });
-    if (comparisonAnswersAmount > 0) return next(new DuplicationError('One of the comparison answer'));
+//     const comparisonAnswersAmount = await ComparisonAnswer.count({ where: { greaterThan, lowerThan } });
+//     if (comparisonAnswersAmount > 0) return next(new DuplicationError('One of the comparison answer'));
 
-    const createdComparisonAnswers = await ComparisonAnswer.bulkCreate(validatedComparisonAnswers);
+//     const createdComparisonAnswers = await ComparisonAnswer.bulkCreate(validatedComparisonAnswers);
 
-    await createAnswers(question, createdComparisonAnswers, req, res, next);
-  } catch (err) {
-    next(err);
-  }
-};
+//     await createAnswers(question, createdComparisonAnswers, req, res, next);
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 export const tryUpdateComparisonAnswer = async (req: Request, res: Response, next: NextFunction, answer: Answer): Promise<void> => {
   try {

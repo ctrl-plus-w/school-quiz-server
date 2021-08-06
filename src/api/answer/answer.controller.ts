@@ -10,7 +10,7 @@ import {
   tryCreateExactAnswer,
   tryUpdateComparisonAnswer,
   tryCreateComparisonAnswer,
-  tryCreateComparisonAnswers,
+  // tryCreateComparisonAnswers,
   tryCreateExactAnswers,
 } from '../../helpers/answer.helper';
 import { Question } from '../../models/question';
@@ -82,7 +82,7 @@ export const getAnswer = async (req: Request, res: Response, next: NextFunction)
 
 export const postAnswerSpreader = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const answerTypes: AnswerTypes = Array.isArray(req.body)
-    ? { exact: tryCreateExactAnswers, comparison: tryCreateComparisonAnswers }
+    ? { exact: tryCreateExactAnswers, comparison: tryCreateComparisonAnswer }
     : { exact: tryCreateExactAnswer, comparison: tryCreateComparisonAnswer };
 
   const answerType = req.params.answerType.toLowerCase();

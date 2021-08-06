@@ -11,6 +11,7 @@ import {
   BelongsToManyCreateAssociationMixin,
   BelongsToManyGetAssociationsMixin,
   BelongsToGetAssociationMixin,
+  BelongsToManyCountAssociationsMixin,
 } from 'sequelize';
 
 import { TextualQuestion } from './textualQuestion';
@@ -79,6 +80,7 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
 
   /* Answer properties */
   public getAnswers!: BelongsToManyGetAssociationsMixin<Answer>;
+  public countAnswers!: BelongsToManyCountAssociationsMixin;
   public addAnswer!: BelongsToManyAddAssociationMixin<Answer, number>;
   public removeAnswer!: BelongsToManyRemoveAssociationMixin<Answer, number>;
   public createAnswer!: BelongsToManyCreateAssociationMixin<Answer>;
