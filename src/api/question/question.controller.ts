@@ -254,12 +254,10 @@ export const deleteQuestion = async (req: Request, res: Response, next: NextFunc
     const questionId = req.params.questionId;
     if (!questionId) return next(new InvalidInputError());
 
-    const question = await Question.findByPk(questionId, {
-      include: {
-        model: Quiz,
-        where: { id: res.locals.quiz.id },
-      },
-    });
+    const quiz: Quiz | undefined = res.locals.quiz;
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const [question] = await quiz.getQuestions({ where: { id: questionId } });
     if (!question) return next(new NotFoundError('Question'));
 
     await question.destroy();
