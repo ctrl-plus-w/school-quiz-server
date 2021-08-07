@@ -11,7 +11,6 @@ import { ExactAnswer } from '../../models/exactAnswer';
 import { UserAnswer } from '../../models/userAnswer';
 import { Question } from '../../models/question';
 import { Choice } from '../../models/choice';
-import { Answer } from '../../models/answer';
 import { Quiz } from '../../models/quiz';
 import { User } from '../../models/user';
 
@@ -44,10 +43,6 @@ const questionIncludes: Includeable | Array<Includeable> = [
   {
     model: ChoiceQuestion,
     include: [QuestionSpecification, Choice],
-  },
-  {
-    model: Answer,
-    include: [ExactAnswer, ComparisonAnswer],
   },
   {
     model: UserAnswer,
@@ -104,7 +99,9 @@ export const getQuestion = async (req: Request, res: Response, next: NextFunctio
     const [question] = await quiz.getQuestions({ where: { id: questionId }, include: questionIncludes });
     if (!question) return next(new NotFoundError('Question'));
 
-    res.json(questionFormatter(question));
+    const answers = await question.getAnswers({ include: [ExactAnswer, ComparisonAnswer] });
+
+    res.json(questionFormatter(question, answers));
   } catch (err) {
     next(err);
   }

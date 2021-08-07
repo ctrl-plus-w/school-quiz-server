@@ -46,7 +46,7 @@ export const userAnswerMapper = (userAnswers?: Array<UserAnswer>): Array<Formatt
   return userAnswers?.map(userAnswerFormatter).filter(isNotNull);
 };
 
-export const questionFormatter = (question?: Question | null): FormattedQuestion | undefined => {
+export const questionFormatter = (question?: Question | null, answers: Array<Answer> | undefined = undefined): FormattedQuestion | undefined => {
   return question
     ? {
         id: question.id,
@@ -56,7 +56,7 @@ export const questionFormatter = (question?: Question | null): FormattedQuestion
         description: question.description,
         questionType: question.questionType,
         typedQuestion: question.typedQuestion,
-        answers: question.answers ? answerMapper(question.answers) : question.answers,
+        answers: answers ? answerMapper(answers) : answers,
         choices: question.choiceQuestion?.choices,
         userAnswers: question.userAnswers ? userAnswerMapper(question.userAnswers) : question.userAnswers,
         createdAt: question.createdAt,
@@ -66,7 +66,7 @@ export const questionFormatter = (question?: Question | null): FormattedQuestion
 };
 
 export const questionMapper = (questions?: Array<Question>): Array<FormattedQuestion> | undefined => {
-  return questions?.map(questionFormatter).filter(isNotNull);
+  return questions?.map((question) => questionFormatter(question)).filter(isNotNull);
 };
 
 export const quizFormatter = (quiz?: Quiz | null, owner?: User, collaborators?: Array<User>): FormattedQuiz | undefined => {
