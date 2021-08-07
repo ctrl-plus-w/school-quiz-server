@@ -65,8 +65,6 @@ export default (sequelize: Sequelize): typeof Answer => {
 
       hooks: {
         beforeDestroy: async (instance: Answer) => {
-          console.log(instance);
-
           if (!instance.answerType || !instance.typedAnswerId) return;
 
           if (instance.answerType === 'comparisonAnswer') {
