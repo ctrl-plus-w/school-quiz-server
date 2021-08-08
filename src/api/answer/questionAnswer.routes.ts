@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { postAnswerSpreader, deleteAnswer, getAnswer, getAnswers, updateAnswer } from './answer.controller';
+import { postAnswerSpreader, deleteAnswer, getAnswer, getAnswers, updateAnswer, deleteAnswers } from './answer.controller';
 
 import { authorize, checkIsProfessor } from '../../middlewares/authorization.middleware';
 import { checkQuizModifyPermission } from '../../middlewares/checkPossesion.middleware';
@@ -14,6 +14,7 @@ router.post('/:answerType', authorize([checkIsProfessor, checkQuizModifyPermissi
 
 router.put('/:answerId', authorize([checkIsProfessor, checkQuizModifyPermission]), updateAnswer);
 
+router.delete('/', authorize([checkIsProfessor, checkQuizModifyPermission]), deleteAnswers);
 router.delete('/:answerId', authorize([checkIsProfessor, checkQuizModifyPermission]), deleteAnswer);
 
 export default router;

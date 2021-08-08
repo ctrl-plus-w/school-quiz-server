@@ -119,9 +119,21 @@ export const deleteAnswer = async (req: Request, res: Response, next: NextFuncti
     const answer = await Answer.findByPk(answerId);
     if (!answer) return next(new NotFoundError('Answer'));
 
-    if (answer.typedAnswer) await answer.typedAnswer.destroy();
-
     await answer.destroy();
+
+    res.json({ deleted: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const question: Question | undefined = res.locals.question;
+    if (!question) return next(new NotFoundError('Question'));
+
+    const answers = await question.getAnswers();
+    for (const answer of answers) await answer.destroy();
 
     res.json({ deleted: true });
   } catch (err) {
