@@ -293,6 +293,9 @@ export const tryUpdateNumericQuestion = async (req: Request, res: Response, next
       if (questionSpecification.questionType !== 'numericQuestion')
         return next(new StatusError("The question specification type doesn't match the question type", 400));
 
+      const answers = await question.getAnswers();
+      for (const answer of answers) await answer.destroy();
+
       await numericQuestion.setQuestionSpecification(questionSpecification);
       await question.save();
     } else {
@@ -388,6 +391,9 @@ export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next:
 
       if (questionSpecification.questionType !== 'choiceQuestion')
         return next(new StatusError("The question specification type doesn't match the question type", 400));
+
+      const answers = await question.getAnswers();
+      for (const answer of answers) await answer.destroy();
 
       await choiceQuestion.save();
       await choiceQuestion.setQuestionSpecification(questionSpecification);
