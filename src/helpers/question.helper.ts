@@ -381,7 +381,7 @@ export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next:
     if (validatedChoiceQuestion.shuffle) choiceQuestion.shuffle = validatedChoiceQuestion.shuffle;
 
     // Update choice question properties
-    if (validatedChoiceQuestion.questionSpecificationId) {
+    if (validatedChoiceQuestion.questionSpecificationId || validatedChoiceQuestion.questionSpecificationSlug) {
       const condition = validatedChoiceQuestion.questionSpecificationId
         ? { id: validatedChoiceQuestion.questionSpecificationId }
         : { slug: validatedChoiceQuestion.questionSpecificationSlug };
@@ -392,8 +392,8 @@ export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next:
       if (questionSpecification.questionType !== 'choiceQuestion')
         return next(new StatusError("The question specification type doesn't match the question type", 400));
 
-      const answers = await question.getAnswers();
-      for (const answer of answers) await answer.destroy();
+      const choices = await choiceQuestion.getChoices();
+      for (const choice of choices) await choice.destroy();
 
       await choiceQuestion.save();
       await choiceQuestion.setQuestionSpecification(questionSpecification);
