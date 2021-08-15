@@ -139,6 +139,9 @@ export default (sequelize: Sequelize): typeof Question => {
             await numericQuestion.destroy();
           } else if (instance.questionType === 'choiceQuestion') {
             const choiceQuestion = await instance.getChoiceQuestion();
+            const choices = await choiceQuestion.getChoices();
+
+            await Choice.destroy({ where: { id: choices.map(({ id }) => id) } });
             await choiceQuestion.destroy();
           }
 
