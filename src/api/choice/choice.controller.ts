@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { Op } from 'sequelize';
 
 import Joi from 'joi';
 
@@ -181,7 +182,7 @@ export const createChoices = async (req: Request, res: Response, next: NextFunct
 
     const conditions =
       questionSpecification.slug === 'choix-unique' && validatedChoices.some(({ valid }) => valid === true)
-        ? { slug: choicesSlug, valid: true }
+        ? { [Op.or]: [{ slug: choicesSlug }, { valid: true }] }
         : { slug: choicesSlug };
 
     const choices = await choiceQuestion.countChoices({ where: conditions });
