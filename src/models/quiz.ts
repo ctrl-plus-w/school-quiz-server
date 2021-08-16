@@ -15,6 +15,7 @@ import {
   HasManyGetAssociationsMixin,
   BelongsToManyCountAssociationsMixin,
   HasManyCountAssociationsMixin,
+  BelongsToManyRemoveAssociationsMixin,
 } from 'sequelize';
 
 import { FormattedQuestion, Question } from './question';
@@ -67,6 +68,7 @@ export class Quiz extends Model<QuizAttributes, QuizCreationAttributes> implemen
   public getCollaborators!: BelongsToManyGetAssociationsMixin<User>;
   public countCollaborators!: BelongsToManyCountAssociationsMixin;
   public addCollaborator!: BelongsToManyAddAssociationMixin<User, number>;
+  public addCollaborators!: BelongsToManyRemoveAssociationsMixin<User, number>;
   public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
 
   /* Question properties */

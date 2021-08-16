@@ -21,6 +21,7 @@ import { quizFormatter, quizMapper, userFormatter, userMapper } from '../../help
 
 import roles from '../../constants/roles';
 import { AllOptional } from '../../types/optional.types';
+import { isNotNull } from '../../utils/mapper.utils';
 
 const creationSchema = Joi.object({
   title: Joi.string().min(1).max(25).required(),
@@ -182,24 +183,36 @@ export const updateQuiz = async (req: Request, res: Response, next: NextFunction
 export const addCollaborator = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.body.userId;
-    if (!userId) return next(new InvalidInputError());
+    const userIds = req.body.userIds;
+    if (!userId && !userIds) return next(new InvalidInputError());
 
     const quiz: Quiz | undefined = res.locals.quiz;
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    if (quiz.ownerId === userId) return next(new ModelRoleDuplicationError());
+    if (quiz.ownerId === userId || userIds.includes(quiz.ownerId)) return next(new ModelRoleDuplicationError());
 
-    const collaboratorsWithSameId = await quiz.countCollaborators({ where: { id: userId } });
+    const collaboratorsWithSameId = await quiz.countCollaborators({ where: { id: userId ? userId : userIds } });
     if (collaboratorsWithSameId > 0) return next(new InvalidInputError());
 
-    const user = await User.findByPk(userId, { include: { model: Role }, attributes: ['id'] });
+    if (userId) {
+      const user = await User.findByPk(userId, { include: { model: Role }, attributes: ['id'] });
 
-    if (!user) return next(new NotFoundError('User'));
-    if (!user.role) return next(new NotFoundError('Role'));
+      if (!user) return next(new NotFoundError('User'));
+      if (!user.role) return next(new NotFoundError('Role'));
 
-    if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
+      if (user.role.permission >= roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
 
-    await quiz.addCollaborator(user);
+      await quiz.addCollaborator(user);
+    } else {
+      const users = await User.findAll({ where: { id: userIds }, include: { model: Role } });
+
+      if (users.length !== userIds.length) return next(new NotFoundError('User'));
+
+      const usersRolePermission = users.map(({ role }) => role && role.permission).filter(isNotNull) as Array<number>;
+      if (!usersRolePermission.every((permission) => permission >= roles.PROFESSOR.PERMISSION)) return next(new ForbiddenAccessParameterError());
+
+      await quiz.addCollaborators(users);
+    }
 
     res.json({ updated: true });
   } catch (err) {
