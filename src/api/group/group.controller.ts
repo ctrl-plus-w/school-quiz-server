@@ -155,7 +155,7 @@ export const addLabel = async (req: Request, res: Response, next: NextFunction):
       await group.addLabels(labels);
     }
 
-    res.json({ added: true });
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

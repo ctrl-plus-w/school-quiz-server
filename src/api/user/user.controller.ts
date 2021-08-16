@@ -309,7 +309,7 @@ export const addGroup = async (req: Request, res: Response, next: NextFunction):
       await user.addGroups(groups);
     }
 
-    res.json({ added: true });
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }
@@ -331,7 +331,7 @@ export const setRole = async (req: Request, res: Response, next: NextFunction): 
 
     await user.setRole(role);
 
-    res.json({ set: true });
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }
@@ -356,7 +356,7 @@ export const setState = async (req: Request, res: Response, next: NextFunction):
 
     await user.setState(state);
 
-    res.json({ set: true });
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

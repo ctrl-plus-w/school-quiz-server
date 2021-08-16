@@ -214,7 +214,7 @@ export const setVerificationType = async (req: Request, res: Response, next: Nex
 
     await textualQuestion.setVerificationType(verificationType);
 
-    res.json({ set: true });
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }
@@ -240,7 +240,7 @@ export const setSpecification = async (req: Request, res: Response, next: NextFu
 
     await question.typedQuestion.setQuestionSpecification(specification);
 
-    res.json({ set: true });
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }

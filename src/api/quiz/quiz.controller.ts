@@ -201,7 +201,7 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
 
     await quiz.addCollaborator(user);
 
-    res.json({ added: true });
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }
