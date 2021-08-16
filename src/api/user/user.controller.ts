@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { Op } from 'sequelize';
 
 import Joi from 'joi';
 import bcrypt from 'bcrypt';
@@ -36,13 +37,10 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
   try {
     const [isAdmin] = await checkIsAdmin(req, res, next);
 
-    const includes = req.query.role && {
-      model: Role,
-      where: { slug: req.query.role },
-      attributes: [],
-    };
+    const includes = req.query.role ? { model: Role, where: { slug: req.query.role }, attributes: [] } : undefined;
+    const conditions = req.query.self === 'false' ? { id: { [Op.not]: res.locals.jwt.userId } } : undefined;
 
-    const users = await User.findAll({ include: includes });
+    const users = await User.findAll({ include: includes, where: conditions });
     res.json(userMapper(users, isAdmin ? 2 : 3));
   } catch (err) {
     next(err);
