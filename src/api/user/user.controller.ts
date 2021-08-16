@@ -36,7 +36,13 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
   try {
     const [isAdmin] = await checkIsAdmin(req, res, next);
 
-    const users = await User.findAll();
+    const includes = req.query.role && {
+      model: Role,
+      where: { slug: req.query.role },
+      attributes: [],
+    };
+
+    const users = await User.findAll({ include: includes });
     res.json(userMapper(users, isAdmin ? 2 : 3));
   } catch (err) {
     next(err);
