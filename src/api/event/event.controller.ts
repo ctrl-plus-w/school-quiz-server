@@ -23,6 +23,7 @@ import { eventFormatter, eventMapper, quizFormatter, userFormatter, userMapper }
 import roles from '../../constants/roles';
 import { AllOptional } from '../../types/optional.types';
 import { getEventDateConditions } from '../../helpers/event.helper';
+import { isNotNull } from '../../utils/mapper.utils';
 
 const createSchema = Joi.object({
   start: Joi.date().required().greater(new Date()),
@@ -246,24 +247,37 @@ export const updateEvent = async (req: Request, res: Response, next: NextFunctio
 export const addCollaborator = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.body.userId;
-    if (!userId) return next(new InvalidInputError());
+    const userIds = req.body.userIds;
+    if (!userId && !userIds) return next(new InvalidInputError());
 
     const event: Event | undefined = res.locals.event;
     if (!event) return next(new NotFoundError('Event'));
 
-    if (event.ownerId === userId) return next(new ModelRoleDuplicationError());
+    if (userId && event.ownerId === userId) return next(new ModelRoleDuplicationError());
+    if (userIds && userIds.includes(event.ownerId)) return next(new ModelRoleDuplicationError());
 
-    const collaboratorsWithSameId = await event.countCollaborators({ where: { id: userId } });
+    const collaboratorsWithSameId = await event.countCollaborators({ where: { id: userId ? userIds : userIds } });
     if (collaboratorsWithSameId) return next(new DuplicationError('Collaborator'));
 
-    const user = await User.findByPk(userId, { attributes: ['id'], include: Role });
+    if (userId) {
+      const user = await User.findByPk(userId, { attributes: ['id'], include: { model: Role } });
 
-    if (!user) return next(new NotFoundError('User'));
-    if (!user.role) return next(new NotFoundError('Role'));
+      if (!user) return next(new NotFoundError('User'));
+      if (!user.role) return next(new NotFoundError('Role'));
 
-    if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
+      if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
 
-    await event.addCollaborator(user);
+      await event.addCollaborator(user);
+    } else {
+      const users = await User.findAll({ where: { id: userIds }, attributes: ['id'], include: { model: Role } });
+
+      if (users.length !== userIds.length) return next(new NotFoundError('User'));
+
+      const usersRolePermission = users.map(({ role }) => role && role.permission).filter(isNotNull) as Array<number>;
+      if (!usersRolePermission.every((permission) => permission >= roles.PROFESSOR.PERMISSION)) return next(new ForbiddenAccessParameterError());
+
+      await event.addCollaborators(users);
+    }
 
     res.json({ updated: true });
   } catch (err) {

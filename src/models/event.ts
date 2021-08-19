@@ -9,6 +9,7 @@ import {
   BelongsToManyGetAssociationsMixin,
   BelongsToGetAssociationMixin,
   BelongsToManyCountAssociationsMixin,
+  BelongsToManyAddAssociationsMixin,
 } from 'sequelize';
 
 import { Group } from './group';
@@ -68,6 +69,7 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public getCollaborators!: BelongsToManyGetAssociationsMixin<User>;
   public countCollaborators!: BelongsToManyCountAssociationsMixin;
   public addCollaborator!: BelongsToManyAddAssociationMixin<User, number>;
+  public addCollaborators!: BelongsToManyAddAssociationsMixin<User, number>;
   public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
 }
 
