@@ -17,6 +17,7 @@ import {
   getUserState,
   updateUser,
   setState,
+  getUserEvent,
 } from './user.controller';
 
 import { authorize, checkIsAdmin, checkIsProfessor } from '../../middlewares/authorization.middleware';
@@ -30,7 +31,7 @@ router.get('/:userId/state', authorize([checkIsProfessor]), getUserState);
 router.get('/:userId/groups', authorize([checkIsProfessor]), getUserGroups);
 router.get('/:userId/groups/:groupId', authorize([checkIsProfessor]), getUserGroup);
 router.get('/:userId/events', authorize([checkIsProfessor]), getUserEvents);
-router.get('/:userId/events/:eventId', authorize([checkIsProfessor]), getUserEvents);
+router.get('/:userId/events/:eventId', authorize([checkIsProfessor]), getUserEvent);
 router.get('/:userId/quizzes', authorize([checkIsProfessor]), getUserQuizzes);
 router.get('/:userId/quizzes/:quizId', authorize([checkIsProfessor]), getUserQuiz);
 
