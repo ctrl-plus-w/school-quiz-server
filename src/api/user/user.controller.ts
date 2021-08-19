@@ -16,6 +16,7 @@ import { eventFormatter, eventMapper, quizFormatter, quizMapper, userFormatter, 
 import { AllOptional } from '../../types/optional.types';
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
 import { Question } from '../../models/question';
+import { Quiz } from '../../models/quiz';
 
 const creationSchema = Joi.object({
   username: Joi.string().min(4).max(25).required(),
@@ -209,10 +210,13 @@ export const getUserEvent = async (req: Request, res: Response, next: NextFuncti
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const [event] = await user.getOwnedEvents({ where: { id: eventId } });
+    const [event] = await user.getOwnedEvents({ where: { id: eventId }, include: [Quiz, Group] });
     if (!event) return next(new NotFoundError('Event'));
 
-    res.json(eventFormatter(event));
+    const owner = await event.getOwner();
+    const collaborators = await event.getCollaborators();
+
+    res.json(eventFormatter(event, owner, collaborators));
   } catch (err) {
     next(err);
   }
