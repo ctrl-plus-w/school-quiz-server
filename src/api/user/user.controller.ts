@@ -194,8 +194,10 @@ export const getUserEvents = async (req: Request, res: Response, next: NextFunct
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const events = await user.getOwnedEvents();
-    res.json(eventMapper(events));
+    const userOwnedEvents = await user.getOwnedEvents();
+    const userCollaboratedEvents = await user.getCollaboratedEvents();
+
+    res.json(eventMapper([...userOwnedEvents, ...userCollaboratedEvents]));
   } catch (err) {
     next(err);
   }
