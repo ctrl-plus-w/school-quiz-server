@@ -212,7 +212,11 @@ export const getUserEvent = async (req: Request, res: Response, next: NextFuncti
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const [event] = await user.getOwnedEvents({ where: { id: eventId }, include: [Quiz, Group] });
+    const [ownedEvent] = await user.getOwnedEvents({ where: { id: eventId }, include: [Quiz, Group] });
+    const [collaboratedEvent] = await user.getCollaboratedEvents({ where: { id: eventId }, include: [Quiz, Group] });
+
+    const event = ownedEvent || collaboratedEvent;
+
     if (!event) return next(new NotFoundError('Event'));
 
     const owner = await event.getOwner();
