@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
 import { Question } from '../../models/question';
-import { UserAnswer, UserAnswerCreationAttributes } from '../../models/userAnswer';
+import { UserAnswer } from '../../models/userAnswer';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 import { userAnswerFormatter, userAnswerMapper } from '../../helpers/mapper.helper';
@@ -14,8 +14,9 @@ import { Event } from '../../models/event';
 import { Op } from 'sequelize';
 
 const schema = Joi.object({
-  answerContent: Joi.string().min(1).max(45),
-});
+  answer: Joi.string().min(1).max(45),
+  answers: Joi.array().items(Joi.string().min(1).max(45)).min(1),
+}).xor('answer', 'answers');
 
 export const getGlobalUserAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -87,35 +88,56 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
       value: validatedUserAnswer,
       error: validationError,
     }: {
-      value: UserAnswerCreationAttributes;
+      value: { answer: string; answers: Array<string> };
       error?: Error;
     } = schema.validate(req.body);
 
     if (validationError) return next(new InvalidInputError());
 
-    const user = await User.findByPk(res.locals.jwt.userId, { include: Group });
+    const user = await User.findByPk(res.locals.jwt.userId);
     if (!user) return next(new NotFoundError('User'));
 
+    const userGroups = await user.getGroups({ attributes: ['id'] });
+    if (userGroups.length === 0) return next(new NotFoundError('Event'));
+
+    const userGroupsId = userGroups.map(({ id }) => id);
+
     const possibleEventsAmount = await Event.count({
-      where: { start: { [Op.lt]: new Date() }, end: { [Op.gt]: new Date() } },
+      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
       include: [
         { model: Quiz, where: { id: quiz.id } },
-        { model: Group, where: { id: user.groups?.map(({ id }) => id) } },
+        { model: Group, where: { id: userGroupsId } },
       ],
     });
 
-    if (possibleEventsAmount) return next(new NotFoundError('Event'));
+    if (possibleEventsAmount === 0) return next(new NotFoundError('Event'));
 
     const userAnswer = await UserAnswer.findOne({
-      include: { model: User, where: { id: user?.id } },
+      include: [
+        { model: User, where: { id: user.id } },
+        { model: Question, where: { id: question.id } },
+      ],
     });
 
     if (userAnswer) return next(new DuplicationError('User answer'));
 
-    const createdUserAnswer = await question.createUserAnswer(validatedUserAnswer);
-    await createdUserAnswer.setUser(user);
+    if (validatedUserAnswer.answer) {
+      const createdUserAnswer = await user.createUserAnswer({ answerContent: validatedUserAnswer.answer });
+      await createdUserAnswer.setQuestion(question);
 
-    res.json(userAnswerFormatter(createdUserAnswer));
+      res.json(userAnswerFormatter(createdUserAnswer));
+    } else {
+      let createdUserAnswers: Array<UserAnswer> = [];
+
+      for (const userAnswer of validatedUserAnswer.answers) {
+        const createdUserAnswer = await user.createUserAnswer({ answerContent: userAnswer });
+        await createdUserAnswer.setQuestion(question);
+
+        createdUserAnswers = createdUserAnswers.concat(createdUserAnswer);
+      }
+
+      res.json(userAnswerMapper(createdUserAnswers));
+    }
   } catch (err) {
     next(err);
   }
