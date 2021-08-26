@@ -10,7 +10,7 @@ const router = Router();
 router.get('/', authorize([checkIsStudent]), getUserAnswers);
 router.get('/:userAnswerId', authorize([checkIsStudent]), getUserAnswer);
 
-router.post('/', authorize([checkIsProfessor]), createUserAnswer);
+router.post('/', authorize([checkIsStudent]), createUserAnswer);
 
 router.delete('/:userAnswerId', authorize([checkIsProfessor, checkQuizModifyPermission]), deleteUserAnswer);
 
