@@ -4,6 +4,8 @@ import {
   addCollaborator,
   createEvent,
   deleteEvent,
+  getActualEvent,
+  getActualEventQuestion,
   getEvent,
   getEventCollaborator,
   getEventCollaborators,
@@ -24,6 +26,8 @@ const router = Router();
 /* Event */
 
 router.get('/', authorize([checkIsStudent]), getEvents);
+router.get('/event', authorize([checkIsStudent]), getActualEvent);
+router.get('/event/question', authorize([checkIsStudent]), getActualEventQuestion);
 router.get('/:eventId', authorize([checkIsStudent]), getEvent);
 router.get('/:eventId/owner', authorize([checkIsStudent], [checkEventExists]), getEventOwner);
 router.get('/:eventId/collaborators', authorize([checkIsStudent], [checkEventExists]), getEventCollaborators);

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Op } from 'sequelize';
+import { Includeable, Op } from 'sequelize';
 
 import Joi from 'joi';
 
@@ -9,6 +9,13 @@ import { Group } from '../../models/group';
 import { Quiz } from '../../models/quiz';
 import { Role } from '../../models/role';
 import { Question } from '../../models/question';
+import { UserAnswer } from '../../models/userAnswer';
+import { TextualQuestion } from '../../models/textualQuestion';
+import { QuestionSpecification } from '../../models/questionSpecification';
+import { VerificationType } from '../../models/verificationType';
+import { NumericQuestion } from '../../models/numericQuestion';
+import { ChoiceQuestion } from '../../models/choiceQuestion';
+import { Choice } from '../../models/choice';
 
 import {
   DuplicationError,
@@ -18,15 +25,38 @@ import {
   NotFoundError,
 } from '../../classes/StatusError';
 
-import { eventFormatter, eventMapper, quizFormatter, userFormatter, userMapper } from '../../helpers/mapper.helper';
-
-import roles from '../../constants/roles';
-import { AllOptional } from '../../types/optional.types';
-import { getEventDateConditions } from '../../helpers/event.helper';
 import { isNotNull } from '../../utils/mapper.utils';
 
+import { eventFormatter, eventMapper, questionFormatter, quizFormatter, userFormatter, userMapper } from '../../helpers/mapper.helper';
+import { getEventDateConditions } from '../../helpers/event.helper';
+
+import { AllOptional } from '../../types/optional.types';
+
+import database from '../../database';
+
+import roles from '../../constants/roles';
+
+const questionIncludes: Includeable | Array<Includeable> = [
+  {
+    model: TextualQuestion,
+    include: [QuestionSpecification, VerificationType],
+  },
+  {
+    model: NumericQuestion,
+    include: [QuestionSpecification],
+  },
+  {
+    model: ChoiceQuestion,
+    include: [QuestionSpecification, Choice],
+  },
+  {
+    model: UserAnswer,
+    include: [{ model: User, attributes: ['id', 'username'] }],
+  },
+];
+
 const createSchema = Joi.object({
-  start: Joi.date().required().greater(new Date()),
+  start: Joi.date().required() /*.greater(new Date())*/,
   end: Joi.date().greater(Joi.ref('start')).required(),
   countdown: Joi.date().required(),
   groupId: Joi.number().required(),
@@ -72,6 +102,94 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction):
     const collaborators = await event.getCollaborators();
 
     res.json(eventFormatter(event, owner, collaborators));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getActualEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = res.locals.jwt.userId;
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const groups = await user.getGroups();
+    if (!groups) return next(new NotFoundError('User groups'));
+
+    if (groups.length === 0) return next(new NotFoundError('Event'));
+
+    const groupsId = groups.map(({ id }) => id);
+
+    const event = await Event.findOne({
+      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
+      include: { model: Group, where: { id: groupsId }, attributes: ['id'] },
+    });
+    if (!event) return next(new NotFoundError('Event'));
+
+    const owner = await event.getOwner();
+    const collaborators = await event.getCollaborators();
+    const quiz = await event.getQuiz();
+
+    res.json(eventFormatter(event, owner, collaborators, undefined, quiz));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getActualEventQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = res.locals.jwt.userId;
+
+    const user = await User.findByPk(userId, { attributes: ['id'] });
+    if (!user) return next(new NotFoundError('User'));
+
+    const groups = await user.getGroups();
+    if (!groups) return next(new NotFoundError('User groups'));
+
+    if (groups.length === 0) return next(new NotFoundError('Event'));
+
+    const groupsId = groups.map(({ id }) => id);
+
+    const event = await Event.findOne({
+      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
+      include: { model: Group, where: { id: groupsId }, attributes: ['id'] },
+    });
+    if (!event) return next(new NotFoundError('Event'));
+
+    const quiz = await event.getQuiz();
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    const userAnswers = await UserAnswer.findAll({
+      include: { model: User, where: { id: userId }, attributes: ['id'] },
+      attributes: ['id'],
+    });
+
+    const userAnswersId = userAnswers.map(({ id }) => id);
+
+    const answeredQuestions = await Question.findAll({
+      include: { model: UserAnswer, where: { id: userAnswersId } },
+      attributes: ['id'],
+    });
+
+    const answeredQuestionsId = answeredQuestions.map(({ id }) => id);
+
+    const questionCount = await quiz.countQuestions();
+
+    const [question] = await quiz.getQuestions({
+      order: quiz.shuffle ? database.random() : [['id', 'ASC']],
+      where: { id: { [Op.notIn]: answeredQuestionsId } },
+      include: questionIncludes,
+      limit: 1,
+    });
+
+    if (!question) return next(new NotFoundError('Question'));
+
+    res.json({
+      ...questionFormatter(question),
+      answeredQuestions: answeredQuestions.length,
+      remainingQuestions: questionCount - answeredQuestions.length,
+    });
   } catch (err) {
     next(err);
   }
@@ -176,15 +294,17 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const user = await User.findByPk(res.locals.jwt.userId);
     if (!user) return next(new NotFoundError('User'));
 
-    const relatedGroups = await group.getRelatedGroups();
-    const relatedGroupsId = relatedGroups.map((group) => group.id);
+    // ! The commented code check if the event isn't conflicting with event that exists in the interval.
 
-    const eventsAmount = await Event.count({
-      where: getEventDateConditions(validatedEvent.start, validatedEvent.end),
-      include: { model: Group, where: { id: relatedGroupsId } },
-    });
+    // const relatedGroups = await group.getRelatedGroups();
+    // const relatedGroupsId = relatedGroups.map((group) => group.id);
 
-    if (eventsAmount > 0) return next(new DuplicationError('Event'));
+    // const eventsAmount = await Event.count({
+    //   where: getEventDateConditions(validatedEvent.start, validatedEvent.end),
+    //   include: { model: Group, where: { id: relatedGroupsId } },
+    // });
+
+    // if (eventsAmount > 0) return next(new DuplicationError('Event'));
 
     const createdEvent = await Event.create({
       start: validatedEvent.start,
