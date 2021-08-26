@@ -12,6 +12,7 @@ import {
   HasManyGetAssociationsMixin,
   BelongsToManyCountAssociationsMixin,
   BelongsToManyRemoveAssociationsMixin,
+  HasManyCreateAssociationMixin,
 } from 'sequelize';
 
 import { Role } from './role';
@@ -19,6 +20,7 @@ import { Event, FormattedEvent } from './event';
 import { State } from './state';
 import { Group } from './group';
 import { FormattedQuiz, Quiz } from './quiz';
+import { UserAnswer } from './userAnswer';
 
 interface UserAttributes {
   id: number;
@@ -87,6 +89,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   /* Quiz properties */
   public getOwnedQuizzes!: HasManyGetAssociationsMixin<Quiz>;
   public getCollaboratedQuizzes!: HasManyGetAssociationsMixin<Quiz>;
+
+  /* User Answers */
+  public createUserAnswer!: HasManyCreateAssociationMixin<UserAnswer>;
 }
 
 export default (sequelize: Sequelize): typeof User => {
