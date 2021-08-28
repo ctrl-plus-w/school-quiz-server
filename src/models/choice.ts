@@ -35,7 +35,6 @@ export default (sequelize: Sequelize): typeof Choice => {
       slug: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
       },
       name: {
         type: DataTypes.STRING,
