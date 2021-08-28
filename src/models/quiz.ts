@@ -90,7 +90,6 @@ export default (sequelize: Sequelize): typeof Quiz => {
       },
       slug: {
         type: DataTypes.STRING,
-        unique: true,
         allowNull: false,
       },
       title: {
