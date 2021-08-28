@@ -33,7 +33,6 @@ export default (sequelize: Sequelize): typeof ExactAnswer => {
       answerContent: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
       },
     },
     {
