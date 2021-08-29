@@ -28,7 +28,6 @@ import {
 import { isNotNull } from '../../utils/mapper.utils';
 
 import { eventFormatter, eventMapper, questionFormatter, quizFormatter, userFormatter, userMapper } from '../../helpers/mapper.helper';
-import { getEventDateConditions } from '../../helpers/event.helper';
 
 import { AllOptional } from '../../types/optional.types';
 
@@ -64,8 +63,8 @@ const createSchema = Joi.object({
 });
 
 const updateSchema = Joi.object({
-  start: Joi.date().greater(new Date()),
-  end: Joi.date().greater(new Date()),
+  start: Joi.date() /*.greater(new Date())*/,
+  end: Joi.date() /*.greater(new Date)*/,
   countdown: Joi.date(),
 }).min(1);
 
@@ -178,7 +177,7 @@ export const getActualEventQuestion = async (req: Request, res: Response, next: 
 
     const [question] = await quiz.getQuestions({
       order: quiz.shuffle ? database.random() : [['id', 'ASC']],
-      where: { id: { [Op.notIn]: answeredQuestionsId } },
+      where: { id: { [Op.notIn]: answeredQuestionsId }, typedQuestionId: { [Op.not]: null } },
       include: questionIncludes,
       limit: 1,
     });
@@ -335,26 +334,32 @@ export const updateEvent = async (req: Request, res: Response, next: NextFunctio
       error?: Error;
     } = updateSchema.validate(req.body);
 
+    if (validationError) return next(new InvalidInputError());
+
     const event = await Event.findByPk(eventId);
     if (!event) return next(new NotFoundError('Event'));
 
-    if (validationError) return next(new InvalidInputError());
+    if (validatedEvent.end) {
+      if (new Date(validatedEvent.end) <= new Date(validatedEvent.start || event.start)) return next(new InvalidInputError());
+    }
 
     const group = await event.getGroup();
     if (!group) return next(new NotFoundError('Group'));
 
-    const relatedGroups = await group.getRelatedGroups();
-    const relatedGroupsId = relatedGroups.map((group) => group.id);
+    // ! The commented code check if the event isn't conflicting with event that exists in the interval.
 
-    const start = validatedEvent.start || event.start;
-    const end = validatedEvent.end || event.end;
+    // const relatedGroups = await group.getRelatedGroups();
+    // const relatedGroupsId = relatedGroups.map((group) => group.id);
 
-    const eventsAmount = await Event.count({
-      where: { ...getEventDateConditions(start, end), id: { [Op.not]: event.id } },
-      include: { model: Group, where: { id: relatedGroupsId } },
-    });
+    // const start = validatedEvent.start || event.start;
+    // const end = validatedEvent.end || event.end;
 
-    if (eventsAmount > 0) return next(new DuplicationError('Event'));
+    // const eventsAmount = await Event.count({
+    //   where: { ...getEventDateConditions(start, end), id: { [Op.not]: event.id } },
+    //   include: { model: Group, where: { id: relatedGroupsId } },
+    // });
+
+    // if (eventsAmount > 0) return next(new DuplicationError('Event'));
 
     await event.update(validatedEvent);
 
