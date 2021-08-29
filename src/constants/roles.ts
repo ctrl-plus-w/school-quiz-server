@@ -1,4 +1,4 @@
-export default {
+const ROLES = {
   ADMIN: {
     PERMISSION: 1,
   },
@@ -9,3 +9,5 @@ export default {
     PERMISSION: 3,
   },
 };
+
+export default ROLES;
