@@ -4,7 +4,7 @@ import { AcccessForbiddenError, UnknownError } from '../classes/StatusError';
 
 import { MiddlewareFunction, MiddlewareValidationPayload } from '../types/middlewares.types';
 
-import roles from '../constants/roles';
+import ROLES from '../constants/roles';
 
 export const authorize = (bypassedMiddlewares: Array<MiddlewareFunction>, middlewares: Array<MiddlewareFunction> = []) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -39,10 +39,10 @@ const checkPermission = (permission: number) => {
   };
 };
 
-export const checkIsAdmin = checkPermission(roles.ADMIN.PERMISSION);
+export const checkIsAdmin = checkPermission(ROLES.ADMIN.PERMISSION);
 
-export const checkIsProfessor = checkPermission(roles.PROFESSOR.PERMISSION);
+export const checkIsProfessor = checkPermission(ROLES.PROFESSOR.PERMISSION);
 
-export const checkIsStudent = checkPermission(roles.STUDENT.PERMISSION);
+export const checkIsStudent = checkPermission(ROLES.STUDENT.PERMISSION);
 
 export default checkPermission;

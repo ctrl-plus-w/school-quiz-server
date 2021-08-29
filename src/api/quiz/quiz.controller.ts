@@ -19,9 +19,10 @@ import { slugify } from '../../utils/string.utils';
 
 import { quizFormatter, quizMapper, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
-import roles from '../../constants/roles';
 import { AllOptional } from '../../types/optional.types';
 import { isNotNull } from '../../utils/mapper.utils';
+
+import ROLES from '../../constants/roles';
 
 const creationSchema = Joi.object({
   title: Joi.string().min(1).max(25).required(),
@@ -200,7 +201,7 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
       if (!user) return next(new NotFoundError('User'));
       if (!user.role) return next(new NotFoundError('Role'));
 
-      if (user.role.permission >= roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
+      if (user.role.permission >= ROLES.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
 
       await quiz.addCollaborator(user);
     } else {
@@ -209,7 +210,7 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
       if (users.length !== userIds.length) return next(new NotFoundError('User'));
 
       const usersRolePermission = users.map(({ role }) => role && role.permission).filter(isNotNull) as Array<number>;
-      if (!usersRolePermission.every((permission) => permission >= roles.PROFESSOR.PERMISSION)) return next(new ForbiddenAccessParameterError());
+      if (!usersRolePermission.every((permission) => permission >= ROLES.PROFESSOR.PERMISSION)) return next(new ForbiddenAccessParameterError());
 
       await quiz.addCollaborators(users);
     }

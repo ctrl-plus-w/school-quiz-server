@@ -33,7 +33,7 @@ import { AllOptional } from '../../types/optional.types';
 
 import database from '../../database';
 
-import roles from '../../constants/roles';
+import ROLES from '../../constants/roles';
 
 const questionIncludes: Includeable | Array<Includeable> = [
   {
@@ -390,7 +390,7 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
       if (!user) return next(new NotFoundError('User'));
       if (!user.role) return next(new NotFoundError('Role'));
 
-      if (user.role.permission > roles.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
+      if (user.role.permission > ROLES.PROFESSOR.PERMISSION) return next(new ForbiddenAccessParameterError());
 
       await event.addCollaborator(user);
     } else {
@@ -399,7 +399,7 @@ export const addCollaborator = async (req: Request, res: Response, next: NextFun
       if (users.length !== userIds.length) return next(new NotFoundError('User'));
 
       const usersRolePermission = users.map(({ role }) => role && role.permission).filter(isNotNull) as Array<number>;
-      if (!usersRolePermission.every((permission) => permission >= roles.PROFESSOR.PERMISSION)) return next(new ForbiddenAccessParameterError());
+      if (!usersRolePermission.every((permission) => permission >= ROLES.PROFESSOR.PERMISSION)) return next(new ForbiddenAccessParameterError());
 
       await event.addCollaborators(users);
     }
