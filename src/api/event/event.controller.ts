@@ -35,24 +35,37 @@ import database from '../../database';
 
 import ROLES from '../../constants/roles';
 
-const questionIncludes: Includeable | Array<Includeable> = [
-  {
-    model: TextualQuestion,
-    include: [QuestionSpecification, VerificationType],
-  },
-  {
-    model: NumericQuestion,
-    include: [QuestionSpecification],
-  },
-  {
-    model: ChoiceQuestion,
-    include: [QuestionSpecification, Choice],
-  },
-  {
-    model: UserAnswer,
-    include: [{ model: User, attributes: ['id', 'username'] }],
-  },
-];
+const questionIncludes = (isProfessor: boolean): Includeable | Array<Includeable> => {
+  const defaultIncludes: Array<Includeable> = [
+    {
+      model: TextualQuestion,
+      include: [{ model: QuestionSpecification, attributes: ['id', 'slug', 'name'] }, { model: VerificationType }],
+    },
+    {
+      model: NumericQuestion,
+      include: [{ model: QuestionSpecification, attributes: ['id', 'slug', 'name'] }],
+    },
+  ];
+
+  if (isProfessor) {
+    return [
+      ...defaultIncludes,
+      { model: ChoiceQuestion, include: [{ model: QuestionSpecification, attributes: ['id', 'slug', 'name'] }, { model: Choice }] },
+      { model: UserAnswer, include: [{ model: User, attributes: ['id', 'username'] }] },
+    ];
+  }
+
+  return [
+    ...defaultIncludes,
+    {
+      model: ChoiceQuestion,
+      include: [
+        { model: QuestionSpecification, attributes: ['id', 'slug', 'name'] },
+        { model: Choice, attributes: ['id', 'slug', 'name'] },
+      ],
+    },
+  ];
+};
 
 const createSchema = Joi.object({
   start: Joi.date().required() /*.greater(new Date())*/,
@@ -140,6 +153,8 @@ export const getActualEventQuestion = async (req: Request, res: Response, next: 
   try {
     const userId = res.locals.jwt.userId;
 
+    if (res.locals.isAdmin) return next(new NotFoundError('Event'));
+
     const user = await User.findByPk(userId, { attributes: ['id'] });
     if (!user) return next(new NotFoundError('User'));
 
@@ -178,7 +193,7 @@ export const getActualEventQuestion = async (req: Request, res: Response, next: 
     const [question] = await quiz.getQuestions({
       order: quiz.shuffle ? database.random() : [['id', 'ASC']],
       where: { id: { [Op.notIn]: answeredQuestionsId }, typedQuestionId: { [Op.not]: null } },
-      include: questionIncludes,
+      include: questionIncludes(res.locals.isProfessor),
       limit: 1,
     });
 
