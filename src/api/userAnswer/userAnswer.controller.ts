@@ -2,16 +2,16 @@ import { Request, Response, NextFunction } from 'express';
 
 import Joi from 'joi';
 
-import { Question } from '../../models/question';
 import { UserAnswer } from '../../models/userAnswer';
-
-import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
-import { userAnswerFormatter, userAnswerMapper } from '../../helpers/mapper.helper';
-import { User } from '../../models/user';
-import { Group } from '../../models/group';
-import { Quiz } from '../../models/quiz';
+import { EventWarn } from '../../models/eventWarn';
+import { Question } from '../../models/question';
 import { Event } from '../../models/event';
-import { Op } from 'sequelize';
+import { User } from '../../models/user';
+import { Quiz } from '../../models/quiz';
+
+import { AcccessForbiddenError, DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
+
+import { userAnswerFormatter, userAnswerMapper } from '../../helpers/mapper.helper';
 
 const schema = Joi.object({
   answer: Joi.string().min(1).max(45),
@@ -78,11 +78,10 @@ export const getUserAnswer = async (req: Request, res: Response, next: NextFunct
 
 export const createUserAnswer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const question: Question | undefined = res.locals.question;
-    if (!question) return next(new NotFoundError('Question'));
-
-    const quiz: Quiz | undefined = res.locals.quiz;
-    if (!quiz) return next(new NotFoundError('Quiz'));
+    const userId: number = res.locals.jwt.userId;
+    const question: Question = res.locals.question;
+    const event: Event = res.locals.event;
+    const quiz: Quiz = res.locals.quiz;
 
     const {
       value: validatedUserAnswer,
@@ -94,23 +93,11 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
 
     if (validationError) return next(new InvalidInputError());
 
-    const user = await User.findByPk(res.locals.jwt.userId);
+    const user = await User.findByPk(userId);
     if (!user) return next(new NotFoundError('User'));
 
     const userGroups = await user.getGroups({ attributes: ['id'] });
     if (userGroups.length === 0) return next(new NotFoundError('Event'));
-
-    const userGroupsId = userGroups.map(({ id }) => id);
-
-    const possibleEventsAmount = await Event.count({
-      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
-      include: [
-        { model: Quiz, where: { id: quiz.id } },
-        { model: Group, where: { id: userGroupsId } },
-      ],
-    });
-
-    if (possibleEventsAmount === 0) return next(new NotFoundError('Event'));
 
     const userAnswer = await UserAnswer.findOne({
       include: [
@@ -120,6 +107,9 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
     });
 
     if (userAnswer) return next(new DuplicationError('User answer'));
+
+    const warn = await EventWarn.findOne({ where: { eventId: event.id, userId: userId }, attributes: ['amount'] });
+    if (warn && quiz.strict && warn.amount >= 3) return next(new AcccessForbiddenError());
 
     if (validatedUserAnswer.answer) {
       const createdUserAnswer = await user.createUserAnswer({ answerContent: validatedUserAnswer.answer });
