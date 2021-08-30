@@ -26,6 +26,8 @@ interface EventAttributes {
 export interface FormattedEvent extends EventAttributes {
   owner?: FormattedUser;
   collaborators?: Array<FormattedUser>;
+  warnedUsers?: Array<FormattedUser>;
+  warns?: number;
   quiz?: Quiz;
   group?: Group;
 
@@ -40,6 +42,8 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public start!: Date;
   public end!: Date;
   public countdown!: Date;
+
+  public warnedUsers?: User[];
 
   public quiz?: Quiz;
   public group?: Group;
@@ -71,6 +75,13 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public addCollaborator!: BelongsToManyAddAssociationMixin<User, number>;
   public addCollaborators!: BelongsToManyAddAssociationsMixin<User, number>;
   public removeCollaborator!: BelongsToManyRemoveAssociationMixin<User, number>;
+
+  /* Punished users properties */
+  public getWarnedUsers!: BelongsToManyGetAssociationsMixin<User>;
+  public countWarnedUsers!: BelongsToManyCountAssociationsMixin;
+  public addWarnedUser!: BelongsToManyAddAssociationMixin<User, number>;
+  public addWarnedUsers!: BelongsToManyAddAssociationsMixin<User, number>;
+  public removeWarnedUser!: BelongsToManyRemoveAssociationMixin<User, number>;
 }
 
 export default (sequelize: Sequelize): typeof Event => {

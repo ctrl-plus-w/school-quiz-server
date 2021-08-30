@@ -19,6 +19,7 @@ import comparisonAnswer from './comparisonAnswer';
 import answer from './answer';
 import userAnswer from './userAnswer';
 import choice from './choice';
+import eventWarn from './eventWarn';
 
 import config from '../config/sequelize-credentials';
 
@@ -55,5 +56,7 @@ export default {
 
     ExactAnswer: exactAnswer(sequelize),
     ComparisonAnswer: comparisonAnswer(sequelize),
+
+    EventWarns: eventWarn(sequelize),
   },
 };

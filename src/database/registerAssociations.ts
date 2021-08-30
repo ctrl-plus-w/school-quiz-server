@@ -1,4 +1,5 @@
 import database from '../models';
+
 import { UserAnswer } from '../models/userAnswer';
 
 export default async (): Promise<void> => {
@@ -20,6 +21,7 @@ export default async (): Promise<void> => {
     Answer,
     ExactAnswer,
     ComparisonAnswer,
+    EventWarns,
   } = database.models;
 
   // User & Role relation.
@@ -62,6 +64,16 @@ export default async (): Promise<void> => {
 
   Event.belongsToMany(User, { through: EVENT_COLLABORATORS_TABLENAME, as: 'collaborators' });
   User.belongsToMany(Event, { through: EVENT_COLLABORATORS_TABLENAME, as: 'collaboratedEvents' });
+
+  // Event & User warns.
+  Event.belongsToMany(User, { through: EventWarns, as: 'warnedUsers' });
+  User.belongsToMany(Event, { through: EventWarns, as: 'warnedEvents' });
+
+  Event.hasMany(EventWarns);
+  EventWarns.belongsTo(Event);
+
+  User.hasMany(EventWarns);
+  EventWarns.belongsTo(User);
 
   // Quiz & Question relation.
   Question.belongsTo(Quiz);

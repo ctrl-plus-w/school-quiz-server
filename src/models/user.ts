@@ -21,6 +21,7 @@ import { State } from './state';
 import { Group } from './group';
 import { FormattedQuiz, Quiz } from './quiz';
 import { UserAnswer } from './userAnswer';
+import { EventWarn } from './eventWarn';
 
 interface UserAttributes {
   id: number;
@@ -37,6 +38,7 @@ export interface FormattedUser extends Optional<UserAttributes, 'password'> {
   events?: Array<FormattedEvent>;
   groups?: Array<Group>;
   quizzes?: Array<FormattedQuiz>;
+  warns?: number;
 
   createdAt: Date;
   updatedAt: Date;
@@ -56,6 +58,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public role?: Role;
   public events?: Array<Event>;
   public groups?: Array<Group>;
+  public eventWarn?: EventWarn;
 
   public quizzes?: Array<Quiz>;
 
