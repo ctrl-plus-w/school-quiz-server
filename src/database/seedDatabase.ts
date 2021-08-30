@@ -5,6 +5,8 @@ import { VerificationType } from '../models/verificationType';
 import { Group } from '../models/group';
 import { Role } from '../models/role';
 import { User } from '../models/user';
+import { Quiz } from '../models/quiz';
+import { Event } from '../models/event';
 
 export default async (): Promise<void> => {
   await Role.bulkCreate([
@@ -159,4 +161,24 @@ export default async (): Promise<void> => {
   users.forEach(async (user) => {
     await user.addGroup(groupBis);
   });
+
+  const quiz = await Quiz.create({
+    title: 'My brand new quiz',
+    slug: 'my-brand-new-quiz',
+    description: 'Easy',
+    shuffle: false,
+    strict: false,
+  });
+
+  await quiz.setOwner(fabrice);
+
+  const event = await Event.create({
+    start: new Date('2021-08-29T22:00:00.000Z'),
+    end: new Date('2021-08-31T22:00:00.000Z'),
+    countdown: new Date(600000),
+  });
+
+  await event.setQuiz(quiz);
+  await event.setOwner(fabrice);
+  await event.setGroup(groupBis);
 };
