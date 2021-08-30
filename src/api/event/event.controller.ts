@@ -1,21 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
-import { Includeable, Op } from 'sequelize';
+import { Includeable, Op, WhereOptions } from 'sequelize';
 
+import sequelize from 'sequelize';
 import Joi from 'joi';
 
-import { Event, EventCreationAttributes } from '../../models/event';
-import { User } from '../../models/user';
-import { Group } from '../../models/group';
-import { Quiz } from '../../models/quiz';
-import { Role } from '../../models/role';
-import { Question } from '../../models/question';
-import { UserAnswer } from '../../models/userAnswer';
-import { TextualQuestion } from '../../models/textualQuestion';
 import { QuestionSpecification } from '../../models/questionSpecification';
+import { Event, EventCreationAttributes } from '../../models/event';
+import { ComparisonAnswer } from '../../models/comparisonAnswer';
 import { VerificationType } from '../../models/verificationType';
+import { TextualQuestion } from '../../models/textualQuestion';
 import { NumericQuestion } from '../../models/numericQuestion';
 import { ChoiceQuestion } from '../../models/choiceQuestion';
+import { ExactAnswer } from '../../models/exactAnswer';
+import { UserAnswer } from '../../models/userAnswer';
+import { Question } from '../../models/question';
 import { Choice } from '../../models/choice';
+import { Answer } from '../../models/answer';
+import { Group } from '../../models/group';
+import { User } from '../../models/user';
+import { Quiz } from '../../models/quiz';
+import { Role } from '../../models/role';
 
 import {
   DuplicationError,
@@ -26,6 +30,7 @@ import {
 } from '../../classes/StatusError';
 
 import { isNotNull } from '../../utils/mapper.utils';
+import { oneLine } from '../../utils/string.utils';
 
 import { eventFormatter, eventMapper, questionFormatter, quizFormatter, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
@@ -52,6 +57,7 @@ const questionIncludes = (isProfessor: boolean): Includeable | Array<Includeable
       ...defaultIncludes,
       { model: ChoiceQuestion, include: [{ model: QuestionSpecification, attributes: ['id', 'slug', 'name'] }, { model: Choice }] },
       { model: UserAnswer, include: [{ model: User, attributes: ['id', 'username'] }] },
+      { model: Answer, include: [{ model: ExactAnswer }, { model: ComparisonAnswer }] },
     ];
   }
 
@@ -190,9 +196,42 @@ export const getActualEventQuestion = async (req: Request, res: Response, next: 
 
     const questionCount = await quiz.countQuestions();
 
+    const questionWithChoiceQuery = oneLine(`
+      SELECT Question.id FROM Question 
+      JOIN ChoiceQuestion ON Question.typedQuestionId = ChoiceQuestion.id 
+      JOIN Choice ON Choice.choiceQuestionId = ChoiceQuestion.id 
+      WHERE Question.questionType = 'choiceQuestion'
+    `);
+
+    const questionWithAnswerQuery = oneLine(`
+      SELECT Question.id FROM Question
+      JOIN Answer ON Answer.questionID = Question.id
+    `);
+
+    // * Conditions :
+    // * The id mustn't be in the answered questions and if the
+    // * questionType is 'numericQuestion', the id must be in
+    // * the ids fetched in the question with choice literal ex
+    // * else the id must be in the ids fetched in the question
+    // * with answer literal ex. The typedQuestionId mustn't be
+    // * null.
+
+    const conditions: WhereOptions = {
+      [Op.and]: [
+        { id: { [Op.notIn]: answeredQuestionsId } },
+        {
+          [Op.or]: [
+            { questionType: 'choiceQuestion', id: { [Op.in]: sequelize.literal(`(${questionWithChoiceQuery})`) } },
+            { questionType: { [Op.not]: 'choiceQuestion' }, id: { [Op.in]: sequelize.literal(`(${questionWithAnswerQuery})`) } },
+          ],
+        },
+      ],
+      typedQuestionId: { [Op.not]: null },
+    };
+
     const [question] = await quiz.getQuestions({
       order: quiz.shuffle ? database.random() : [['id', 'ASC']],
-      where: { id: { [Op.notIn]: answeredQuestionsId }, typedQuestionId: { [Op.not]: null } },
+      where: conditions,
       include: questionIncludes(res.locals.isProfessor),
       limit: 1,
     });
