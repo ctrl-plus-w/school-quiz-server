@@ -22,7 +22,7 @@ import { User } from '../../models/user';
 import { Quiz } from '../../models/quiz';
 import { Role } from '../../models/role';
 
-import {
+import StatusError, {
   AcccessForbiddenError,
   DuplicationError,
   ForbiddenAccessParameterError,
@@ -233,10 +233,13 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
 
     if (!question) return next(new NotFoundError('Question'));
 
+    const warn = await EventWarn.findOne({ where: { eventId: event.id, userId: userId }, attributes: ['amount'] });
+
     res.json({
       ...questionFormatter(question),
       answeredQuestions: answeredQuestions.length,
       remainingQuestions: questionCount - answeredQuestions.length,
+      blocked: warn && quiz.strict && warn.amount >= 3,
     });
   } catch (err) {
     next(err);
@@ -377,6 +380,11 @@ export const warnActualEvent = async (_req: Request, res: Response, next: NextFu
 
     const eventId = event.id;
     if (!event || !eventId) return next(new NotFoundError('Event'));
+
+    const quiz = await event.getQuiz();
+    if (!quiz) return next(new NotFoundError('Quiz'));
+
+    if (!quiz.strict) return next(new StatusError("The strict isn't strict, so you cannot get warned.", 404));
 
     const warn = await EventWarn.findOne({
       include: [

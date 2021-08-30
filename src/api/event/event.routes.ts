@@ -29,7 +29,7 @@ const router = Router();
 
 router.get('/', authorize([checkIsStudent]), getEvents);
 router.get('/event', authorize([checkIsStudent], [checkActualEventExists]), getActualEvent);
-router.get('/event/question', authorize([], [checkIsStudent, checkActualEventExists, checkIsNotBlocked]), getActualEventQuestion);
+router.get('/event/question', authorize([], [checkIsStudent, checkActualEventExists]), getActualEventQuestion);
 router.get('/:eventId', authorize([checkIsStudent]), getEvent);
 router.get('/:eventId/owner', authorize([checkIsStudent], [checkEventExists]), getEventOwner);
 router.get('/:eventId/collaborators', authorize([checkIsStudent], [checkEventExists]), getEventCollaborators);
