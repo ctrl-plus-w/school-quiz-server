@@ -15,7 +15,7 @@ import {
 
 import questionRoutes from '../question/quizQuestion.routes';
 
-import { authorize, checkIsProfessor, checkIsStudent } from '../../middlewares/authorization.middleware';
+import { authorize, checkIsProfessor } from '../../middlewares/authorization.middleware';
 import { checkQuizExists } from '../../middlewares/checkExists.middleware';
 import { checkQuizOwner } from '../../middlewares/checkPossesion.middleware';
 
@@ -23,11 +23,11 @@ const router = Router();
 
 /* Quiz */
 
-router.get('/', authorize([checkIsStudent]), getQuizzes);
-router.get('/:quizId', authorize([checkIsStudent]), getQuiz);
-router.get('/:quizId/owner', authorize([checkIsStudent], [checkQuizExists]), getQuizOwner);
-router.get('/:quizId/collaborators', authorize([checkIsStudent], [checkQuizExists]), getQuizCollaborators);
-router.get('/:quizId/collaborators/:collaboratorId', authorize([checkIsStudent], [checkQuizExists]), getQuizCollaborator);
+router.get('/', authorize([checkIsProfessor]), getQuizzes);
+router.get('/:quizId', authorize([checkIsProfessor]), getQuiz);
+router.get('/:quizId/owner', authorize([checkIsProfessor], [checkQuizExists]), getQuizOwner);
+router.get('/:quizId/collaborators', authorize([checkIsProfessor], [checkQuizExists]), getQuizCollaborators);
+router.get('/:quizId/collaborators/:collaboratorId', authorize([checkIsProfessor], [checkQuizExists]), getQuizCollaborator);
 
 router.post('/', authorize([checkIsProfessor]), createQuiz);
 router.post('/:quizId/collaborators', authorize([checkIsProfessor, checkQuizOwner]), addCollaborator);
