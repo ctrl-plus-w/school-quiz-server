@@ -13,6 +13,7 @@ import { NumericQuestion } from '../../models/numericQuestion';
 import { ChoiceQuestion } from '../../models/choiceQuestion';
 import { ExactAnswer } from '../../models/exactAnswer';
 import { UserAnswer } from '../../models/userAnswer';
+import { EventWarn } from '../../models/eventWarn';
 import { Question } from '../../models/question';
 import { Choice } from '../../models/choice';
 import { Answer } from '../../models/answer';
@@ -22,6 +23,7 @@ import { Quiz } from '../../models/quiz';
 import { Role } from '../../models/role';
 
 import {
+  AcccessForbiddenError,
   DuplicationError,
   ForbiddenAccessParameterError,
   InvalidInputError,
@@ -113,69 +115,62 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction):
     const eventId = req.params.eventId;
     if (!eventId) return next(new InvalidInputError());
 
-    const event = await Event.findByPk(eventId, { include: [Quiz, Group] });
+    const event = await Event.findByPk(eventId);
     if (!event) return next(new NotFoundError('Event'));
 
     const owner = await event.getOwner();
     const collaborators = await event.getCollaborators();
-
-    res.json(eventFormatter(event, owner, collaborators));
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getActualEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const userId = res.locals.jwt.userId;
-
-    const user = await User.findByPk(userId, { attributes: ['id'] });
-    if (!user) return next(new NotFoundError('User'));
-
-    const groups = await user.getGroups();
-    if (!groups) return next(new NotFoundError('User groups'));
-
-    if (groups.length === 0) return next(new NotFoundError('Event'));
-
-    const groupsId = groups.map(({ id }) => id);
-
-    const event = await Event.findOne({
-      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
-      include: { model: Group, where: { id: groupsId }, attributes: ['id'] },
-    });
-    if (!event) return next(new NotFoundError('Event'));
-
-    const owner = await event.getOwner();
-    const collaborators = await event.getCollaborators();
+    const group = await event.getGroup();
     const quiz = await event.getQuiz();
 
-    res.json(eventFormatter(event, owner, collaborators, undefined, quiz));
+    res.json(eventFormatter(event, owner, collaborators, group, quiz));
   } catch (err) {
     next(err);
   }
 };
 
-export const getActualEventQuestion = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getActualEvent = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = res.locals.jwt.userId;
+    const userId: number = res.locals.jwt.userId;
+    const event: Event = res.locals.event;
 
-    if (res.locals.isAdmin) return next(new NotFoundError('Event'));
+    const user = await User.findByPk(userId, { attributes: ['id', 'roleId'] });
+    if (!user) return next(new AcccessForbiddenError());
 
-    const user = await User.findByPk(userId, { attributes: ['id'] });
-    if (!user) return next(new NotFoundError('User'));
+    const role = await user.getRole();
+    if (!role) return next(new AcccessForbiddenError());
 
-    const groups = await user.getGroups();
-    if (!groups) return next(new NotFoundError('User groups'));
+    const owner = await event.getOwner({ attributes: ['id', 'username', 'firstName', 'lastName'] });
+    const collaborators = await event.getCollaborators();
+    const quiz = await event.getQuiz({ attributes: ['id', 'slug', 'title', 'description', 'strict', 'shuffle'] });
+    const group = await event.getGroup({ attributes: ['id', 'slug', 'name'] });
 
-    if (groups.length === 0) return next(new NotFoundError('Event'));
+    if (role.slug === 'professeur') {
+      const warnedUsers = await Event.findByPk(event.id, {
+        include: { model: User, as: 'warnedUsers', attributes: ['id', 'username', 'firstName', 'lastName'] },
+        attributes: [],
+      }).then((event) => {
+        if (!event) return undefined;
+        if (!event.warnedUsers) return [];
 
-    const groupsId = groups.map(({ id }) => id);
+        return event.warnedUsers;
+      });
 
-    const event = await Event.findOne({
-      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
-      include: { model: Group, where: { id: groupsId }, attributes: ['id'] },
-    });
-    if (!event) return next(new NotFoundError('Event'));
+      res.json(eventFormatter(event, owner, collaborators, group, quiz, warnedUsers));
+    } else {
+      const warn = await EventWarn.findOne({ where: { eventId: event.id, userId: userId }, attributes: ['amount'] });
+
+      res.json(eventFormatter(event, owner, collaborators, group, quiz, undefined, warn?.amount || 0));
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getActualEventQuestion = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId: number = res.locals.jwt.userId;
+    const event: Event = res.locals.event;
 
     const quiz = await event.getQuiz();
     if (!quiz) return next(new NotFoundError('Quiz'));
@@ -370,6 +365,35 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     await createdEvent.setGroup(group);
 
     res.json(eventFormatter(createdEvent, user, undefined, group, quiz));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const warnActualEvent = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId: number = res.locals.jwt.userId;
+    const event: Event = res.locals.event;
+
+    const eventId = event.id;
+    if (!event || !eventId) return next(new NotFoundError('Event'));
+
+    const warn = await EventWarn.findOne({
+      include: [
+        { model: User, where: { id: userId }, attributes: [] },
+        { model: Event, where: { id: event.id }, attributes: [] },
+      ],
+      attributes: ['amount'],
+    });
+
+    const user = await User.findByPk(userId);
+    if (!user) return next(new AcccessForbiddenError());
+
+    // * Trick to update the ManyToMany middle table. (Adding here make sequelize update the table)
+
+    await event.addWarnedUser(user, { through: { amount: warn ? warn.amount + 1 : 1 } });
+
+    res.json({ updated: true });
   } catch (err) {
     next(err);
   }
