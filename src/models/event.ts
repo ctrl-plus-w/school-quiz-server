@@ -27,7 +27,6 @@ export interface FormattedEvent extends EventAttributes {
   owner?: FormattedUser;
   collaborators?: Array<FormattedUser>;
   warnedUsers?: Array<FormattedUser>;
-  warns?: number;
   quiz?: Quiz;
   group?: Group;
 

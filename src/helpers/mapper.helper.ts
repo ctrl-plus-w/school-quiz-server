@@ -97,8 +97,7 @@ export const eventFormatter = (
   collaborators?: Array<User>,
   group?: Group,
   quiz?: Quiz,
-  warnedUsers?: Array<User>,
-  warns?: number
+  warnedUsers?: Array<User>
 ): FormattedEvent | null => {
   return event
     ? {
@@ -113,7 +112,6 @@ export const eventFormatter = (
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
         warnedUsers: userMapper(warnedUsers),
-        warns: warns,
       }
     : null;
 };
