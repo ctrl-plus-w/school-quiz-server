@@ -198,9 +198,26 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
       WHERE Question.questionType = 'choiceQuestion'
     `);
 
-    const questionWithAnswerQuery = oneLine(`
+    const automaticAndHybrideQuestionWithAnswerQuery = oneLine(`
       SELECT Question.id FROM Question
-      JOIN Answer ON Answer.questionID = Question.id
+      JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
+      JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
+      JOIN Answer ON Answer.questionId = Question.id
+      WHERE Question.questionType = 'textualQuestion' AND NOT VerificationType.slug = 'manuel'
+    `);
+
+    const manualTextualQuestionQuery = oneLine(`
+      SELECT Question.id FROM Question
+      JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
+      JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
+      WHERE VerificationType.slug = 'manuel' AND Question.questionType = 'textualQuestion'
+    `);
+
+    const combinedQueries = oneLine(`
+      SELECT Question.id FROM Question
+      WHERE Question.id IN (${manualTextualQuestionQuery})
+      OR Question.id IN (${automaticAndHybrideQuestionWithAnswerQuery})
+      OR Question.id IN (${questionWithChoiceQuery})
     `);
 
     // * Conditions :
@@ -212,15 +229,7 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
     // * null.
 
     const conditions: WhereOptions = {
-      [Op.and]: [
-        { id: { [Op.notIn]: answeredQuestionsId } },
-        {
-          [Op.or]: [
-            { questionType: 'choiceQuestion', id: { [Op.in]: sequelize.literal(`(${questionWithChoiceQuery})`) } },
-            { questionType: { [Op.not]: 'choiceQuestion' }, id: { [Op.in]: sequelize.literal(`(${questionWithAnswerQuery})`) } },
-          ],
-        },
-      ],
+      id: { [Op.notIn]: answeredQuestionsId, [Op.in]: sequelize.literal(`(${combinedQueries})`) },
       typedQuestionId: { [Op.not]: null },
     };
 
