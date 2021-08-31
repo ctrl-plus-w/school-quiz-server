@@ -363,7 +363,7 @@ export const warnActualEvent = async (_req: Request, res: Response, next: NextFu
 
     await event.addWarnedUser(user, { through: { amount: newWarnAmount } });
 
-    res.json({ warns: newWarnAmount });
+    res.json({ warns: newWarnAmount, blocked: newWarnAmount >= 3 });
   } catch (err) {
     next(err);
   }
