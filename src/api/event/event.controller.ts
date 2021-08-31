@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Includeable, Op, WhereOptions } from 'sequelize';
+import { Includeable, Op, WhereOptions, Sequelize } from 'sequelize';
 
 import sequelize from 'sequelize';
 import Joi from 'joi';
@@ -141,7 +141,7 @@ export const getActualEvent = async (_req: Request, res: Response, next: NextFun
     if (!role) return next(new AcccessForbiddenError());
 
     const owner = await event.getOwner({ attributes: ['id', 'username', 'firstName', 'lastName'] });
-    const collaborators = await event.getCollaborators();
+    const collaborators = await event.getCollaborators({ attributes: ['id', 'username', 'firstName', 'lastName'] });
     const quiz = await event.getQuiz({ attributes: ['id', 'slug', 'title', 'description', 'strict', 'shuffle'] });
     const group = await event.getGroup({ attributes: ['id', 'slug', 'name'] });
 
@@ -158,9 +158,32 @@ export const getActualEvent = async (_req: Request, res: Response, next: NextFun
 
       res.json(eventFormatter(event, owner, collaborators, group, quiz, warnedUsers));
     } else {
-      const warn = await EventWarn.findOne({ where: { eventId: event.id, userId: userId }, attributes: ['amount'] });
+      const quizQuestions = await Question.findAll({
+        include: [
+          { model: Quiz, where: { id: quiz.id }, attributes: [] },
+          { model: UserAnswer, where: { userId: userId }, attributes: [] },
+        ],
+        attributes: {
+          include: [[Sequelize.fn('COUNT', Sequelize.col('userAnswers.id')), 'userAnswerCount']],
+        },
+        group: ['question.id'],
+      });
 
-      res.json(eventFormatter(event, owner, collaborators, group, quiz, undefined, warn?.amount || 0));
+      // * When using the fn() function, sequelize add the value to the dataValues but doesn't eager loads it
+      // * so when retrieving the value, it's needed to retrieve it from the dataValues.
+
+      const answeredQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => userAnswerCount && userAnswerCount > 0);
+      const remainingQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => !userAnswerCount || userAnswerCount === 0);
+
+      const warn = await EventWarn.findOne({ where: { eventId: event.id, userId: userId }, attributes: ['amount'] });
+      const isBlocked = (warn && warn.amount >= 3) || false;
+
+      res.json({
+        ...eventFormatter(event, owner, collaborators, group, quiz),
+        answeredQuestions: answeredQuestions.length,
+        remainingQuestions: remainingQuestions.length,
+        blocked: isBlocked,
+      });
     }
   } catch (err) {
     next(err);
@@ -175,21 +198,25 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
     const quiz = await event.getQuiz();
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const userAnswers = await UserAnswer.findAll({
-      include: { model: User, where: { id: userId }, attributes: ['id'] },
-      attributes: ['id'],
+    const quizQuestions = await Question.findAll({
+      include: [
+        { model: Quiz, where: { id: quiz.id }, attributes: [] },
+        { model: UserAnswer, attributes: [], where: { userId: userId } },
+      ],
+      attributes: {
+        include: [[Sequelize.fn('COUNT', Sequelize.col('userAnswers.id')), 'userAnswerCount']],
+      },
+      group: ['question.id'],
     });
 
-    const userAnswersId = userAnswers.map(({ id }) => id);
+    // * When using the fn() function, sequelize add the value to the dataValues but doesn't eager loads it
+    // * so when retrieving the value, it's needed to retrieve it from the dataValues.
 
-    const answeredQuestions = await Question.findAll({
-      include: { model: UserAnswer, where: { id: userAnswersId } },
-      attributes: ['id'],
-    });
+    const answeredQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => userAnswerCount && userAnswerCount > 0);
+    const remainingQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => !userAnswerCount || userAnswerCount === 0);
 
-    const answeredQuestionsId = answeredQuestions.map(({ id }) => id);
-
-    const questionCount = await quiz.countQuestions();
+    console.log(answeredQuestions);
+    console.log(remainingQuestions);
 
     const questionWithChoiceQuery = oneLine(`
       SELECT Question.id FROM Question 
@@ -229,7 +256,7 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
     // * null.
 
     const conditions: WhereOptions = {
-      id: { [Op.notIn]: answeredQuestionsId, [Op.in]: sequelize.literal(`(${combinedQueries})`) },
+      id: { [Op.notIn]: answeredQuestions.map(({ id }) => id), [Op.in]: sequelize.literal(`(${combinedQueries})`) },
       typedQuestionId: { [Op.not]: null },
     };
 
@@ -247,7 +274,7 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
     res.json({
       ...questionFormatter(question),
       answeredQuestions: answeredQuestions.length,
-      remainingQuestions: questionCount - answeredQuestions.length,
+      remainingQuestions: remainingQuestions.length,
       blocked: warn && quiz.strict && warn.amount >= 3,
     });
   } catch (err) {
@@ -408,9 +435,11 @@ export const warnActualEvent = async (_req: Request, res: Response, next: NextFu
 
     // * Trick to update the ManyToMany middle table. (Adding here make sequelize update the table)
 
-    await event.addWarnedUser(user, { through: { amount: warn ? warn.amount + 1 : 1 } });
+    const newWarnAmount = warn ? warn.amount + 1 : 1;
 
-    res.json({ updated: true });
+    await event.addWarnedUser(user, { through: { amount: newWarnAmount } });
+
+    res.json({ warns: newWarnAmount });
   } catch (err) {
     next(err);
   }
