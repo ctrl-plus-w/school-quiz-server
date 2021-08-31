@@ -69,6 +69,8 @@ export class Question extends Model<QuestionAttributes, QuestionCreationAttribut
   public answers?: Array<Answer>;
   public userAnswers?: Array<UserAnswer>;
 
+  public userAnswerCount?: number;
+
   /* Additional property */
   public dataValues!: QuestionDataValues;
 
