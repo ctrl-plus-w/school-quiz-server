@@ -14,8 +14,8 @@ import { AcccessForbiddenError, DuplicationError, InvalidInputError, NotFoundErr
 import { userAnswerFormatter, userAnswerMapper } from '../../helpers/mapper.helper';
 
 const schema = Joi.object({
-  answer: Joi.string().min(1).max(45),
-  answers: Joi.array().items(Joi.string().min(1).max(45)).min(1),
+  answer: Joi.string().min(1).max(750),
+  answers: Joi.array().items(Joi.string().min(1).max(750)).min(1),
 }).xor('answer', 'answers');
 
 export const getGlobalUserAnswers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
