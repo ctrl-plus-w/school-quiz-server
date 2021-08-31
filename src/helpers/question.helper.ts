@@ -1,13 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
+import { Sequelize } from 'sequelize';
 
 import Joi from 'joi';
 
 import { Question, TypedQuestion } from '../models/question';
 import { Quiz } from '../models/quiz';
 
-import { ChoiceQuestion, ChoiceQuestionCreationAttributes } from '../models/choiceQuestion';
 import { NumericQuestion, NumericQuestionCreationAttributes } from '../models/numericQuestion';
 import { TextualQuestion, TextualQuestionCreationAttributes } from '../models/textualQuestion';
+import { ChoiceQuestion, ChoiceQuestionCreationAttributes } from '../models/choiceQuestion';
+import { QuestionSpecification } from '../models/questionSpecification';
+import { VerificationType } from '../models/verificationType';
+import { UserAnswer } from '../models/userAnswer';
 
 import StatusError, { DuplicationError, InvalidInputError, NotFoundError } from '../classes/StatusError';
 
@@ -16,8 +20,6 @@ import { questionFormatter } from './mapper.helper';
 import { slugify } from '../utils/string.utils';
 
 import { AllOptional } from '../types/optional.types';
-import { VerificationType } from '../models/verificationType';
-import { QuestionSpecification } from '../models/questionSpecification';
 
 /* Global schemas */
 const questionCreationSchema: Joi.SchemaMap = {
@@ -407,4 +409,31 @@ export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next:
   } catch (err) {
     next(err);
   }
+};
+
+export const getAnsweredAndRemainingQuestions = async (
+  quizId: number,
+  userId: number
+): Promise<{
+  answeredQuestions: Array<Question>;
+  remainingQuestions: Array<Question>;
+}> => {
+  const quizQuestions = await Question.findAll({
+    include: [
+      { model: Quiz, where: { id: quizId }, attributes: [] },
+      { model: UserAnswer, attributes: [], where: { userId: userId }, required: false },
+    ],
+    attributes: {
+      include: [[Sequelize.fn('COUNT', Sequelize.col('userAnswers.id')), 'userAnswerCount']],
+    },
+    group: ['question.id'],
+  });
+
+  // * When using the fn() function, sequelize add the value to the dataValues but doesn't eager loads it
+  // * so when retrieving the value, it's needed to retrieve it from the dataValues.
+
+  const answeredQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => userAnswerCount && userAnswerCount > 0);
+  const remainingQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => !userAnswerCount || userAnswerCount === 0);
+
+  return { answeredQuestions, remainingQuestions };
 };

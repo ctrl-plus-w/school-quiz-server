@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Includeable, Op, WhereOptions, Sequelize } from 'sequelize';
+import { Includeable, Op, WhereOptions } from 'sequelize';
 
 import sequelize from 'sequelize';
 import Joi from 'joi';
@@ -41,6 +41,7 @@ import { AllOptional } from '../../types/optional.types';
 import database from '../../database';
 
 import ROLES from '../../constants/roles';
+import { getAnsweredAndRemainingQuestions } from '../../helpers/question.helper';
 
 const questionIncludes = (isProfessor: boolean): Includeable | Array<Includeable> => {
   const defaultIncludes: Array<Includeable> = [
@@ -158,22 +159,7 @@ export const getActualEvent = async (_req: Request, res: Response, next: NextFun
 
       res.json(eventFormatter(event, owner, collaborators, group, quiz, warnedUsers));
     } else {
-      const quizQuestions = await Question.findAll({
-        include: [
-          { model: Quiz, where: { id: quiz.id }, attributes: [] },
-          { model: UserAnswer, where: { userId: userId }, attributes: [] },
-        ],
-        attributes: {
-          include: [[Sequelize.fn('COUNT', Sequelize.col('userAnswers.id')), 'userAnswerCount']],
-        },
-        group: ['question.id'],
-      });
-
-      // * When using the fn() function, sequelize add the value to the dataValues but doesn't eager loads it
-      // * so when retrieving the value, it's needed to retrieve it from the dataValues.
-
-      const answeredQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => userAnswerCount && userAnswerCount > 0);
-      const remainingQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => !userAnswerCount || userAnswerCount === 0);
+      const { answeredQuestions, remainingQuestions } = await getAnsweredAndRemainingQuestions(quiz.id, userId);
 
       const warn = await EventWarn.findOne({ where: { eventId: event.id, userId: userId }, attributes: ['amount'] });
       const isBlocked = (warn && warn.amount >= 3) || false;
@@ -198,25 +184,7 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
     const quiz = await event.getQuiz();
     if (!quiz) return next(new NotFoundError('Quiz'));
 
-    const quizQuestions = await Question.findAll({
-      include: [
-        { model: Quiz, where: { id: quiz.id }, attributes: [] },
-        { model: UserAnswer, attributes: [], where: { userId: userId } },
-      ],
-      attributes: {
-        include: [[Sequelize.fn('COUNT', Sequelize.col('userAnswers.id')), 'userAnswerCount']],
-      },
-      group: ['question.id'],
-    });
-
-    // * When using the fn() function, sequelize add the value to the dataValues but doesn't eager loads it
-    // * so when retrieving the value, it's needed to retrieve it from the dataValues.
-
-    const answeredQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => userAnswerCount && userAnswerCount > 0);
-    const remainingQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => !userAnswerCount || userAnswerCount === 0);
-
-    console.log(answeredQuestions);
-    console.log(remainingQuestions);
+    const { answeredQuestions, remainingQuestions } = await getAnsweredAndRemainingQuestions(quiz.id, userId);
 
     const questionWithChoiceQuery = oneLine(`
       SELECT Question.id FROM Question 
