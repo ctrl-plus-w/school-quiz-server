@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { Sequelize } from 'sequelize';
+import { Sequelize, WhereOptions, Op } from 'sequelize';
 
+import sequelize from 'sequelize';
 import Joi from 'joi';
 
 import { Question, TypedQuestion } from '../models/question';
@@ -17,7 +18,7 @@ import StatusError, { DuplicationError, InvalidInputError, NotFoundError } from 
 
 import { questionFormatter } from './mapper.helper';
 
-import { slugify } from '../utils/string.utils';
+import { oneLine, slugify } from '../utils/string.utils';
 
 import { AllOptional } from '../types/optional.types';
 
@@ -436,4 +437,53 @@ export const getAnsweredAndRemainingQuestions = async (
   const remainingQuestions = quizQuestions.filter(({ dataValues: { userAnswerCount } }) => !userAnswerCount || userAnswerCount === 0);
 
   return { answeredQuestions, remainingQuestions };
+};
+
+export const getValidQuestionConditions = (userId: number, quizId: number): WhereOptions => {
+  const questionWithChoiceQuery = oneLine(`
+    SELECT Question.id FROM Question 
+    JOIN ChoiceQuestion ON Question.typedQuestionId = ChoiceQuestion.id 
+    JOIN Choice ON Choice.choiceQuestionId = ChoiceQuestion.id 
+    WHERE Question.questionType = 'choiceQuestion'
+  `);
+
+  const automaticAndHybrideQuestionWithAnswerQuery = oneLine(`
+    SELECT Question.id FROM Question
+    JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
+    JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
+    JOIN Answer ON Answer.questionId = Question.id
+    WHERE Question.questionType = 'textualQuestion' AND NOT VerificationType.slug = 'manuel'
+  `);
+
+  const manualTextualQuestionQuery = oneLine(`
+    SELECT Question.id FROM Question
+    JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
+    JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
+    WHERE VerificationType.slug = 'manuel' AND Question.questionType = 'textualQuestion'
+  `);
+
+  const questionWithAnswers = oneLine(`
+    SELECT Question.id FROM Question
+    LEFT OUTER JOIN UserAnswer ON Question.id = UserAnswer.questionId
+    WHERE UserAnswer.userId = ${userId}
+    GROUP BY Question.id
+    HAVING COUNT(UserAnswer.id) = 0
+  `);
+
+  const combinedQueries = oneLine(`
+    SELECT Question.id FROM Question
+    WHERE (
+      Question.id IN (${manualTextualQuestionQuery}) OR
+      Question.id IN (${automaticAndHybrideQuestionWithAnswerQuery}) OR
+      Question.id IN (${questionWithChoiceQuery})
+    ) AND NOT (
+      Question.id IN (${questionWithAnswers}) AND 
+      Question.quizId = ${quizId}
+    ) 
+  `);
+
+  return {
+    id: { [Op.in]: sequelize.literal(`(${combinedQueries})`) },
+    typedQuestionId: { [Op.not]: null },
+  };
 };

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { Includeable, Op, WhereOptions } from 'sequelize';
+import { Includeable } from 'sequelize';
 
-import sequelize from 'sequelize';
 import Joi from 'joi';
 
 import { QuestionSpecification } from '../../models/questionSpecification';
@@ -32,16 +31,15 @@ import StatusError, {
 } from '../../classes/StatusError';
 
 import { isNotNull } from '../../utils/mapper.utils';
-import { oneLine } from '../../utils/string.utils';
 
 import { eventFormatter, eventMapper, questionFormatter, quizFormatter, userFormatter, userMapper } from '../../helpers/mapper.helper';
+import { getAnsweredAndRemainingQuestions, getValidQuestionConditions } from '../../helpers/question.helper';
 
 import { AllOptional } from '../../types/optional.types';
 
 import database from '../../database';
 
 import ROLES from '../../constants/roles';
-import { getAnsweredAndRemainingQuestions } from '../../helpers/question.helper';
 
 const questionIncludes = (isProfessor: boolean): Includeable | Array<Includeable> => {
   const defaultIncludes: Array<Includeable> = [
@@ -186,51 +184,9 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
 
     const { answeredQuestions, remainingQuestions } = await getAnsweredAndRemainingQuestions(quiz.id, userId);
 
-    const questionWithChoiceQuery = oneLine(`
-      SELECT Question.id FROM Question 
-      JOIN ChoiceQuestion ON Question.typedQuestionId = ChoiceQuestion.id 
-      JOIN Choice ON Choice.choiceQuestionId = ChoiceQuestion.id 
-      WHERE Question.questionType = 'choiceQuestion'
-    `);
-
-    const automaticAndHybrideQuestionWithAnswerQuery = oneLine(`
-      SELECT Question.id FROM Question
-      JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
-      JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
-      JOIN Answer ON Answer.questionId = Question.id
-      WHERE Question.questionType = 'textualQuestion' AND NOT VerificationType.slug = 'manuel'
-    `);
-
-    const manualTextualQuestionQuery = oneLine(`
-      SELECT Question.id FROM Question
-      JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
-      JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
-      WHERE VerificationType.slug = 'manuel' AND Question.questionType = 'textualQuestion'
-    `);
-
-    const combinedQueries = oneLine(`
-      SELECT Question.id FROM Question
-      WHERE Question.id IN (${manualTextualQuestionQuery})
-      OR Question.id IN (${automaticAndHybrideQuestionWithAnswerQuery})
-      OR Question.id IN (${questionWithChoiceQuery})
-    `);
-
-    // * Conditions :
-    // * The id mustn't be in the answered questions and if the
-    // * questionType is 'numericQuestion', the id must be in
-    // * the ids fetched in the question with choice literal ex
-    // * else the id must be in the ids fetched in the question
-    // * with answer literal ex. The typedQuestionId mustn't be
-    // * null.
-
-    const conditions: WhereOptions = {
-      id: { [Op.notIn]: answeredQuestions.map(({ id }) => id), [Op.in]: sequelize.literal(`(${combinedQueries})`) },
-      typedQuestionId: { [Op.not]: null },
-    };
-
     const [question] = await quiz.getQuestions({
       order: quiz.shuffle ? database.random() : [['id', 'ASC']],
-      where: conditions,
+      where: getValidQuestionConditions(userId, quiz.id),
       include: questionIncludes(res.locals.isProfessor),
       limit: 1,
     });
