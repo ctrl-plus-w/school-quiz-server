@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 
 import { json } from 'body-parser';
+import { Server } from 'socket.io';
 
 import registerAssociations from './database/registerAssociations';
 
@@ -30,15 +31,20 @@ import event from './api/event/event.routes';
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
 import pageNotFound from './middlewares/pageNotFound.middleware';
+import socketMiddleware from './middlewares/socket.middleware';
 
 import seedDatabase from './database/seedDatabase';
 import database from './models/index';
+
+import onConnection from './socket';
 
 // Constants
 const PORT = process.env.PORT || 3005;
 
 // Body
 const app: express.Application = express();
+const httpServer = app.listen(PORT);
+const io = new Server(httpServer, { cors: { origin: 'http://localhost:3000' } });
 
 // Middlewares
 app.use(morgan('dev'));
@@ -69,6 +75,9 @@ app.use('/api/events', authenticateMiddleware, event);
 app.use(pageNotFound);
 app.use(errorHandler);
 
+// Socket IO
+io.use(socketMiddleware).on('connection', onConnection);
+
 (async () => {
   await registerAssociations();
 
@@ -79,7 +88,5 @@ app.use(errorHandler);
     await seedDatabase();
   }
 
-  app.listen(PORT, () => {
-    console.log(`App started, listening on port : ${PORT}.`);
-  });
+  console.log(`Server started on port ${PORT} !`);
 })();
