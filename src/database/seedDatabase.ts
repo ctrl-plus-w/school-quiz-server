@@ -7,6 +7,7 @@ import { Role } from '../models/role';
 import { User } from '../models/user';
 import { Quiz } from '../models/quiz';
 import { Event } from '../models/event';
+import { State } from '../models/state';
 
 export default async (): Promise<void> => {
   await Role.bulkCreate([
@@ -135,6 +136,21 @@ export default async (): Promise<void> => {
       slug: 'choix-multiple',
       name: 'Choix multiple',
       questionType: 'choiceQuestion',
+    },
+  ]);
+
+  await State.bulkCreate([
+    {
+      name: 'Prêt',
+      slug: 'pret',
+    },
+    {
+      name: 'Actif',
+      slug: 'actif',
+    },
+    {
+      name: 'Inactif',
+      slug: 'inactif',
     },
   ]);
 
