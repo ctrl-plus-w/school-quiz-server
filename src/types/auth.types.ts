@@ -1,5 +1,6 @@
 import { Socket } from 'socket.io';
 
+import { Event } from '../models/event';
 import { User } from '../models/user';
 
 export interface IAuthPayload {
@@ -11,7 +12,8 @@ export interface IAuthPayload {
   exp: number;
 }
 
-export interface ISocketWithJWT extends Socket {
+export interface ISocketWithData extends Socket {
   jwt: IAuthPayload;
   user: User;
+  event?: Event;
 }

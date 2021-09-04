@@ -5,12 +5,11 @@ import type { Socket } from 'socket.io';
 
 import { User } from '../models/user';
 
-import { IAuthPayload, ISocketWithJWT } from '../types/auth.types';
+import { IAuthPayload, ISocketWithData } from '../types/auth.types';
 
 import CREDENTIALS from '../constants/credentials';
-
 export default async (_socket: Socket, next: (err?: ExtendedError | undefined) => void): Promise<void> => {
-  const socket = _socket as ISocketWithJWT;
+  const socket = _socket as ISocketWithData;
 
   try {
     const query = socket.handshake.query;
