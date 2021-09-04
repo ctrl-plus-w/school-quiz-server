@@ -40,6 +40,7 @@ import { AllOptional } from '../../types/optional.types';
 import database from '../../database';
 
 import ROLES from '../../constants/roles';
+import { State } from '../../models/state';
 
 const questionIncludes = (isProfessor: boolean, quizId: number): Includeable | Array<Includeable> => {
   const defaultIncludes: Array<Includeable> = [
@@ -149,9 +150,13 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     const quiz = await event.getQuiz({ attributes: ['id', 'slug', 'title', 'description', 'strict', 'shuffle'] });
     const group = await event.getGroup({ attributes: ['id', 'slug', 'name'] });
 
+    const users =
+      role.slug === 'professeur' ? await group.getUsers({ include: [State], attributes: ['id', 'firstName', 'lastName', 'username', 'gender'] }) : [];
+
     if (event.start.valueOf() > Date.now()) {
       res.json({
         ...eventFormatter(event, owner, collaborators, group, quiz),
+        users: role.slug === 'professeur' ? users : undefined,
         inFuture: true,
       });
 
@@ -169,7 +174,10 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
         return event.warnedUsers;
       });
 
-      res.json(eventFormatter(event, owner, collaborators, group, quiz, warnedUsers));
+      res.json({
+        ...eventFormatter(event, owner, collaborators, group, quiz, warnedUsers),
+        users: users,
+      });
     } else {
       const { answeredQuestions, remainingQuestions } = await getAnsweredAndRemainingQuestions(quiz.id, userId);
 
