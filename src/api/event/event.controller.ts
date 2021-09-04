@@ -41,8 +41,13 @@ import database from '../../database';
 
 import ROLES from '../../constants/roles';
 
-const questionIncludes = (isProfessor: boolean): Includeable | Array<Includeable> => {
+const questionIncludes = (isProfessor: boolean, quizId: number): Includeable | Array<Includeable> => {
   const defaultIncludes: Array<Includeable> = [
+    {
+      model: Quiz,
+      where: { id: quizId },
+      attributes: [],
+    },
     {
       model: TextualQuestion,
       include: [{ model: QuestionSpecification, attributes: ['id', 'slug', 'name'] }, { model: VerificationType }],
@@ -128,7 +133,7 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
-export const getActualEvent = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getNextEvent = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId: number = res.locals.jwt.userId;
     const event: Event = res.locals.event;
@@ -143,6 +148,15 @@ export const getActualEvent = async (_req: Request, res: Response, next: NextFun
     const collaborators = await event.getCollaborators({ attributes: ['id', 'username', 'firstName', 'lastName'] });
     const quiz = await event.getQuiz({ attributes: ['id', 'slug', 'title', 'description', 'strict', 'shuffle'] });
     const group = await event.getGroup({ attributes: ['id', 'slug', 'name'] });
+
+    if (event.start.valueOf() > Date.now()) {
+      res.json({
+        ...eventFormatter(event, owner, collaborators, group, quiz),
+        inFuture: true,
+      });
+
+      return;
+    }
 
     if (role.slug === 'professeur') {
       const warnedUsers = await Event.findByPk(event.id, {
@@ -167,6 +181,7 @@ export const getActualEvent = async (_req: Request, res: Response, next: NextFun
         answeredQuestions: answeredQuestions.length,
         remainingQuestions: remainingQuestions.length,
         blocked: isBlocked,
+        inFuture: false,
       });
     }
   } catch (err) {
@@ -186,9 +201,8 @@ export const getActualEventQuestion = async (_req: Request, res: Response, next:
 
     const [question] = await quiz.getQuestions({
       order: quiz.shuffle ? database.random() : [['id', 'ASC']],
-      where: getValidQuestionConditions(userId, quiz.id),
-      include: questionIncludes(res.locals.isProfessor),
-      limit: 1,
+      where: getValidQuestionConditions(userId),
+      include: questionIncludes(res.locals.isProfessor, quiz.id),
     });
 
     if (!question) return next(new NotFoundError('Question'));

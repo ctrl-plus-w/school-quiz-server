@@ -439,22 +439,28 @@ export const getAnsweredAndRemainingQuestions = async (
   return { answeredQuestions, remainingQuestions };
 };
 
-export const getValidQuestionConditions = (userId: number, quizId: number): WhereOptions => {
+export const getValidQuestionConditions = (userId: number): WhereOptions => {
+  // Get every choice quesiton which have at least
   const questionWithChoiceQuery = oneLine(`
     SELECT Question.id FROM Question 
     JOIN ChoiceQuestion ON Question.typedQuestionId = ChoiceQuestion.id 
-    JOIN Choice ON Choice.choiceQuestionId = ChoiceQuestion.id 
-    WHERE Question.questionType = 'choiceQuestion'
+    LEFT OUTER JOIN Choice ON Choice.choiceQuestionId = ChoiceQuestion.id 
+    WHERE Question.questionType = 'choiceQuestion' AND Choice.id IS NOT NULL
+    GROUP BY Question.id
   `);
 
+  // Fetch every textual question which haven't a 'manual' verification type
+  // and which have at least one answer
   const automaticAndHybrideQuestionWithAnswerQuery = oneLine(`
     SELECT Question.id FROM Question
     JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
     JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
-    JOIN Answer ON Answer.questionId = Question.id
-    WHERE Question.questionType = 'textualQuestion' AND NOT VerificationType.slug = 'manuel'
+    LEFT OUTER JOIN Answer ON Answer.questionId = Question.id
+    WHERE Question.questionType = 'textualQuestion' AND NOT VerificationType.slug = 'manuel' AND Answer.id IS NOT NULL
+    GROUP BY Question.id
   `);
 
+  // Fetch every textual questoin which have a 'manual' verification type
   const manualTextualQuestionQuery = oneLine(`
     SELECT Question.id FROM Question
     JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
@@ -462,24 +468,30 @@ export const getValidQuestionConditions = (userId: number, quizId: number): Wher
     WHERE VerificationType.slug = 'manuel' AND Question.questionType = 'textualQuestion'
   `);
 
-  const questionWithAnswers = oneLine(`
+  // Fetch every numeric question which have at least one answer
+  const numericQuestionQuery = oneLine(`
     SELECT Question.id FROM Question
-    LEFT OUTER JOIN UserAnswer ON Question.id = UserAnswer.questionId
-    WHERE UserAnswer.userId = ${userId}
+    LEFT OUTER JOIN Answer ON Answer.questionId = Question.id
+    WHERE Question.questionType = 'numericQuestion' AND Answer.id IS NOT NULL
     GROUP BY Question.id
-    HAVING COUNT(UserAnswer.id) = 0
   `);
 
+  // Get every questions which have a user answer associated with the given userId
+  const questionWithAnswers = oneLine(`
+    SELECT Question.id FROM Question
+    LEFT OUTER JOIN UserAnswer ON Question.id = UserAnswer.questionId AND UserAnswer.userId = ${userId}
+    WHERE UserAnswer.id IS NOT NULL
+  `);
+
+  // Combine all the queries
   const combinedQueries = oneLine(`
     SELECT Question.id FROM Question
     WHERE (
       Question.id IN (${manualTextualQuestionQuery}) OR
       Question.id IN (${automaticAndHybrideQuestionWithAnswerQuery}) OR
-      Question.id IN (${questionWithChoiceQuery})
-    ) AND NOT (
-      Question.id IN (${questionWithAnswers}) AND 
-      Question.quizId = ${quizId}
-    ) 
+      Question.id IN (${questionWithChoiceQuery}) OR
+      Question.id IN (${numericQuestionQuery})
+    ) AND NOT Question.id IN (${questionWithAnswers})
   `);
 
   return {

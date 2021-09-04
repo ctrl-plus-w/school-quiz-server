@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Op } from 'sequelize';
+import { Includeable, Op } from 'sequelize';
 
 import { ChoiceQuestion } from '../models/choiceQuestion';
 import { UserAnswer } from '../models/userAnswer';
@@ -69,7 +69,7 @@ export const checkQuestionExists = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const checkActualEventExists = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
+export const checkNextEventExists = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
   try {
     const userId = res.locals.jwt.userId;
 
@@ -79,30 +79,41 @@ export const checkActualEventExists = async (req: Request, res: Response, next: 
     const userRole = await user.getRole();
     if (!userRole) return [false, new AcccessForbiddenError()];
 
-    if (userRole.slug === 'professeur') {
-      const event = await Event.findOne({
-        where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
-        include: { model: User, where: { id: userId }, attributes: ['id'], as: 'owner' },
-      });
-      if (!event) return [false, new NotFoundError('Event')];
+    const isStudent = userRole.slug === 'eleve';
 
-      res.locals.event = event;
-    } else {
-      const groups = await user.getGroups();
-      if (!groups) return [false, new NotFoundError('User groups')];
+    const groups = await user.getGroups();
 
-      if (groups.length === 0) return [false, new NotFoundError('Event')];
+    const eventIncludes: Includeable[] = isStudent
+      ? [{ model: Group, where: { id: groups.map(({ id }) => id) }, attributes: ['id'] }]
+      : [{ model: User, where: { id: userId }, attributes: ['id'], as: 'owner' }];
 
-      const groupsId = groups.map(({ id }) => id);
+    const actualEvent = await Event.findOne({
+      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
+      include: [...eventIncludes],
+    });
 
-      const event = await Event.findOne({
-        where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
-        include: { model: Group, where: { id: groupsId }, attributes: ['id'] },
-      });
-      if (!event) return [false, new NotFoundError('Event')];
+    const nextEvent = !actualEvent
+      ? await Event.findOne({
+          where: { start: { [Op.gte]: new Date() } },
+          include: [...eventIncludes],
+        })
+      : null;
 
-      res.locals.event = event;
-    }
+    if (!actualEvent && !nextEvent) return [false, new NotFoundError('Event')];
+
+    res.locals.event = actualEvent || nextEvent;
+
+    return [true, null];
+  } catch (err) {
+    return err instanceof Error ? [false, err] : [false, new UnknownError()];
+  }
+};
+
+export const checkeNextEventIsNow = async (req: Request, res: Response, next: NextFunction): Promise<MiddlewareValidationPayload> => {
+  try {
+    const event: Event = res.locals.event;
+
+    if (new Date(event.start).valueOf() > Date.now()) return [false, new NotFoundError('Event')];
 
     return [true, null];
   } catch (err) {
