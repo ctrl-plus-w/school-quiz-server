@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { Includeable, Op } from 'sequelize';
 
+import { TextualQuestion } from '../models/textualQuestion';
+import { NumericQuestion } from '../models/numericQuestion';
 import { ChoiceQuestion } from '../models/choiceQuestion';
 import { UserAnswer } from '../models/userAnswer';
 import { Question } from '../models/question';
@@ -56,6 +58,8 @@ export const checkQuestionExists = async (req: Request, res: Response, next: Nex
         { model: Answer, attributes: ['id'] },
         { model: UserAnswer, attributes: ['id'] },
         { model: ChoiceQuestion, attributes: ['id'] },
+        { model: TextualQuestion, attributes: ['id'] },
+        { model: NumericQuestion, attributes: ['id'] },
       ],
     });
 

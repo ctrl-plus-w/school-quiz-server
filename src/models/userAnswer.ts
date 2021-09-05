@@ -6,6 +6,7 @@ import { FormattedUser, User } from './user';
 interface UserAnswerAttributes {
   id: number;
   answerContent: string;
+  valid?: boolean;
 }
 
 export interface FormattedUserAnswer extends UserAnswerAttributes {
@@ -19,6 +20,7 @@ export type UserAnswerCreationAttributes = Optional<UserAnswerAttributes, 'id'>;
 
 export class UserAnswer extends Model<UserAnswerAttributes, UserAnswerCreationAttributes> implements UserAnswerAttributes {
   public id!: number;
+  public boolean?: boolean;
 
   public answerContent!: string;
 
@@ -46,6 +48,10 @@ export default (sequelize: Sequelize): typeof UserAnswer => {
       answerContent: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      valid: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
       },
     },
     {
