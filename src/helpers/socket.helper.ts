@@ -6,7 +6,7 @@ import { Event } from '../models/event';
 import { Group } from '../models/group';
 import { User } from '../models/user';
 
-export const getEvent = async (user: User, roleSlug: string): Promise<[Event | null, Event | null]> => {
+export const getEvent = async (user: User, roleSlug: string, onlyActual = false): Promise<[Event | null, Event | null]> => {
   const isStudent = roleSlug === 'eleve';
 
   const groups = await (isStudent ? user.getGroups({ attributes: ['id'] }) : <Array<Group>>[]);
@@ -20,9 +20,10 @@ export const getEvent = async (user: User, roleSlug: string): Promise<[Event | n
     include: [...eventIncludes],
   });
 
-  const nextEvent = !actualEvent
-    ? await Event.findOne({ where: { start: { [Op.gte]: new Date() } }, include: [...eventIncludes], order: [['start', 'DESC']] })
-    : null;
+  const nextEvent =
+    !actualEvent && !onlyActual
+      ? await Event.findOne({ where: { start: { [Op.gte]: new Date() } }, include: [...eventIncludes], order: [['start', 'DESC']] })
+      : null;
 
   return [actualEvent, nextEvent];
 };

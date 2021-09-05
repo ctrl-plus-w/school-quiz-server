@@ -15,12 +15,12 @@ import {
   getEvents,
   removeCollaborator,
   updateEvent,
-  warnActualEvent,
+  // warnActualEvent,
 } from './event.controller';
 
 import { authorize, checkIsProfessor, checkIsStudent } from '../../middlewares/authorization.middleware';
 import { checkNextEventExists, checkEventExists, checkeNextEventIsNow } from '../../middlewares/checkExists.middleware';
-import { checkIsNotBlocked } from '../../middlewares/checkAuthorization.middleware';
+// import { checkIsNotBlocked } from '../../middlewares/checkAuthorization.middleware';
 import { checkEventOwner } from '../../middlewares/checkPossesion.middleware';
 
 const router = Router();
@@ -38,7 +38,7 @@ router.get('/:eventId/quiz', authorize([checkIsStudent], [checkEventExists]), ge
 router.get('/:eventId/group', authorize([checkIsStudent], [checkEventExists]), getEventGroup);
 
 router.post('/', authorize([checkIsProfessor]), createEvent);
-router.post('/event/warn', authorize([], [checkIsStudent, checkNextEventExists, checkIsNotBlocked]), warnActualEvent);
+// router.post('/event/warn', authorize([], [checkIsStudent, checkNextEventExists, checkIsNotBlocked]), warnActualEvent);
 router.post('/:eventId/collaborators', authorize([checkIsProfessor, checkEventOwner]), addCollaborator);
 
 router.put('/:eventId', authorize([checkIsProfessor, checkEventOwner]), updateEvent);

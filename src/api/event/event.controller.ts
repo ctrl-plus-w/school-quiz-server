@@ -151,7 +151,12 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     const group = await event.getGroup({ attributes: ['id', 'slug', 'name'] });
 
     const users =
-      role.slug === 'professeur' ? await group.getUsers({ include: [State], attributes: ['id', 'firstName', 'lastName', 'username', 'gender'] }) : [];
+      role.slug === 'professeur'
+        ? await group.getUsers({
+            include: [{ model: State }, { model: EventWarn, attributes: ['amount'] }],
+            attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
+          })
+        : [];
 
     if (event.start.valueOf() > Date.now()) {
       res.json({
@@ -164,18 +169,8 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     }
 
     if (role.slug === 'professeur') {
-      const warnedUsers = await Event.findByPk(event.id, {
-        include: { model: User, as: 'warnedUsers', attributes: ['id', 'username', 'firstName', 'lastName'] },
-        attributes: [],
-      }).then((event) => {
-        if (!event) return undefined;
-        if (!event.warnedUsers) return [];
-
-        return event.warnedUsers;
-      });
-
       res.json({
-        ...eventFormatter(event, owner, collaborators, group, quiz, warnedUsers),
+        ...eventFormatter(event, owner, collaborators, group, quiz),
         users: users,
       });
     } else {
