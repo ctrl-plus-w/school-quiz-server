@@ -7,7 +7,6 @@ import bcrypt from 'bcrypt';
 import { User, UserCreationAttributes } from '../../models/user';
 import { Group } from '../../models/group';
 import { Role } from '../../models/role';
-import { State } from '../../models/state';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
@@ -55,7 +54,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
 
     const [isAdmin] = await checkIsAdmin(req, res, next);
 
-    const user = await User.findByPk(userId, { include: [Group, Role, State] });
+    const user = await User.findByPk(userId, { include: [Group, Role] });
     if (!user) return next(new NotFoundError('User'));
 
     const userOwnedEvents = await user.getOwnedEvents();
@@ -115,21 +114,6 @@ export const getUserRole = async (req: Request, res: Response, next: NextFunctio
 
     const role = await user.getRole();
     res.json(role);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getUserState = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const userId = req.params.userId;
-    if (!userId) return next(new InvalidInputError());
-
-    const user = await User.findByPk(userId, { attributes: ['id', 'stateId'] });
-    if (!user) return next(new NotFoundError('User'));
-
-    const state = await user.getState();
-    res.json(state);
   } catch (err) {
     next(err);
   }
@@ -340,31 +324,6 @@ export const setRole = async (req: Request, res: Response, next: NextFunction): 
     if (!role) return next(new NotFoundError('Role'));
 
     await user.setRole(role);
-
-    res.json({ updated: true });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const setState = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const userId = req.params.userId;
-    const stateId = req.body.stateId;
-    if (!userId || !stateId) return next(new InvalidInputError());
-
-    const user = await User.findByPk(userId, { include: State });
-    if (!user) return next(new NotFoundError('User'));
-
-    const actualState = await user.getState({ attributes: ['id'] });
-    if (!actualState) return next(new NotFoundError('State'));
-
-    if (actualState.id === stateId) return next(new DuplicationError('State'));
-
-    const state = await State.findByPk(stateId);
-    if (!state) return next(new NotFoundError('State'));
-
-    await user.setState(state);
 
     res.json({ updated: true });
   } catch (err) {

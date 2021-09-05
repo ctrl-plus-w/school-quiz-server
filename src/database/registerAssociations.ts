@@ -9,7 +9,6 @@ export default async (): Promise<void> => {
     Group,
     Label,
     Event,
-    State,
     Quiz,
     Question,
     Choice,
@@ -32,10 +31,6 @@ export default async (): Promise<void> => {
   const USER_GROUP_TABLENAME = 'UserGroup';
   User.belongsToMany(Group, { through: USER_GROUP_TABLENAME });
   Group.belongsToMany(User, { through: USER_GROUP_TABLENAME });
-
-  // User & State relation.
-  User.belongsTo(State);
-  State.hasOne(User);
 
   // Group & Label relation.
   const GROUP_LABEL_TABLENAME = 'GroupLabel';

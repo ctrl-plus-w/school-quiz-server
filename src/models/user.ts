@@ -17,7 +17,6 @@ import {
 
 import { Role } from './role';
 import { Event, FormattedEvent } from './event';
-import { State } from './state';
 import { Group } from './group';
 import { FormattedQuiz, Quiz } from './quiz';
 import { UserAnswer } from './userAnswer';
@@ -33,7 +32,6 @@ interface UserAttributes {
 }
 
 export interface FormattedUser extends Optional<UserAttributes, 'password'> {
-  state?: State;
   role?: Role;
   events?: Array<FormattedEvent>;
   groups?: Array<Group>;
@@ -54,7 +52,6 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public password!: string;
   public gender!: boolean | null;
 
-  public state?: State;
   public role?: Role;
   public events?: Array<Event>;
   public groups?: Array<Group>;
@@ -77,10 +74,6 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public addGroups!: BelongsToManyAddAssociationsMixin<Group, number>;
   public removeGroup!: BelongsToManyRemoveAssociationMixin<Group, number>;
   public removeGroups!: BelongsToManyRemoveAssociationsMixin<Group, number>;
-
-  /* State property */
-  public getState!: BelongsToGetAssociationMixin<State>;
-  public setState!: BelongsToSetAssociationMixin<State, number>;
 
   /* Event properties */
   public getOwnedEvents!: HasManyGetAssociationsMixin<Event>;

@@ -148,7 +148,6 @@ export const userFormatter = (
         groups: user.groups,
         quizzes: quizMapper(quizzes),
         role: user.role,
-        state: user.state,
       };
 
     case 1:
@@ -158,7 +157,6 @@ export const userFormatter = (
         groups: user.groups,
         quizzes: quizMapper(quizzes),
         role: user.role,
-        state: user.state,
       };
 
     case 2:

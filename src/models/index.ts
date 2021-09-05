@@ -13,7 +13,6 @@ import choiceQuestion from './choiceQuestion';
 import question from './question';
 import questionSpecification from './questionSpecification';
 import verificationType from './verificationType';
-import state from './state';
 import exactAnswer from './exactAnswer';
 import comparisonAnswer from './comparisonAnswer';
 import answer from './answer';
@@ -36,8 +35,6 @@ export default {
 
     Event: event(sequelize),
     Quiz: quiz(sequelize),
-
-    State: state(sequelize),
 
     Question: question(sequelize),
     QuestionSpecification: questionSpecification(sequelize),
