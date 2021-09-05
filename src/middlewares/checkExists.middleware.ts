@@ -113,7 +113,7 @@ export const checkeNextEventIsNow = async (req: Request, res: Response, next: Ne
   try {
     const event: Event = res.locals.event;
 
-    if (new Date(event.start).valueOf() > Date.now()) return [false, new NotFoundError('Event')];
+    if (new Date(event.start).valueOf() > Date.now() && !event.started) return [false, new NotFoundError('Event')];
 
     return [true, null];
   } catch (err) {

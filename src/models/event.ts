@@ -21,6 +21,8 @@ interface EventAttributes {
   start: Date;
   end: Date;
   countdown: Date;
+  started: boolean;
+  startedAt: Date;
 }
 
 export interface FormattedEvent extends EventAttributes {
@@ -33,13 +35,15 @@ export interface FormattedEvent extends EventAttributes {
   updatedAt: Date;
 }
 
-export type EventCreationAttributes = Optional<EventAttributes, 'id'>;
+export type EventCreationAttributes = Optional<EventAttributes, 'id' | 'started' | 'startedAt'>;
 
 export class Event extends Model<EventAttributes, EventCreationAttributes> implements EventAttributes {
   public id!: number;
   public start!: Date;
   public end!: Date;
   public countdown!: Date;
+  public started!: boolean;
+  public startedAt!: Date;
 
   public warnedUsers?: User[];
 
@@ -101,6 +105,15 @@ export default (sequelize: Sequelize): typeof Event => {
       countdown: {
         type: DataTypes.TIME,
         allowNull: false,
+      },
+      started: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      startedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
     },
     {

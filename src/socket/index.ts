@@ -6,11 +6,13 @@ import { State } from '../models/state';
 import { ISocketWithData } from '../types/auth.types';
 
 import registerUserHandlers from './userHandler';
+import registerQuizHandlers from './quizHandler';
 
 const onConnection = (_socket: Socket): void => {
   const socket = _socket as ISocketWithData;
 
   registerUserHandlers(socket);
+  registerQuizHandlers(socket);
 
   socket.on('disconnect', async () => {
     const user = socket.user;

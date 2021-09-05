@@ -96,7 +96,7 @@ export const eventFormatter = (
   owner?: User,
   collaborators?: Array<User>,
   group?: Group,
-  quiz?: Quiz,
+  quiz?: Quiz
 ): FormattedEvent | null => {
   return event
     ? {
@@ -108,6 +108,8 @@ export const eventFormatter = (
         owner: userFormatter(owner),
         collaborators: userMapper(collaborators),
         group: event.group || group,
+        started: event.started,
+        startedAt: event.startedAt,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
       }

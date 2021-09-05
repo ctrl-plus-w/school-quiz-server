@@ -16,7 +16,12 @@ export const getEvent = async (user: User, roleSlug: string, onlyActual = false)
     : [{ model: User, as: 'owner', where: { id: user.id } }];
 
   const actualEvent = await Event.findOne({
-    where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
+    where: {
+      [Op.or]: [
+        { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
+        { start: { [Op.gte]: new Date() }, started: true },
+      ],
+    },
     include: [...eventIncludes],
   });
 

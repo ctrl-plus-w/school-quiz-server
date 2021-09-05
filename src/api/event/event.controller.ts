@@ -158,7 +158,7 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
           })
         : [];
 
-    if (event.start.valueOf() > Date.now()) {
+    if (event.start.valueOf() > Date.now() && !event.started) {
       res.json({
         ...eventFormatter(event, owner, collaborators, group, quiz),
         users: role.slug === 'professeur' ? users : undefined,
