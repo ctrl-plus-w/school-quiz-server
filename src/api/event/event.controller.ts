@@ -39,8 +39,9 @@ import { AllOptional } from '../../types/optional.types';
 
 import database from '../../database';
 
+import { redisMGetAsync } from '../../redis';
+
 import ROLES from '../../constants/roles';
-import { State } from '../../models/state';
 
 const questionIncludes = (isProfessor: boolean, quizId: number): Includeable | Array<Includeable> => {
   const defaultIncludes: Array<Includeable> = [
@@ -153,15 +154,20 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     const users =
       role.slug === 'professeur'
         ? await group.getUsers({
-            include: [{ model: State }, { model: EventWarn, attributes: ['amount'] }],
+            include: [{ model: EventWarn, attributes: ['amount'] }],
             attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
           })
         : [];
 
+    // Get the users state and map them
+    const stringifiedUsersState = users.length > 0 ? await redisMGetAsync(...users.map((user) => user.id.toString())) : [];
+    const usersState = stringifiedUsersState.map((state) => state && JSON.parse(state));
+    const usersWithState = [...users].map((user, index) => ({ ...user.toJSON(), state: usersState[index] }));
+
     if (event.start.valueOf() > Date.now() && !event.started) {
       res.json({
         ...eventFormatter(event, owner, collaborators, group, quiz),
-        users: role.slug === 'professeur' ? users : undefined,
+        users: role.slug === 'professeur' ? usersWithState : undefined,
         inFuture: true,
       });
 
@@ -171,7 +177,7 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     if (role.slug === 'professeur') {
       res.json({
         ...eventFormatter(event, owner, collaborators, group, quiz),
-        users: users,
+        users: usersWithState,
       });
     } else {
       const { answeredQuestions, remainingQuestions } = await getAnsweredAndRemainingQuestions(quiz.id, userId);

@@ -1,7 +1,9 @@
 import { decode, verify } from 'jsonwebtoken';
 
 import type { ExtendedError } from 'socket.io/dist/namespace';
+import type { RedisClient } from 'redis';
 import type { Socket } from 'socket.io';
+import type { Redis } from 'ioredis';
 
 import { User } from '../models/user';
 
@@ -34,3 +36,14 @@ export default async (_socket: Socket, next: (err?: ExtendedError | undefined) =
     next(new Error('Access forbidden'));
   }
 };
+
+export const setRedis =
+  (client: RedisClient, redis: Redis) =>
+  (_socket: Socket, next: (err?: ExtendedError | undefined) => void): void => {
+    const socket = _socket as ISocketWithData;
+
+    socket.redisClient = client;
+    socket.redis = redis;
+
+    next();
+  };

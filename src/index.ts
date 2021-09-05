@@ -28,15 +28,17 @@ import userAnswer from './api/userAnswer/userAnswer.routes';
 import choice from './api/choice/choice.routes';
 import event from './api/event/event.routes';
 
+import socketMiddleware, { setRedis } from './middlewares/socket.middleware';
 import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
 import pageNotFound from './middlewares/pageNotFound.middleware';
-import socketMiddleware from './middlewares/socket.middleware';
 
 import seedDatabase from './database/seedDatabase';
 import database from './models/index';
 
 import onConnection from './socket';
+
+import { client, redis } from './redis';
 
 // Constants
 const PORT = process.env.PORT || 3005;
@@ -76,7 +78,7 @@ app.use(pageNotFound);
 app.use(errorHandler);
 
 // Socket IO
-io.use(socketMiddleware).on('connection', onConnection);
+io.use(socketMiddleware).use(setRedis(client, redis)).on('connection', onConnection);
 
 (async () => {
   await registerAssociations();

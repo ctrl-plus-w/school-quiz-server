@@ -1,6 +1,7 @@
+import util from 'util';
+
 import { EventWarn } from '../models/eventWarn';
 import { Event } from '../models/event';
-import { State } from '../models/state';
 import { User } from '../models/user';
 
 import { userFormatter } from '../helpers/mapper.helper';
@@ -8,8 +9,13 @@ import { getEvent } from '../helpers/socket.helper';
 
 import { ISocketWithData } from '../types/auth.types';
 
+import STATES from '../constants/states';
+
 export default (socket: ISocketWithData): void => {
   const isDev = process.env.NODE_ENV === 'development';
+
+  // const redisGetAsync = util.promisify(socket.redisClient.get).bind(socket.redisClient);
+  const redisSetAsync = util.promisify(socket.redisClient.set).bind(socket.redisClient);
 
   socket.on('user:join', async () => {
     const user = socket.user;
@@ -17,18 +23,10 @@ export default (socket: ISocketWithData): void => {
 
     const [actualEvent, nextEvent] = await getEvent(user, socket.jwt.role);
 
-    const state = isStudent ? await State.findOne({ where: { slug: actualEvent ? 'actif' : 'pret' } }) : null;
+    // const state = isStudent ? await State.findOne({ where: { slug: actualEvent ? 'actif' : 'pret' } }) : null;
 
     if (actualEvent || nextEvent) {
       const eventId = actualEvent?.id || nextEvent?.id;
-
-      // Add the state to the user
-      if (state) {
-        await user.setState(state);
-
-        isDev && console.log(`${user.username} is now ready !`);
-        isDev && eventId && console.log(`${user.username} joined the test ! (event ${eventId})`);
-      }
 
       // Make the user join the rooms
       // rooms e.g : student-event-1 || professor-event-1     event-1
@@ -37,11 +35,17 @@ export default (socket: ISocketWithData): void => {
       await socket.join(rooms);
       isDev && console.log(`${user.username} joined room ${rooms.join(' and ')} as a ${isStudent ? 'student' : 'professor'}.`);
 
+      // Add the state to the user
       if (isStudent) {
-        const userState = await socket.user.getState();
+        const state = actualEvent ? STATES.ONLINE : STATES.READY;
+        await redisSetAsync(socket.user.id.toString(), JSON.stringify(state));
+
+        isDev && console.log(`${user.username} is now ready !`);
+        isDev && eventId && console.log(`${user.username} joined the test ! (event ${eventId})`);
+
         const warn = await EventWarn.findOne({ where: { eventId: eventId, userId: user.id }, attributes: ['amount'] });
 
-        socket.to(`professor-event-${eventId}`).emit('user:update', { ...userFormatter(user), state: userState, eventWarns: [warn] });
+        socket.to(`professor-event-${eventId}`).emit('user:update', { ...userFormatter(user), state: state, eventWarns: [warn] });
       }
     }
   });

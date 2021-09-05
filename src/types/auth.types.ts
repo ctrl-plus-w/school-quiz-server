@@ -1,4 +1,6 @@
+import { RedisClient } from 'redis';
 import { Socket } from 'socket.io';
+import { Redis } from 'ioredis';
 
 import { Event } from '../models/event';
 import { User } from '../models/user';
@@ -16,4 +18,6 @@ export interface ISocketWithData extends Socket {
   jwt: IAuthPayload;
   user: User;
   event?: Event;
+  redisClient: RedisClient;
+  redis: Redis;
 }

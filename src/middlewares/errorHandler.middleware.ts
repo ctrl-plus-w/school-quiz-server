@@ -8,6 +8,7 @@ import StatusError from '../classes/StatusError';
 */
 
 export default async (err: StatusError | Error, _req: Request, res: Response, next: NextFunction): Promise<void> => {
+  console.log(err);
   if (err instanceof StatusError) {
     res.status(err.status).json({ error: err.message });
   } else {
