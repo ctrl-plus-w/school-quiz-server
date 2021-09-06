@@ -499,3 +499,30 @@ export const getValidQuestionConditions = (userId: number): WhereOptions => {
     typedQuestionId: { [Op.not]: null },
   };
 };
+
+const questionToCorrectQuery = oneLine(`
+  SELECT Question.id FROM Question
+    JOIN TextualQuestion ON Question.typedQuestionId = TextualQuestion.id
+    JOIN VerificationType ON TextualQuestion.verificationTypeId = VerificationType.id
+    JOIN UserAnswer ON UserAnswer.questionId = Question.id AND UserAnswer.valid IS NULL
+  WHERE Question.questionType = 'textualQuestion' AND VerificationType.slug = 'manuel'
+`);
+
+export const getQuizQuestionsToAnswer = async (quiz: Quiz): Promise<Array<Question>> => {
+  const questions = await quiz.getQuestions({
+    where: { [Op.and]: [{ id: { [Op.in]: sequelize.literal(`(${questionToCorrectQuery})`) } }] },
+    include: [{ model: UserAnswer, attributes: ['id', 'answerContent'], where: { valid: null } }],
+  });
+
+  return questions;
+};
+
+export const getQuizQuestionToAnswer = async (quiz: Quiz, questionId: number, userAnswerId?: number): Promise<Question | null> => {
+  const [question] = await quiz.getQuestions({
+    where: { [Op.and]: [{ id: { [Op.in]: sequelize.literal(`(${questionToCorrectQuery})`) } }, { id: questionId }] },
+    include: [{ model: UserAnswer, attributes: ['id', 'answerContent'], where: userAnswerId ? { id: userAnswerId, valid: null } : { valid: null } }],
+    limit: 1,
+  });
+
+  return question;
+};

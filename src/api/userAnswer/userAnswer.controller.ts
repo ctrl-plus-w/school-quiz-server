@@ -17,6 +17,7 @@ import { Quiz } from '../../models/quiz';
 import { AcccessForbiddenError, DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { userAnswerFormatter, userAnswerMapper } from '../../helpers/mapper.helper';
+import { getQuizQuestionToAnswer } from '../../helpers/question.helper';
 
 import { isNotNull, removeAccents } from '../../utils/mapper.utils';
 import { isSameDate } from '../../utils/date.utils';
@@ -222,6 +223,40 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
 
       res.json(userAnswerMapper(createdUserAnswers));
     }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUserAnswerValidity = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userAnswerId = req.params.userAnswerId;
+    const questionId = req.params.questionId;
+    console.log(req.params);
+    if (!userAnswerId || !questionId) return next(new InvalidInputError());
+
+    const {
+      value: validatedUserAnswer,
+      error: validationError,
+    }: {
+      value: { valid: boolean };
+      error?: Error;
+    } = Joi.object({ valid: Joi.boolean().required() }).validate(req.body);
+
+    if (validationError) return next(new InvalidInputError());
+
+    const event: Event = res.locals.event;
+    const quiz = await event.getQuiz({ attributes: ['id'] });
+
+    const question = await getQuizQuestionToAnswer(quiz, parseInt(questionId as string), parseInt(userAnswerId as string));
+    if (!question) return next(new NotFoundError('Question'));
+
+    const [userAnswer] = question.userAnswers || [];
+    if (!userAnswer) return next(new NotFoundError('UserAnswer'));
+
+    await userAnswer.update(validatedUserAnswer);
+
+    res.json(userAnswer);
   } catch (err) {
     next(err);
   }

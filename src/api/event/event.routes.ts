@@ -18,10 +18,12 @@ import {
   // warnActualEvent,
 } from './event.controller';
 
+import eventQuestion from '../question/eventQuestion.routes';
+
 import { authorize, checkIsProfessor, checkIsStudent } from '../../middlewares/authorization.middleware';
 import { checkNextEventExists, checkEventExists, checkeNextEventIsNow } from '../../middlewares/checkExists.middleware';
 // import { checkIsNotBlocked } from '../../middlewares/checkAuthorization.middleware';
-import { checkEventOwner } from '../../middlewares/checkPossesion.middleware';
+import { checkEventModifyPermission, checkEventOwner } from '../../middlewares/checkPossesion.middleware';
 
 const router = Router();
 
@@ -45,5 +47,9 @@ router.put('/:eventId', authorize([checkIsProfessor, checkEventOwner]), updateEv
 
 router.delete('/:eventId', authorize([checkIsProfessor, checkEventOwner]), deleteEvent);
 router.delete('/:eventId/collaborators/:collaboratorId', authorize([checkIsProfessor, checkEventOwner]), removeCollaborator);
+
+/* Event -> Questions */
+
+router.use('/:eventId/questionsToCorrect', authorize([checkIsProfessor, checkEventModifyPermission], [checkEventExists]), eventQuestion);
 
 export default router;

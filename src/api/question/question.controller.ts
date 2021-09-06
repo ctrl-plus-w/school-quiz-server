@@ -11,6 +11,7 @@ import { ExactAnswer } from '../../models/exactAnswer';
 import { UserAnswer } from '../../models/userAnswer';
 import { Question } from '../../models/question';
 import { Choice } from '../../models/choice';
+import { Event } from '../../models/event';
 import { Quiz } from '../../models/quiz';
 import { User } from '../../models/user';
 
@@ -19,6 +20,8 @@ import StatusError, { InvalidInputError, NotFoundError } from '../../classes/Sta
 import { questionFormatter, questionMapper } from '../../helpers/mapper.helper';
 
 import {
+  getQuizQuestionsToAnswer,
+  getQuizQuestionToAnswer,
   tryCreateChoiceQuestion,
   tryCreateNumericQuestion,
   tryCreateTextualQuestion,
@@ -66,6 +69,37 @@ export const getQuestions = async (req: Request, res: Response, next: NextFuncti
 
     const questions = await quiz.getQuestions();
     res.json(questionMapper(questions));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getQuestionsToCorrect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const event: Event = res.locals.event;
+
+    const quiz = await event.getQuiz({ attributes: ['id'] });
+
+    const questions = await getQuizQuestionsToAnswer(quiz);
+
+    res.json(questions);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getQuestionToCorrect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const questionId: string = req.params.questionId;
+    if (!questionId) return next(new InvalidInputError());
+
+    const event: Event = res.locals.event;
+    const quiz = await event.getQuiz({ attributes: ['id'] });
+
+    const question = await getQuizQuestionToAnswer(quiz, parseInt(questionId as string));
+    if (!question) return next(new NotFoundError('Question'));
+
+    res.json(question);
   } catch (err) {
     next(err);
   }
