@@ -133,7 +133,13 @@ export const getQuestion = async (req: Request, res: Response, next: NextFunctio
     const [question] = await quiz.getQuestions({ where: { id: questionId }, include: questionIncludes });
     if (!question) return next(new NotFoundError('Question'));
 
-    const answers = await question.getAnswers({ include: [ExactAnswer, ComparisonAnswer] });
+    const answers = await question.getAnswers({
+      include: [
+        { model: ExactAnswer, required: false },
+        { model: ComparisonAnswer, required: false },
+      ],
+    });
+    console.log(answers);
 
     res.json(questionFormatter(question, answers));
   } catch (err) {
