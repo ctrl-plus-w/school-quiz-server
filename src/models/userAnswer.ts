@@ -46,7 +46,7 @@ export default (sequelize: Sequelize): typeof UserAnswer => {
         primaryKey: true,
       },
       answerContent: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(750),
         allowNull: false,
       },
       valid: {
