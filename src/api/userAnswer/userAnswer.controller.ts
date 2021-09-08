@@ -232,7 +232,6 @@ export const updateUserAnswerValidity = async (req: Request, res: Response, next
   try {
     const userAnswerId = req.params.userAnswerId;
     const questionId = req.params.questionId;
-    console.log(req.params);
     if (!userAnswerId || !questionId) return next(new InvalidInputError());
 
     const {
