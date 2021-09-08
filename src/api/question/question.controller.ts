@@ -139,7 +139,6 @@ export const getQuestion = async (req: Request, res: Response, next: NextFunctio
         { model: ComparisonAnswer, required: false },
       ],
     });
-    console.log(answers);
 
     res.json(questionFormatter(question, answers));
   } catch (err) {

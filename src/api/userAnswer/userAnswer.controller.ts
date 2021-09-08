@@ -186,8 +186,6 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
         const parser = getParser();
         const parsedUserAnswer = parser(userAnswer);
 
-        console.log(parsedUserAnswer);
-
         if (!specification || ['nombre-entier', 'pourcentage', 'nombre-decimal', 'prix'].includes(specification.slug)) {
           for (const { greaterThan, lowerThan } of comparisonAnswers) {
             if (parsedUserAnswer > greaterThan && parsedUserAnswer < lowerThan) return true;
