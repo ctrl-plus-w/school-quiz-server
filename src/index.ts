@@ -32,12 +32,11 @@ import authenticateMiddleware from './middlewares/authenticate.middleware';
 import errorHandler from './middlewares/errorHandler.middleware';
 import pageNotFound from './middlewares/pageNotFound.middleware';
 
-import seedDatabase from './database/seedDatabase';
-import database from './models/index';
-
 import onConnection from './socket';
 
-import { client, redis } from './redis';
+import { client } from './redis';
+
+import CREDENTIALS from './constants/credentials';
 
 // Constants
 const PORT = process.env.PORT || 3005;
@@ -45,7 +44,7 @@ const PORT = process.env.PORT || 3005;
 // Body
 const app: express.Application = express();
 const httpServer = app.listen(PORT);
-const io = new Server(httpServer, { cors: { origin: 'http://localhost:3000' } });
+const io = new Server(httpServer, { cors: { origin: CREDENTIALS.CLIENT_URL } });
 
 // Middlewares
 app.use(morgan('dev'));
@@ -76,17 +75,10 @@ app.use(pageNotFound);
 app.use(errorHandler);
 
 // Socket IO
-io.use(socketMiddleware).use(setRedis(client, redis)).on('connection', onConnection);
+io.use(socketMiddleware).use(setRedis(client)).on('connection', onConnection);
 
 (async () => {
   await registerAssociations();
-
-  const DEV = false;
-
-  if (DEV) {
-    await database.sequelize.sync({ force: true });
-    await seedDatabase();
-  }
 
   console.log(`Server started on port ${PORT} !`);
 })();

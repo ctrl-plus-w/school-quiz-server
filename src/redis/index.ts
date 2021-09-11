@@ -1,10 +1,10 @@
 import { createClient } from 'redis';
 
-import Redis from 'ioredis';
 import util from 'util';
 
-const client = createClient('redis://127.0.0.1');
-const redis = new Redis('redis://127.0.0.1');
+import CREDENTIALS from '../constants/credentials';
+
+const client = createClient({ host: CREDENTIALS.REDIS_HOST, port: CREDENTIALS.REDIS_PORT, password: CREDENTIALS.REDIS_PW });
 
 const redisGetAsync = util.promisify(client.get).bind(client);
 const redisSetAsync = util.promisify(client.set).bind(client);
@@ -18,4 +18,4 @@ const redisMGetAsync = (...args: Array<string>): Promise<Array<string | null>> =
   );
 };
 
-export { client, redis, redisGetAsync, redisMGetAsync, redisSetAsync };
+export { client, redisGetAsync, redisMGetAsync, redisSetAsync };

@@ -1,6 +1,3 @@
-import { Sequelize as SequelizeClass } from 'sequelize/types';
-import { Sequelize } from 'sequelize';
-
 import user from './user';
 import role from './role';
 import group from './group';
@@ -20,10 +17,7 @@ import userAnswer from './userAnswer';
 import choice from './choice';
 import eventWarn from './eventWarn';
 
-import config from '../config/sequelize-credentials';
-
-if (!config.database || !config.username || !config.password) throw new Error('Invalid database credentials.');
-const sequelize: SequelizeClass = new Sequelize(config.database, config.username, config.password, config);
+import sequelize from '../database';
 
 export default {
   sequelize,

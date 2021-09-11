@@ -1,6 +1,16 @@
+import dotenv from 'dotenv';
+
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
+
 const CREDENTIALS = {
-  DB_URL: process.env.DB_URL || 'mysql://root:!FreshRoot1@localhost/SchoolQuiz',
-  JWT_TOKEN: process.env.JWT_TOKEN || 'az4d1654',
+  DB_URL: <string>process.env.DB_URL,
+  REDIS_HOST: <string>process.env.REDIS_HOST,
+  REDIS_PORT: <number>parseInt(<string>process.env.REDIS_PORT),
+  REDIS_PW: <string>process.env.REDIS_PW,
+  JWT_TOKEN: <string>process.env.JWT_TOKEN,
+  CLIENT_URL: <string>process.env.CLIENT_URL,
 };
 
 export default CREDENTIALS;
