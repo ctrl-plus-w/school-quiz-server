@@ -49,7 +49,7 @@ const io = new Server(httpServer, { cors: { origin: CREDENTIALS.CLIENT_URL } });
 // Middlewares
 app.use(morgan('dev'));
 app.use(json());
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: CREDENTIALS.CLIENT_URL }));
 
 // Routes
 app.use('/auth', auth);
