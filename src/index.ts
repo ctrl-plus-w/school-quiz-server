@@ -1,5 +1,5 @@
 // Imports
-import express from 'express';
+import express, { NextFunction, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 
@@ -52,6 +52,15 @@ app.use(morgan('dev'));
 app.use(json());
 app.use(cors({ origin: 'http://localhost:3000' }));
 
+// Socket IO
+io.use(socketMiddleware).use(setRedis(client, redis)).on('connection', onConnection);
+
+app.use((_, res: Response, next: NextFunction) => {
+  res.locals.io = io;
+
+  next();
+});
+
 // Routes
 app.use('/auth', auth);
 app.use('/api/groups', authenticateMiddleware, groups);
@@ -74,9 +83,6 @@ app.use('/api/events', authenticateMiddleware, event);
 
 app.use(pageNotFound);
 app.use(errorHandler);
-
-// Socket IO
-io.use(socketMiddleware).use(setRedis(client, redis)).on('connection', onConnection);
 
 (async () => {
   await registerAssociations();
