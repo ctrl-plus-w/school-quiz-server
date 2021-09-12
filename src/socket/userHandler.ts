@@ -1,6 +1,7 @@
 import util from 'util';
 
 import { EventWarn } from '../models/eventWarn';
+import { Analytic } from '../models/analytics';
 import { Event } from '../models/event';
 import { User } from '../models/user';
 
@@ -45,7 +46,27 @@ export default (socket: ISocketWithData): void => {
 
         const warn = await EventWarn.findOne({ where: { eventId: eventId, userId: user.id }, attributes: ['amount'] });
 
-        socket.to(`professor-event-${eventId}`).emit('user:update', { ...userFormatter(user), state: state, eventWarns: [warn] });
+        const emitUserUpdate = (args: { [key: string]: unknown } = {}): void => {
+          socket.to(`professor-event-${eventId}`).emit('user:update', { ...userFormatter(user), state: state, eventWarns: [warn], ...args });
+        };
+
+        // If there is an event and the user doesn't have any analytics on this event, creates it
+        if (actualEvent) {
+          const [userAnalytic] = await user.getAnalytics({ include: { model: Event, where: { id: eventId }, attributes: [] }, limit: 1 });
+
+          if (!userAnalytic) {
+            const analytic = await Analytic.create({ startedAt: new Date() });
+
+            await analytic.setUser(user);
+            await analytic.setEvent(actualEvent);
+
+            emitUserUpdate({ analytics: [analytic] });
+          } else {
+            emitUserUpdate({ analytics: [userAnalytic] });
+          }
+        } else {
+          emitUserUpdate();
+        }
       }
     }
   });
