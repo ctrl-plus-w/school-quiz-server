@@ -52,7 +52,7 @@ app.use(json());
 app.use(cors({ origin: CREDENTIALS.CLIENT_URL }));
 
 // Socket IO
-io.use(socketMiddleware).use(setRedis(client, redis)).on('connection', onConnection);
+io.use(socketMiddleware).use(setRedis(client)).on('connection', onConnection);
 
 app.use((_, res: Response, next: NextFunction) => {
   res.locals.io = io;
