@@ -1,5 +1,6 @@
 import database from '../models';
 
+import { Analytic } from '../models/analytics';
 import { UserAnswer } from '../models/userAnswer';
 
 export default async (): Promise<void> => {
@@ -137,4 +138,11 @@ export default async (): Promise<void> => {
 
   UserAnswer.belongsTo(User);
   User.hasMany(UserAnswer);
+
+  // (User / Event) & analytics relations.
+  Analytic.belongsTo(User);
+  User.hasMany(Analytic);
+
+  Analytic.belongsTo(Event);
+  Event.hasMany(Analytic);
 };

@@ -13,6 +13,9 @@ import {
   BelongsToManyCountAssociationsMixin,
   BelongsToManyRemoveAssociationsMixin,
   HasManyCreateAssociationMixin,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyRemoveAssociationMixin,
 } from 'sequelize';
 
 import { Role } from './role';
@@ -21,6 +24,7 @@ import { Group } from './group';
 import { FormattedQuiz, Quiz } from './quiz';
 import { UserAnswer } from './userAnswer';
 import { EventWarn } from './eventWarn';
+import { Analytic } from './analytics';
 
 interface UserAttributes {
   id: number;
@@ -88,6 +92,13 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
 
   /* User Answers */
   public createUserAnswer!: HasManyCreateAssociationMixin<UserAnswer>;
+
+  /* Analytics properties */
+  public createAnalytic!: HasManyCreateAssociationMixin<Analytic>;
+  public getAnalytics!: HasManyGetAssociationsMixin<Analytic>;
+  public addAnalytic!: HasManyAddAssociationMixin<Analytic, number>;
+  public addAnalytics!: HasManyAddAssociationsMixin<Analytic, number>;
+  public removeAnalytic!: HasManyRemoveAssociationMixin<Analytic, number>;
 }
 
 export default (sequelize: Sequelize): typeof User => {

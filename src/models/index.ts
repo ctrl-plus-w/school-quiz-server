@@ -19,6 +19,7 @@ import answer from './answer';
 import userAnswer from './userAnswer';
 import choice from './choice';
 import eventWarn from './eventWarn';
+import analytic from './analytics';
 
 import config from '../config/sequelize-credentials';
 
@@ -55,5 +56,7 @@ export default {
     ComparisonAnswer: comparisonAnswer(sequelize),
 
     EventWarns: eventWarn(sequelize),
+
+    Analytic: analytic(sequelize),
   },
 };
