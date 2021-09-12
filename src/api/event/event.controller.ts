@@ -13,6 +13,7 @@ import { ChoiceQuestion } from '../../models/choiceQuestion';
 import { ExactAnswer } from '../../models/exactAnswer';
 import { UserAnswer } from '../../models/userAnswer';
 import { EventWarn } from '../../models/eventWarn';
+import { Analytic } from '../../models/analytics';
 import { Question } from '../../models/question';
 import { Choice } from '../../models/choice';
 import { Answer } from '../../models/answer';
@@ -154,7 +155,7 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     const users =
       role.slug === 'professeur'
         ? await group.getUsers({
-            include: [{ model: EventWarn, attributes: ['amount'] }],
+            include: [{ model: EventWarn, attributes: ['amount'] }, { model: Analytic }],
             attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
           })
         : [];
