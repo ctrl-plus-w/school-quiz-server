@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { Server } from 'socket.io';
 
 import Joi from 'joi';
 
@@ -16,11 +17,13 @@ import { Quiz } from '../../models/quiz';
 
 import { AcccessForbiddenError, DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
-import { userAnswerFormatter, userAnswerMapper } from '../../helpers/mapper.helper';
+import { userAnswerFormatter, userAnswerMapper, userFormatter } from '../../helpers/mapper.helper';
 import { getQuizQuestionToAnswer } from '../../helpers/question.helper';
 
 import { isNotNull, removeAccents } from '../../utils/mapper.utils';
 import { isSameDate } from '../../utils/date.utils';
+
+import STATES from '../../constants/states';
 
 const schema = Joi.object({
   answer: Joi.string().min(1).max(750),
@@ -91,6 +94,7 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
     const question: Question = res.locals.question;
     const event: Event = res.locals.event;
     const quiz: Quiz = res.locals.quiz;
+    const io: Server = res.locals.io;
 
     const {
       value: validatedUserAnswer,
@@ -200,15 +204,48 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
       return false;
     };
 
+    // Emit the update user socketio event
+    const emitUserUpdate = (args: { [key: string]: unknown } = {}): void => {
+      io.to(`professor-event-${event.id}`).emit('user:update', {
+        ...userFormatter(user),
+        state: STATES.ONLINE,
+        eventWarns: [warn?.toJSON()],
+        ...args,
+      });
+    };
+
+    // Update the analytics
+    const updateAnalytic = async (validAnswersCount: number, answersCount: number) => {
+      const [userAnalytic] = await user.getAnalytics({ include: { model: Event, where: { id: event.id }, attributes: [] }, limit: 1 });
+
+      if (!userAnalytic) {
+        const analytic = await user.createAnalytic({ startedAt: new Date(), score: validAnswersCount, maxSore: answersCount });
+        await analytic.setEvent(event);
+
+        emitUserUpdate({ analytics: [{ ...analytic.toJSON(), score: validAnswersCount, maxScore: answersCount }] });
+      } else {
+        const score = userAnalytic.score + validAnswersCount;
+        const maxScore = userAnalytic.maxScore + answersCount;
+
+        await userAnalytic.increment({ score: validAnswersCount, maxScore: answersCount });
+
+        emitUserUpdate({ analytics: [{ ...userAnalytic.toJSON(), score, maxScore }] });
+      }
+    };
+
     if (validatedUserAnswer.answer) {
       const isValid = await checkIsValid(validatedUserAnswer.answer);
 
       const createdUserAnswer = await user.createUserAnswer({ answerContent: validatedUserAnswer.answer, valid: isValid });
       await createdUserAnswer.setQuestion(question);
 
+      isValid !== null && (await updateAnalytic(isValid ? 1 : 0, 1));
+
       res.json(userAnswerFormatter(createdUserAnswer));
     } else {
       let createdUserAnswers: Array<UserAnswer> = [];
+      let validAnswersCount = 0;
+      let answersCount = 0;
 
       for (const userAnswer of validatedUserAnswer.answers) {
         const isValid = await checkIsValid(userAnswer);
@@ -216,8 +253,15 @@ export const createUserAnswer = async (req: Request, res: Response, next: NextFu
         const createdUserAnswer = await user.createUserAnswer({ answerContent: userAnswer, valid: isValid });
         await createdUserAnswer.setQuestion(question);
 
+        if (isValid !== null) {
+          isValid && validAnswersCount++;
+          answersCount++;
+        }
+
         createdUserAnswers = createdUserAnswers.concat(createdUserAnswer);
       }
+
+      await updateAnalytic(validAnswersCount, answersCount);
 
       res.json(userAnswerMapper(createdUserAnswers));
     }
