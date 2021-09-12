@@ -412,6 +412,18 @@ export const tryUpdateChoiceQuestion = async (req: Request, res: Response, next:
   }
 };
 
+export const hasQuizRemainingQuestions = async (quizId: number, userId: number): Promise<boolean> => {
+  const quizQuestions = await Question.findAll({
+    include: [
+      { model: Quiz, where: { id: quizId }, attributes: [] },
+      { model: UserAnswer, attributes: [], where: { userId: userId }, required: false },
+    ],
+    group: ['question.id'],
+  });
+
+  return quizQuestions.some((question) => question?.userAnswers?.length === 0);
+};
+
 export const getAnsweredAndRemainingQuestions = async (
   quizId: number,
   userId: number
