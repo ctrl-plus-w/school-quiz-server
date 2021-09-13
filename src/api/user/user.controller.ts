@@ -8,11 +8,12 @@ import { User, UserCreationAttributes } from '../../models/user';
 import { EventWarn } from '../../models/eventWarn';
 import { Analytic } from '../../models/analytics';
 import { Question } from '../../models/question';
+import { Event } from '../../models/event';
 import { Group } from '../../models/group';
 import { Role } from '../../models/role';
 import { Quiz } from '../../models/quiz';
 
-import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
+import { AcccessForbiddenError, DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { eventFormatter, eventMapper, quizFormatter, quizMapper, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
@@ -178,13 +179,30 @@ export const getUserEvents = async (req: Request, res: Response, next: NextFunct
     const userId = req.params.userId;
     if (!userId) return next(new InvalidInputError());
 
-    const user = await User.findByPk(userId, { attributes: ['id'] });
+    const user = await User.findByPk(userId, { attributes: ['id', 'roleId'] });
     if (!user) return next(new NotFoundError('User'));
 
-    const userOwnedEvents = await user.getOwnedEvents();
-    const userCollaboratedEvents = await user.getCollaboratedEvents();
+    const role = await user.getRole();
+    if (!role) return next(new AcccessForbiddenError());
 
-    res.json(eventMapper([...userOwnedEvents, ...userCollaboratedEvents]));
+    if (role.slug !== 'eleve') {
+      const userOwnedEvents = await user.getOwnedEvents();
+      const userCollaboratedEvents = await user.getCollaboratedEvents();
+
+      res.json(eventMapper([...userOwnedEvents, ...userCollaboratedEvents]));
+    } else {
+      const groups = await user.getGroups({ attributes: ['id'] });
+
+      const events = await Event.findAll({
+        where: { groupId: groups.map((group) => group.id) },
+        include: [
+          { model: Quiz, attributes: ['id', 'title', 'description'] },
+          { model: Analytic, where: { userId: user.id }, required: false },
+        ],
+      });
+
+      res.json(eventMapper(events));
+    }
   } catch (err) {
     next(err);
   }
