@@ -212,13 +212,16 @@ export const getUserEvent = async (req: Request, res: Response, next: NextFuncti
     const quiz = await event.getQuiz();
 
     const users = await group.getUsers({
-      include: [{ model: EventWarn, attributes: ['amount'], where: { eventId: event.id }, required: false }, { model: Analytic, required: false }],
+      include: [
+        { model: EventWarn, attributes: ['amount'], where: { eventId: event.id }, required: false },
+        { model: Analytic, required: false },
+      ],
       attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
     });
 
     res.json({
       ...eventFormatter(event, owner, collaborators, group, quiz),
-      users: userMapper(users),
+      users: users,
     });
   } catch (err) {
     next(err);
