@@ -112,6 +112,7 @@ export const eventFormatter = (
         startedAt: event.startedAt,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
+        analytics: event.analytics,
       }
     : null;
 };

@@ -12,8 +12,9 @@ import {
   BelongsToManyAddAssociationsMixin,
 } from 'sequelize';
 
-import { Group } from './group';
 import { FormattedUser, User } from './user';
+import { Analytic } from './analytics';
+import { Group } from './group';
 import { Quiz } from './quiz';
 
 interface EventAttributes {
@@ -23,6 +24,7 @@ interface EventAttributes {
   countdown: Date;
   started: boolean;
   startedAt: Date;
+  groupId?: number;
 }
 
 export interface FormattedEvent extends EventAttributes {
@@ -30,6 +32,7 @@ export interface FormattedEvent extends EventAttributes {
   collaborators?: Array<FormattedUser>;
   quiz?: Quiz;
   group?: Group;
+  analytics?: Array<Analytic>;
 
   createdAt: Date;
   updatedAt: Date;
@@ -50,7 +53,10 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   public quiz?: Quiz;
   public group?: Group;
 
+  public analytics?: Array<Analytic>;
+
   private userId?: number;
+  public groupId?: number;
 
   public get ownerId(): number | undefined {
     return this.userId;
