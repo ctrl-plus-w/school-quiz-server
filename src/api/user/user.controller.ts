@@ -5,17 +5,20 @@ import Joi from 'joi';
 import bcrypt from 'bcrypt';
 
 import { User, UserCreationAttributes } from '../../models/user';
+import { EventWarn } from '../../models/eventWarn';
+import { Analytic } from '../../models/analytics';
+import { Question } from '../../models/question';
 import { Group } from '../../models/group';
 import { Role } from '../../models/role';
+import { Quiz } from '../../models/quiz';
 
 import { DuplicationError, InvalidInputError, NotFoundError } from '../../classes/StatusError';
 
 import { eventFormatter, eventMapper, quizFormatter, quizMapper, userFormatter, userMapper } from '../../helpers/mapper.helper';
 
-import { AllOptional } from '../../types/optional.types';
 import { checkIsAdmin } from '../../middlewares/authorization.middleware';
-import { Question } from '../../models/question';
-import { Quiz } from '../../models/quiz';
+
+import { AllOptional } from '../../types/optional.types';
 
 const creationSchema = Joi.object({
   username: Joi.string().min(4).max(25).required(),
@@ -205,8 +208,18 @@ export const getUserEvent = async (req: Request, res: Response, next: NextFuncti
 
     const owner = await event.getOwner();
     const collaborators = await event.getCollaborators();
+    const group = await event.getGroup();
+    const quiz = await event.getQuiz();
 
-    res.json(eventFormatter(event, owner, collaborators));
+    const users = await group.getUsers({
+      include: [{ model: EventWarn, attributes: ['amount'], where: { eventId: event.id }, required: false }, { model: Analytic, required: false }],
+      attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
+    });
+
+    res.json({
+      ...eventFormatter(event, owner, collaborators, group, quiz),
+      users: userMapper(users),
+    });
   } catch (err) {
     next(err);
   }

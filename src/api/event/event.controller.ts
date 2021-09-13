@@ -130,7 +130,18 @@ export const getEvent = async (req: Request, res: Response, next: NextFunction):
     const group = await event.getGroup();
     const quiz = await event.getQuiz();
 
-    res.json(eventFormatter(event, owner, collaborators, group, quiz));
+    const users = await group.getUsers({
+      include: [
+        { model: EventWarn, attributes: ['amount'], where: { eventId: event.id }, required: false },
+        { model: Analytic, required: false },
+      ],
+      attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
+    });
+
+    res.json({
+      ...eventFormatter(event, owner, collaborators, group, quiz),
+      users: userMapper(users),
+    });
   } catch (err) {
     next(err);
   }
@@ -155,7 +166,7 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     const users =
       role.slug === 'professeur'
         ? await group.getUsers({
-            include: [{ model: EventWarn, attributes: ['amount'] }, { model: Analytic }],
+            include: [{ model: EventWarn, attributes: ['amount'], where: { eventId: event.id } }, { model: Analytic }],
             attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
           })
         : [];
