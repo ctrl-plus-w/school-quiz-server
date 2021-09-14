@@ -123,6 +123,6 @@ export default (socket: ISocketWithData): void => {
     await event.addWarnedUser(userToUnblock, { through: { amount: 0 } });
 
     socket.to(`professor-event-${event.id}`).emit('user:unblock', userToUnblock.id);
-    socket.emit('user:unblock');
+    socket.to(`student-event-${event.id}`).emit('user:unblock', userToUnblock.id);
   });
 };
