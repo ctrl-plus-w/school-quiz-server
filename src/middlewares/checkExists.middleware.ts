@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { Includeable, Op } from 'sequelize';
+import { Includeable, Op, WhereOptions } from 'sequelize';
+
+import sequelize from 'sequelize';
 
 import { TextualQuestion } from '../models/textualQuestion';
 import { NumericQuestion } from '../models/numericQuestion';
@@ -13,6 +15,8 @@ import { Quiz } from '../models/quiz';
 import { User } from '../models/user';
 
 import { AcccessForbiddenError, InvalidInputError, NotFoundError, UnknownError } from '../classes/StatusError';
+
+import { oneLine } from '../utils/string.utils';
 
 import { MiddlewareValidationPayload } from '../types/middlewares.types';
 
@@ -87,18 +91,24 @@ export const checkNextEventExists = async (req: Request, res: Response, next: Ne
 
     const groups = await user.getGroups();
 
-    const eventIncludes: Includeable[] = isStudent
-      ? [{ model: Group, where: { id: groups.map(({ id }) => id) }, attributes: ['id'] }]
-      : [{ model: User, where: { id: userId }, attributes: ['id'], as: 'owner' }];
+    const eventOwnedOrCollaborated = oneLine(`
+      SELECT Event.id FROM Event
+        JOIN EventCollaborators ON EventCollaborators.userId = userId
+      WHERE EventCollaborators.userId = 1 OR Event.ownerId = 1
+    `);
+
+    const eventIncludes: Includeable[] = isStudent ? [{ model: Group, where: { id: groups.map(({ id }) => id) }, attributes: ['id'] }] : [];
+
+    const eventConditions: WhereOptions = !isStudent ? { id: { [Op.in]: sequelize.literal(`(${eventOwnedOrCollaborated})`) } } : {};
 
     const actualEvent = await Event.findOne({
-      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() } },
+      where: { start: { [Op.lte]: new Date() }, end: { [Op.gte]: new Date() }, ...eventConditions },
       include: [...eventIncludes],
     });
 
     const nextEvent = !actualEvent
       ? await Event.findOne({
-          where: { start: { [Op.gte]: new Date() } },
+          where: { start: { [Op.gte]: new Date() }, ...eventConditions },
           include: [...eventIncludes],
         })
       : null;
