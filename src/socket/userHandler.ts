@@ -102,4 +102,27 @@ export default (socket: ISocketWithData): void => {
       socket.emit('quiz:blocked');
     }
   });
+
+  socket.on('user:unblock', async (userId: number) => {
+    const user = socket.user;
+
+    if (socket.jwt.role !== 'professeur') return;
+
+    // Only fetching the actual event
+    const [event] = await getEvent(user, socket.jwt.role, true);
+    if (!event) return;
+
+    const quiz = await event.getQuiz();
+    if (!quiz || !quiz.strict) return;
+
+    const userToUnblock = await User.findByPk(userId);
+    if (!userToUnblock) return;
+
+    // * Trick to update the ManyToMany middle table. (Adding here make sequelize update the table)
+
+    await event.addWarnedUser(userToUnblock, { through: { amount: 0 } });
+
+    socket.to(`professor-event-${event.id}`).emit('user:unblock', userToUnblock.id);
+    socket.emit('user:unblock');
+  });
 };
