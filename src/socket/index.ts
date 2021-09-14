@@ -59,7 +59,7 @@ const onConnection = (_socket: Socket): void => {
 
       // Update the warns if the user leave the page and if there is an actual event
       const newWarnAmount = warn ? warn.amount + 1 : 1;
-      const shouldUpdateWarn = actualEvent && newWarnAmount < 3 && questions.length > 0;
+      const shouldUpdateWarn = actualEvent && newWarnAmount <= 3 && questions.length > 0;
 
       if (shouldUpdateWarn) {
         await event.addWarnedUser(user, { through: { amount: newWarnAmount } });
