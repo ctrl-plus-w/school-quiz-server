@@ -166,7 +166,7 @@ export const getNextEvent = async (_req: Request, res: Response, next: NextFunct
     const users =
       role.slug === 'professeur'
         ? await group.getUsers({
-            include: [{ model: EventWarn, attributes: ['amount'], where: { eventId: event.id } }, { model: Analytic }],
+            include: [{ model: EventWarn, attributes: ['amount'], where: { eventId: event.id }, required: false }, { model: Analytic, required: false }],
             attributes: ['id', 'firstName', 'lastName', 'username', 'gender'],
           })
         : [];
