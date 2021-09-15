@@ -42,7 +42,7 @@ const textualQuestionCreationSchema = Joi.object({
   caseSensitive: Joi.boolean().required(),
 
   verificationTypeId: Joi.number(),
-  verificationTypeSlug: Joi.string().valid('automatique', 'hybride', 'manuel'),
+  verificationTypeSlug: Joi.string().valid('automatique', 'manuel'),
 }).xor('verificationTypeId', 'verificationTypeSlug');
 
 const textualQuestionUpdateSchema = Joi.object({
@@ -52,7 +52,7 @@ const textualQuestionUpdateSchema = Joi.object({
   caseSensitive: Joi.boolean(),
 
   verificationTypeId: Joi.number(),
-  verificationTypeSlug: Joi.string().valid('automatique', 'hybride', 'manuel'),
+  verificationTypeSlug: Joi.string().valid('automatique', 'manuel'),
 })
   .min(1)
   .oxor('verificationTypeId', 'verificationTypeSlug');

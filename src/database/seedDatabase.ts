@@ -82,10 +82,6 @@ export default async (): Promise<void> => {
 
   await VerificationType.bulkCreate([
     {
-      name: 'Hybride',
-      slug: 'hybride',
-    },
-    {
       name: 'Automatique',
       slug: 'automatique',
     },
