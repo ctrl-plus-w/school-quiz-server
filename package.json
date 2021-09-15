@@ -8,6 +8,7 @@
     "build": "tsc",
     "dev": "nodemon --config nodemon.json src/index.ts",
     "db:sync": "node dist/syncDatabase.js",
+    "db:lightsync": "node dist/lightSyncDatabase.js",
     "db:seed": "node dist/seedDatabase.js",
     "postinstall": "npm run build"
   },
