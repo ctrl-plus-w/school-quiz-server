@@ -5,7 +5,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const CREDENTIALS = {
-  DB_URL: <string>process.env.DB_URL,
   REDIS_HOST: <string>process.env.REDIS_HOST,
   REDIS_PORT: <number>parseInt(<string>process.env.REDIS_PORT),
   REDIS_PW: <string>process.env.REDIS_PW,

@@ -137,17 +137,25 @@ export default async (): Promise<void> => {
   const lukas = await User.findOne({ where: { username: 'llaudrain' } });
   const rose = await User.findOne({ where: { username: 'ryazid' } });
   const fabrice = await User.findOne({ where: { username: 'fbernard' } });
+  const eric = await User.findOne({ where: { username: 'elaurent' } });
+  const robinson = await User.findOne({ where: { username: 'rrambeau' } });
 
   const admin = await Role.findOne({ where: { slug: 'admin' } });
+  const student = await Role.findOne({ where: { slug: 'eleve' } });
   const professor = await Role.findOne({ where: { slug: 'professeur' } });
+
   const group = await Group.findOne({ where: { slug: '1ere3' } });
 
-  if (!lukas || !rose || !fabrice || !admin || !group || !professor) return;
+  if (!lukas || !rose || !fabrice || !student || !group || !professor || !eric || !robinson || !admin) return;
 
   await lukas.setRole(admin);
-  await rose.setRole(admin);
-  await lukas.addGroup(group);
+
+  await robinson.setRole(student);
+  await rose.setRole(student);
+  await robinson.addGroup(group);
+
   await fabrice.setRole(professor);
+  await eric.setRole(professor);
 
   const groupBis = await Group.findOne({ where: { slug: '1ere2' } });
   if (!groupBis) return;
